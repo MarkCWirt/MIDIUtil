@@ -1,12 +1,10 @@
-========
 MIDIUtil
 ========
 
-------------
 Introduction
 ------------
 
-MIDIUtil is a pure Python library that allows one to write muti-track
+MIDIUtil is a pure Python library that allows one to write multi-track
 Musical Instrument Digital Interface (MIDI) files from within Python
 programs. It is object-oriented and allows one to create and write these
 files with a minimum of fuss.
@@ -25,11 +23,15 @@ is provided.
 
 This software was originally developed with Python 2.5.2 and it makes use
 of some features that were introduced in 2.5. I have used it extensively
-in Python 2.6.
+in Python 2.6.+. [Note that soon I plan on unifying the Python 2 and 3
+version, at which point the code will probably require python 2.7 to
+run.]
 
-Included in this version is an intitial port to Python 3 (but which should
+Included in this version is an initial port to Python 3 (but which should
 work in 2.6.X also). The file is called MidiFile3.py. To use it, use
 the following import line in your code:
+
+.. code:: python
 
         from midiutil.MidiFile3 import MIDIFile
 
@@ -40,7 +42,6 @@ This software is distributed under an Open Source license and you are
 free to use it as you see fit, provided that attribution is maintained.
 See License.txt in the source distribution for details.
 
-------------
 Installation
 ------------
 
@@ -50,6 +51,8 @@ project's directory (or to any directory pointed to  by the PYTHONPATH
 environment variable). For the Windows platforms an executable installer
 is provided. Alternately the source distribution can be downloaded,
 un-zipped (or un-tarred), and installed in the standard way:
+
+.. code:: bash
 
     python setup.py install
 
@@ -68,21 +71,23 @@ then refer to it with a fully qualified name. This will prevent it from
 conflicting with any version of the software that may be installed on
 the target system.
 
------------
+
 Quick Start
 -----------
 
 Using the software is easy:
 
-    o The package must be imported into your namespace
-    o A MIDIFile object is created
-    o Events (notes, tempo-changes, etc.) are added to the object
-    o The MIDI file is written to disk.
+* The package must be imported into your namespace
+* A MIDIFile object is created
+* Events (notes, tempo-changes, etc.) are added to the object
+* The MIDI file is written to disk.
 
 Detailed documentation is provided; what follows is a simple example
 to get you going quickly. In this example we'll create a one track MIDI
 File, assign a name and tempo to the track, add a one beat middle-C to
 the track, and write it to disk.
+
+.. code:: python
 
         #Import the library
         from midiutil.MidiFile import MIDIFile
@@ -124,15 +129,17 @@ the library is provided in the documentation directory.
 
 Have fun!
 
----------
 Thank You
 ---------
 
 I'd like to mention the following people who have given feedback, but
 fixes,  and suggestions on the library:
 
-    Bram de Jong
-    Mike Reeves-McMillan
-    Egg Syntax
-    Nils Gey
-    Francis G.
+* Bram de Jong
+* Mike Reeves-McMillan
+* Egg Syntax
+* Nils Gey
+* Francis G.
+
+I've actually been off email for a few years, so I'm sure there are lots
+of suggestions waiting. Stay tuned for updates and bug fixes!
