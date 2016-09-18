@@ -203,7 +203,6 @@ class TestMIDIUtils(unittest.TestCase):
         self.assertEquals(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[8])[0], 0xf7)
         
     def testTuning(self):
-        print "In this test"
         MyMIDI = MIDIFile(1)
         MyMIDI.changeNoteTuning(0, [(1, 440), (2, 880)])
         MyMIDI.close()
