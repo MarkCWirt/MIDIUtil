@@ -25,8 +25,16 @@ is provided.
 
 This software was originally developed with Python 2.5.2 and it makes use
 of some features that were introduced in 2.5. I have used it extensively
-in Python 2.6, so it should work in this or any later versions (but I
-have not tested it on Python 3).
+in Python 2.6.
+
+Included in this version is an intitial port to Python 3 (but which should
+work in 2.6.X also). The file is called MidiFile3.py. To use it, use
+the following import line in your code:
+
+        from midiutil.MidiFile3 import MIDIFile
+
+(This assumes that the code has been installed into your system path or that
+the midiutil directory is copied into your script's working directory.)
 
 This software is distributed under an Open Source license and you are
 free to use it as you see fit, provided that attribution is maintained.
@@ -116,3 +124,15 @@ the library is provided in the documentation directory.
 
 Have fun!
 
+---------
+Thank You
+---------
+
+I'd like to mention the following people who have given feedback, but
+fixes,  and suggestions on the library:
+
+    Bram de Jong
+    Mike Reeves-McMillan
+    Egg Syntax
+    Nils Gey
+    Francis G.
