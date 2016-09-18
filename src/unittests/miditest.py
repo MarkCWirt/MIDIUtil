@@ -11,10 +11,7 @@
 #-----------------------------------------------------------------------------
 
 
-
-# Next few lines are necessary owing to limitations of the IDE and the
-# directory structure of the project.
-
+from __future__ import division, print_function
 import sys,  struct
 
 import unittest
@@ -232,7 +229,7 @@ def suite():
     return MIDISuite
 
 if __name__ == '__main__':
-    print "Begining MIDIUtil Test Suite"
+    print("Begining MIDIUtil Test Suite")
     MIDISuite = suite()
     unittest.TextTestRunner(verbosity=2, stream=sys.stdout).run(MIDISuite)
 

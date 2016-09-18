@@ -10,6 +10,7 @@
 #              software is distributed.
 #-----------------------------------------------------------------------------
 
+from __future__ import division, print_function
 import struct,  sys,  math
 
 # TICKSPERBEAT is the number of "ticks" (time measurement in the MIDI file) that
@@ -379,7 +380,7 @@ class MIDITrack(object):
                 self.MIDIEventList.append(event)
 
             else:
-                print "Error in MIDITrack: Unknown event type"
+                print("Error in MIDITrack: Unknown event type")
                 sys.exit(2)
             
         # Assumptions in the code expect the list to be time-sorted.
@@ -464,7 +465,6 @@ class MIDITrack(object):
                 testBuffer = testBuffer + struct.pack('>B',timeByte)
             (roundedVal,discard) = readVarLength(0,testBuffer)
             roundedTime = actualTime + roundedVal
-            # print "Rounded, Precise: %15.10f %15.10f" % (roundedTime, preciseTime)
 
             # Calculate the delta between the two and apply it to the event time.
 
