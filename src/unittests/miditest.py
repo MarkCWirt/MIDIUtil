@@ -16,12 +16,10 @@
 # directory structure of the project.
 
 import sys,  struct
-sys.path.append('..')
 
 import unittest
-from midiutil.MidiFile import MIDIFile, MIDIHeader, MIDITrack, writeVarLength,  \
+from midiutil.MidiFile import MIDIFile, writeVarLength,  \
     frequencyTransform,  returnFrequency
-import sys
 
 class TestMIDIUtils(unittest.TestCase):
     
@@ -205,6 +203,7 @@ class TestMIDIUtils(unittest.TestCase):
         self.assertEquals(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[8])[0], 0xf7)
         
     def testTuning(self):
+        print "In this test"
         MyMIDI = MIDIFile(1)
         MyMIDI.changeNoteTuning(0, [(1, 440), (2, 880)])
         MyMIDI.close()
@@ -227,9 +226,15 @@ class TestMIDIUtils(unittest.TestCase):
         self.assertEquals(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[15])[0], 0)
         self.assertEquals(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[16])[0], 0)
         self.assertEquals(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[17])[0], 0xf7)
-    
-MIDISuite = unittest.TestLoader().loadTestsFromTestCase(TestMIDIUtils)
-    
+
+def suite():
+    MIDISuite = unittest.TestLoader().loadTestsFromTestCase(TestMIDIUtils)
+
+    return MIDISuite
+
 if __name__ == '__main__':
-    unittest.TextTestRunner(verbosity=1).run(MIDISuite)
+    print "Begining MIDIUtil Test Suite"
+    MIDISuite = suite()
+    unittest.TextTestRunner(verbosity=2, stream=sys.stdout).run(MIDISuite)
+
 
