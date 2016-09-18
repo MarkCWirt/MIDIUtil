@@ -1,9 +1,14 @@
+    * Added 'annotation' as a parameter to note addition function. This can be used
+      to attach an arbitrary python object to the note event. This is
+      useful for extension development.
+
 Date:       1 December 2013
 Version:    0.89
     * Updated MIDIFile to support non-integral note values better.
     * Changed default temporal resolution to 960 ticks per beat.
     * Updated Python3 support. It is still somewhat experimental.
     * Misc. Bug Fixes.
+
 
 Date:       20 October 2009
 Version:    0.87

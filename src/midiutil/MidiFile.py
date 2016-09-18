@@ -131,7 +131,7 @@ class MIDITrack:
     class note(GenericEvent):
         '''A class that encapsulates a note
         '''
-        def __init__(self,channel, pitch,time,duration,volume):
+        def __init__(self,channel, pitch,time,duration,volume,annotation=None):
             
             GenericEvent.__init__(self,time)
             self.pitch = pitch
@@ -139,6 +139,7 @@ class MIDITrack:
             self.volume = volume
             self.type = 'note'
             self.channel = channel
+            self.annotation = annotation
             
         def compare(self, other):
             '''Compare two notes for equality.
@@ -229,10 +230,10 @@ class MIDITrack:
         self.remdep = removeDuplicates
         self.deinterleave = deinterleave
         
-    def addNoteByNumber(self,channel, pitch,time,duration,volume):
+    def addNoteByNumber(self,channel, pitch,time,duration,volume,annotation=None):
         '''Add a note by chromatic MIDI number
         '''
-        self.eventList.append(MIDITrack.note(channel, pitch,time,duration,volume))
+        self.eventList.append(MIDITrack.note(channel, pitch,time,duration,volume,annotation))
         
     def addControllerEvent(self,channel,time,eventType, paramerter1):
         '''
@@ -720,7 +721,7 @@ class MIDIFile:
     # Public Functions. These (for the most part) wrap the MIDITrack functions, where most
     # Processing takes place.
     
-    def addNote(self,track, channel, pitch,time,duration,volume):
+    def addNote(self,track, channel, pitch,time,duration,volume,annotation=None):
         """
         Add notes to the MIDIFile object
         
@@ -735,7 +736,7 @@ class MIDIFile:
             duration: the duration of the note (in beats) [Float].
             volume: the volume (velocity) of the note. [Integer, 0-127].
         """
-        self.tracks[track].addNoteByNumber(channel, pitch, time, duration, volume)
+        self.tracks[track].addNoteByNumber(channel, pitch, time, duration, volume, annotation)
 
     def addTrackName(self,track, time,trackName):
         """
