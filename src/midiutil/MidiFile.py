@@ -125,7 +125,7 @@ class GenericEvent(object):
 class Note(GenericEvent):
     '''A class that encapsulates a note
     '''
-    def __init__(self,channel, pitch,time,duration,volume,ordinal=3,annotation=None):
+    def __init__(self,channel, pitch,time,duration,volume,ordinal=3,annotation=None, insertion_order=0):
         #GenericEvent.__init__(self,time)
         self.pitch = pitch
         self.duration = duration
@@ -134,48 +134,53 @@ class Note(GenericEvent):
         self.channel = channel
         self.annotation = annotation
         self.ord = ordinal
+        self.insertion_order = insertion_order
         super(Note, self).__init__(time)
         
 class Tempo(GenericEvent):
     '''A class that encapsulates a tempo meta-event
     '''
-    def __init__(self,time,tempo, ordinal=3):
+    def __init__(self,time,tempo, ordinal=3, insertion_order=0):
         
         #GenericEvent.__init__(self,time)
         self.type = 'tempo'
         self.tempo = int(60000000 / tempo)
         self.ord = ordinal
+        self.insertion_order = insertion_order
         super(Tempo, self).__init__(time)
         
 class ProgramChange(GenericEvent):
     '''A class that encapsulates a program change event.
     '''
     
-    def __init__(self,  channel,  time,  programNumber, ordinal=1):
+    def __init__(self,  channel,  time,  programNumber, ordinal=1, insertion_order=0):
         #GenericEvent.__init__(self, time,)
         self.type = 'programChange'
         self.programNumber = programNumber
         self.channel = channel
         self.ord = ordinal
+        self.insertion_order = insertion_order
         super(ProgramChange, self).__init__(time)
         
 class SysExEvent(GenericEvent):
     '''A class that encapsulates a System Exclusive  event.
     '''
     
-    def __init__(self,  time,  manID,  payload, ordinal=1):
+    def __init__(self,  time,  manID,  payload, ordinal=1, insertion_order=0):
         #GenericEvent.__init__(self, time,)
         self.type = 'SysEx'
         self.manID = manID
         self.payload = payload
         self.ord = ordinal
+        self.insertion_order = insertion_order
         super(SysExEvent, self).__init__(time)
         
 class UniversalSysExEvent(GenericEvent):
     '''A class that encapsulates a Universal System Exclusive  event.
     '''
     
-    def __init__(self,  time,  realTime,  sysExChannel,  code,  subcode,  payload, ordinal=1):
+    def __init__(self,  time,  realTime,  sysExChannel,  code,  subcode,  payload, 
+                 ordinal=1, insertion_order=0):
         #GenericEvent.__init__(self, time,)
         self.type = 'UniversalSysEx'
         self.realTime = realTime
@@ -184,30 +189,33 @@ class UniversalSysExEvent(GenericEvent):
         self.subcode = subcode
         self.payload = payload
         self.ord = ordinal
+        self.insertion_order = insertion_order
         super(UniversalSysExEvent, self).__init__(time)
         
 class ControllerEvent(GenericEvent):
     '''A class that encapsulates a program change event.
     '''
     
-    def __init__(self,  channel,  time,  eventType,  parameter1,ordinal=1):
+    def __init__(self,  channel,  time,  eventType,  parameter1,ordinal=1, insertion_order=0):
         GenericEvent.__init__(self, time,)
         self.type = 'controllerEvent'
         self.parameter1 = parameter1
         self.channel = channel
         self.eventType = eventType
         self.ord = ordinal
+        self.insertion_order = insertion_order
         super(ControllerEvent, self).__init__(time)
 
 class TrackName(GenericEvent):
     '''A class that encapsulates a program change event.
     '''
     
-    def __init__(self,  time,  trackName, ordinal=0):
+    def __init__(self,  time,  trackName, ordinal=0, insertion_order=0):
         #GenericEvent.__init__(self, time,)
         self.type = 'trackName'
         self.trackName = trackName
         self.ord = ordinal
+        self.insertion_order = insertion_order
         super(TrackName, self).__init__(time)
         
 class MIDITrack(object):
@@ -226,53 +234,56 @@ class MIDITrack(object):
         self.remdep = removeDuplicates
         self.deinterleave = deinterleave
         
-    def addNoteByNumber(self,channel, pitch,time,duration,volume,annotation=None):
+    def addNoteByNumber(self,channel, pitch,time,duration,volume,annotation=None, 
+                        insertion_order=0):
         '''Add a note by chromatic MIDI number
         '''
-        self.eventList.append(Note(channel, pitch,time,duration,volume,annotation=annotation))
+        self.eventList.append(Note(channel, pitch,time,duration,volume,annotation=annotation,
+                                   insertion_order = insertion_order))
         
-    def addControllerEvent(self,channel,time,eventType, paramerter1):
+    def addControllerEvent(self,channel,time,eventType, paramerter1, insertion_order=0):
         '''
         Add a controller event.
         '''
         
         self.eventList.append(ControllerEvent(channel,time,eventType, \
-                                             paramerter1))
+                                             paramerter1, insertion_order=insertion_order))
         
-    def addTempo(self,time,tempo):
+    def addTempo(self,time,tempo, insertion_order=0):
         '''
         Add a tempo change (or set) event.
         '''
-        self.eventList.append(Tempo(time,tempo))
+        self.eventList.append(Tempo(time,tempo, insertion_order = insertion_order))
         
-    def addSysEx(self,time,manID, payload):
+    def addSysEx(self,time,manID, payload, insertion_order=0):
         '''
         Add a SysEx event.
         '''
-        self.eventList.append(SysExEvent(time, manID,  payload))
+        self.eventList.append(SysExEvent(time, manID,  payload, 
+                                         insertion_order = insertion_order))
         
     def addUniversalSysEx(self,time,code, subcode, payload,  sysExChannel=0x7F,  \
-        realTime=False):
+        realTime=False, insertion_order = 0):
         '''
         Add a Universal SysEx event.
         '''
         self.eventList.append(UniversalSysExEvent(time, realTime,  \
-            sysExChannel,  code,  subcode, payload))
+            sysExChannel,  code,  subcode, payload, insertion_order = insertion_order))
         
-    def addProgramChange(self,channel, time, program):
+    def addProgramChange(self,channel, time, program, insertion_order=0):
         '''
         Add a program change event.
         '''
-        self.eventList.append(ProgramChange(channel, time, program))
+        self.eventList.append(ProgramChange(channel, time, program, insertion_order = insertion_order))
         
-    def addTrackName(self,time,trackName):
+    def addTrackName(self,time,trackName, insertion_order = 0):
         '''
         Add a track name event.
         '''
-        self.eventList.append(TrackName(time,trackName))
+        self.eventList.append(TrackName(time,trackName, insertion_order = insertion_order))
         
     def changeNoteTuning(self,  tunings,   sysExChannel=0x7F,  realTime=False,  \
-        tuningProgam=0):
+        tuningProgam=0, insertion_order=0):
         '''Change the tuning of MIDI notes
         '''
         payload = struct.pack('>B',  tuningProgam)
@@ -284,7 +295,7 @@ class MIDITrack(object):
                 payload = payload + struct.pack('>B',  byte)
                 
         self.eventList.append(UniversalSysExEvent(0, realTime,  sysExChannel,\
-            8,  2, payload))
+            8,  2, payload, insertion_order = insertion_order))
     
     def processEventList(self):
         '''
@@ -713,6 +724,8 @@ class MIDIFile(object):
         for i in range(0,numTracks):
             self.tracks.append(MIDITrack(removeDuplicates,  deinterleave))
             
+        self.event_counter = 0 # to keep track of the order of insertion for new sorting
+            
             
     # Public Functions. These (for the most part) wrap the MIDITrack functions, where most
     # Processing takes place.
@@ -732,7 +745,9 @@ class MIDIFile(object):
             duration: the duration of the note (in beats) [Float].
             volume: the volume (velocity) of the note. [Integer, 0-127].
         """
-        self.tracks[track].addNoteByNumber(channel, pitch, time, duration, volume, annotation)
+        self.tracks[track].addNoteByNumber(channel, pitch, time, duration, volume, 
+            annotation = annotation, insertion_order = self.event_counter)
+        self.event_counter = self.event_counter + 1
 
     def addTrackName(self,track, time,trackName):
         """
@@ -746,7 +761,8 @@ class MIDIFile(object):
             time: The time at which the track name is added, in beats [Float].
             trackName: The track name. [String].
         """
-        self.tracks[track].addTrackName(time,trackName)
+        self.tracks[track].addTrackName(time,trackName, insertion_order = self.event_counter)
+        self.event_counter = self.event_counter + 1
         
     def addTempo(self,track, time,tempo):
         """
@@ -760,7 +776,8 @@ class MIDIFile(object):
             time: The time at which the event is added, in beats. [Float].
             tempo: The tempo, in Beats per Minute. [Integer]
         """
-        self.tracks[track].addTempo(time,tempo)
+        self.tracks[track].addTempo(time,tempo, insertion_order = self.event_counter)
+        self.event_counter = self.event_counter + 1
         
     def addProgramChange(self,track, channel, time, program):
         """
@@ -775,7 +792,9 @@ class MIDIFile(object):
             time: The time at which the event is added, in beats. [Float].
             program: the program number. [Integer, 0-127].
         """
-        self.tracks[track].addProgramChange(channel, time, program)
+        self.tracks[track].addProgramChange(channel, time, program, 
+            insertion_order = self.event_counter)
+        self.event_counter = self.event_counter + 1
     
     def addControllerEvent(self,track, channel,time,eventType, paramerter1):
         """
@@ -791,7 +810,9 @@ class MIDIFile(object):
             eventType: the controller event type.
             parameter1: The event's parameter. The meaning of which varies by event type.
         """
-        self.tracks[track].addControllerEvent(channel,time,eventType, paramerter1)
+        self.tracks[track].addControllerEvent(channel,time,eventType, paramerter1, 
+            insertion_order = self.event_counter)
+        self.event_counter = self.event_counter + 1
         
     def changeNoteTuning(self,  track,  tunings,   sysExChannel=0x7F,  \
                          realTime=False,  tuningProgam=0):
@@ -815,27 +836,10 @@ class MIDIFile(object):
         this standard!
         """
         self.tracks[track].changeNoteTuning(tunings,   sysExChannel,  realTime,\
-                                              tuningProgam)
+            tuningProgam, insertion_order = self.event_counter)
+        self.event_counter = self.event_counter + 1
   
-    def writeFile(self,fileHandle):
-        '''
-        Write the MIDI File.
-        
-        Use:
-            MyMIDI.writeFile(filehandle)
-        
-        Arguments:
-            filehandle: a file handle that has been opened for binary writing.
-        '''
-        
-        self.header.writeFile(fileHandle)
-        
-        #Close the tracks and have them create the MIDI event data structures.
-        self.close()
-        
-        #Write the MIDI Events to file.
-        for i in range(0,self.numTracks):
-            self.tracks[i].writeTrack(fileHandle)
+
 
     def addSysEx(self,track, time, manID, payload):
         """
@@ -855,7 +859,8 @@ class MIDIFile(object):
         functions be written to wrap this function and construct the payload if
         a developer finds him or herself using the function heavily.
         """
-        self.tracks[track].addSysEx(time,manID, payload)
+        self.tracks[track].addSysEx(time,manID, payload, insertion_order = self.event_counter)
+        self.event_counter = self.event_counter + 1
     
     def addUniversalSysEx(self,track,  time,code, subcode, payload,  \
                           sysExChannel=0x7F,  realTime=False):
@@ -884,8 +889,29 @@ class MIDIFile(object):
         """
         
         self.tracks[track].addUniversalSysEx(time,code, subcode, payload,  sysExChannel,\
-                                               realTime)
-                                               
+                                               realTime, insertion_order = self.event_counter)
+        self.event_counter = self.event_counter + 1
+
+    def writeFile(self,fileHandle):
+        '''
+        Write the MIDI File.
+        
+        Use:
+            MyMIDI.writeFile(filehandle)
+        
+        Arguments:
+            filehandle: a file handle that has been opened for binary writing.
+        '''
+        
+        self.header.writeFile(fileHandle)
+        
+        #Close the tracks and have them create the MIDI event data structures.
+        self.close()
+        
+        #Write the MIDI Events to file.
+        for i in range(0,self.numTracks):
+            self.tracks[i].writeTrack(fileHandle)
+                      
     def shiftTracks(self,  offset=0):
         """Shift tracks to be zero-origined, or origined at offset.
         
