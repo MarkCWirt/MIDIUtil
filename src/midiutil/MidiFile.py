@@ -19,8 +19,9 @@ import struct,  sys,  math
 TICKSPERBEAT = 960
 
 controllerEventTypes = {
-                        'pan' : 0x0a
-                        }
+    'pan' : 0x0a
+}
+                        
 class MIDIEvent(object):
     '''
     The class to contain the MIDI Event (placed on MIDIEventList.
@@ -29,20 +30,6 @@ class MIDIEvent(object):
         self.type='unknown'
         self.time=0
         self.ord = 0
-        
-    def __cmp__(self, other):
-        ''' Sorting function for events.'''
-        if self.time < other.time:
-            return -1
-        elif self.time > other.time:
-            return 1
-        else:
-            if self.ord < other.ord:
-                return -1
-            elif self.ord > other.ord:
-                return 1
-            else:
-                return 0
 
 class GenericEvent(object):
     '''The event class from which specific events are derived
@@ -316,6 +303,7 @@ class MIDITrack(object):
                 event.volume = thing.volume
                 event.channel = thing.channel
                 event.ord = thing.ord
+                event.insertion_order = thing.insertion_order
                 self.MIDIEventList.append(event)
 
                 event = MIDIEvent()
@@ -325,6 +313,7 @@ class MIDITrack(object):
                 event.volume = thing.volume
                 event.channel = thing.channel
                 event.ord = thing.ord - 0.1
+                event.insertion_order = thing.insertion_order
                 self.MIDIEventList.append(event)
 
             elif thing.type == 'tempo':
@@ -333,6 +322,7 @@ class MIDITrack(object):
                 event.time = thing.time * TICKSPERBEAT
                 event.tempo = thing.tempo
                 event.ord = thing.ord
+                event.insertion_order = thing.insertion_order
                 self.MIDIEventList.append(event)
 
             elif thing.type == 'programChange':
@@ -342,6 +332,7 @@ class MIDITrack(object):
                 event.programNumber = thing.programNumber
                 event.channel = thing.channel
                 event.ord = thing.ord
+                event.insertion_order = thing.insertion_order
                 self.MIDIEventList.append(event)
 
             elif thing.type == 'trackName':
@@ -350,6 +341,7 @@ class MIDITrack(object):
                 event.time = thing.time * TICKSPERBEAT
                 event.trackName = thing.trackName
                 event.ord = thing.ord
+                event.insertion_order = thing.insertion_order
                 self.MIDIEventList.append(event)
 
             elif thing.type == 'controllerEvent':
@@ -360,6 +352,7 @@ class MIDITrack(object):
                 event.channel = thing.channel
                 event.paramerter1 = thing.parameter1
                 event.ord = thing.ord
+                event.insertion_order = thing.insertion_order
                 self.MIDIEventList.append(event)
 
             elif thing.type == 'SysEx':
@@ -369,6 +362,7 @@ class MIDITrack(object):
                 event.manID = thing.manID
                 event.payload = thing.payload
                 event.ord = thing.ord
+                event.insertion_order = thing.insertion_order
                 self.MIDIEventList.append(event)
 
             elif thing.type == 'UniversalSysEx':
@@ -381,6 +375,7 @@ class MIDITrack(object):
                 event.subcode = thing.subcode
                 event.payload = thing.payload
                 event.ord = thing.ord
+                event.insertion_order = thing.insertion_order
                 self.MIDIEventList.append(event)
 
             else:
@@ -388,9 +383,7 @@ class MIDITrack(object):
                 sys.exit(2)
             
         # Assumptions in the code expect the list to be time-sorted.
-        # self.MIDIEventList.sort(lambda x, y: x.time - y.time)
-
-        self.MIDIEventList.sort(lambda x, y: int( 1000 * (x.time - y.time)))
+        self.MIDIEventList.sort(key=sort_events)
 
         if self.deinterleave:    
             self.deInterleaveNotes()
@@ -405,18 +398,14 @@ class MIDITrack(object):
         
         # For this algorithm to work, the events in the eventList must be hashable 
         # (that is, they must have a __hash__() and __eq__() function defined).
-        
+
         tempDict = {}
         for item in self.eventList:
             tempDict[item] = 1
             
         self.eventList = tempDict.keys()
         
-        # Sort on type, them on time. Necessary because keys() has no requirement to return
-        # things in any order.
-        
-        self.eventList.sort(lambda x, y: cmp(x.type ,  y.type))
-        self.eventList.sort(lambda x, y: int( 1000 * (x.time - y.time))) #A bit of a hack.
+        self.eventList.sort(key=sort_events)
 
     def closeTrack(self):
         '''Called to close a track before writing
@@ -615,14 +604,11 @@ class MIDITrack(object):
                     
         self.MIDIEventList = tempEventList
         
-        # A little trickery here. We want to make sure that NoteOff events appear 
-        # before NoteOn events, so we'll do two sorts -- on on type, one on time. 
-        # This may have to be revisited, as it makes assumptions about how 
-        # the internal sort works, and is in essence creating a sort on a primary 
-        # and secondary key.
+        # Note that ``processEventList`` makes the ordinality of a note off event
+        # a bit lower than the note on event, so this sort will make concomitant
+        # note off events processed first.
         
-        self.MIDIEventList.sort(lambda x, y: cmp(x.type ,  y.type))
-        self.MIDIEventList.sort(lambda x, y: int( 1000 * (x.time - y.time)))
+        self.MIDIEventList.sort(key=sort_events)
 
     def adjustTime(self,origin):
         '''
@@ -956,7 +942,7 @@ class MIDIFile(object):
             self.tracks[i].closeTrack()
             # We want things like program changes to come before notes when they are at the
             # same time, so we sort the MIDI events by their ordinality
-            self.tracks[i].MIDIEventList.sort()
+            self.tracks[i].MIDIEventList.sort(key=sort_events)
             
         origin = self.findOrigin()
 
@@ -1064,3 +1050,29 @@ def returnFrequency(freqBytes):
     frac = (float((int(freqBytes[1]) << 7) + int(freqBytes[2])) * 100.0) / resolution
     frequency = baseFrequency * pow(2.0, frac/1200.0)
     return frequency
+    
+def sort_events(event):
+    '''
+    .. py:function:: sort_events(event)
+    
+        The key function used to sort events (both MIDI and Generic)
+        
+        :param event: An object of type :class:`MIDIEvent` or (a derrivative of)
+            :class:`GenericEvent`
+        
+        This function should be provided as the ``key`` for both ``list.sort()``
+        and ``sorted()``. By using it sorting will be as follows:
+        
+        * Events are ordered in time. An event that takes place earier will
+          appear eariler
+        * If two events happen at the same time, the secondary sort key is
+          ``ord``. Thus a class of events can be processed eariler than another.
+          One place this is used in the code is to make sure that note off events
+          are processed before note on events.
+        * If time and ordinality are the same, they are sorted in the order in which
+          they were originally added to the list. Thus, for example, if one is making
+          an RPN call one can specify the contoller change events in the proper order
+          and be sure that they will end up in the file that way.
+    '''
+    
+    return (event.time, event.ord, event.insertion_order)
