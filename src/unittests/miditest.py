@@ -34,6 +34,18 @@ class TestMIDIUtils(unittest.TestCase):
         self.assertEqual(MyMIDI.tracks[0].eventList[0].time, 0)
         self.assertEqual(MyMIDI.tracks[0].eventList[0].duration, 1)
         self.assertEqual(MyMIDI.tracks[0].eventList[0].volume, 100)
+        
+    def testShiftTrack(self):
+        time = 1
+        MyMIDI = MIDIFile(1)
+        MyMIDI.addNote(0, 0, 100,time,1,100)
+        self.assertEqual(MyMIDI.tracks[0].eventList[0].type, "note")
+        self.assertEqual(MyMIDI.tracks[0].eventList[0].pitch, 100)
+        self.assertEqual(MyMIDI.tracks[0].eventList[0].time, time)
+        self.assertEqual(MyMIDI.tracks[0].eventList[0].duration, 1)
+        self.assertEqual(MyMIDI.tracks[0].eventList[0].volume, 100)
+        MyMIDI.shiftTracks()
+        self.assertEqual(MyMIDI.tracks[0].eventList[0].time, 0)
 
     def testDeinterleaveNotes(self):
         MyMIDI = MIDIFile(1)
@@ -302,15 +314,46 @@ class TestMIDIUtils(unittest.TestCase):
         self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[14].encode("ISO-8859-1"))[0], 0x26) # Bank LSB
         self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[15].encode("ISO-8859-1"))[0], data_lsb) # Bank value (bank number)
         
-    def testUniversalSysEx(self):
+    def testAddControllerEvent(self):
+        #import pdb; pdb.set_trace()
+        track = 0
+        time = 0
+        channel = 3
+        controller_number = 1
+        parameter =  2
         MyMIDI = MIDIFile(1)
-        MyMIDI.addUniversalSysEx(0,0, 1, 2, struct.pack('>B', 0x01))
+        MyMIDI.addControllerEvent(track, channel, time, controller_number, parameter)
+        MyMIDI.close()
+        self.assertEqual(MyMIDI.tracks[0].MIDIEventList[0].type, 'ControllerEvent')
+        self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[0].encode("ISO-8859-1"))[0], 0x00) # time
+        self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[1].encode("ISO-8859-1"))[0], 0xB << 4 | channel) # Code
+        self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[2].encode("ISO-8859-1"))[0], controller_number) # Controller Number
+        self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[3].encode("ISO-8859-1"))[0], parameter) # Controller Value
+        
+    def testNonRealTimeUniversalSysEx(self):
+        MyMIDI = MIDIFile(1)
+        MyMIDI.addUniversalSysEx(0,0, 1, 2, struct.pack('>B', 0x01), realTime=False)
         MyMIDI.close()
         self.assertEqual(MyMIDI.tracks[0].MIDIEventList[0].type, 'UniversalSysEx')
         self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[0].encode("ISO-8859-1"))[0], 0x00)
         self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[1].encode("ISO-8859-1"))[0], 0xf0)
         self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[2].encode("ISO-8859-1"))[0], 6)
         self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[3].encode("ISO-8859-1"))[0], 0x7E)
+        self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[4].encode("ISO-8859-1"))[0], 0x7F)
+        self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[5].encode("ISO-8859-1"))[0], 0x01)
+        self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[6].encode("ISO-8859-1"))[0], 0x02)
+        self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[7].encode("ISO-8859-1"))[0], 0x01)
+        self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[8].encode("ISO-8859-1"))[0], 0xf7)
+        
+    def testRealTimeUniversalSysEx(self):
+        MyMIDI = MIDIFile(1)
+        MyMIDI.addUniversalSysEx(0,0, 1, 2, struct.pack('>B', 0x01), realTime=True)
+        MyMIDI.close()
+        self.assertEqual(MyMIDI.tracks[0].MIDIEventList[0].type, 'UniversalSysEx')
+        self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[0].encode("ISO-8859-1"))[0], 0x00)
+        self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[1].encode("ISO-8859-1"))[0], 0xf0)
+        self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[2].encode("ISO-8859-1"))[0], 6)
+        self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[3].encode("ISO-8859-1"))[0], 0x7F)
         self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[4].encode("ISO-8859-1"))[0], 0x7F)
         self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[5].encode("ISO-8859-1"))[0], 0x01)
         self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[6].encode("ISO-8859-1"))[0], 0x02)
