@@ -5,7 +5,7 @@
 # Author:      Mark Conway Wirt <emergentmusics) at (gmail . com>
 #
 # Created:     2008/04/17
-# Copyright:   (c) 2009 Mark Conway Wirt
+# Copyright:   (c) 2009-2016 Mark Conway Wirt
 # License:     Please see License.txt for the terms under which this
 #              software is distributed.
 #-----------------------------------------------------------------------------
