@@ -11,7 +11,7 @@
 #-----------------------------------------------------------------------------
 
 from __future__ import division, print_function
-import struct,  sys,  math
+import struct,  math
 
 # TICKSPERBEAT is the number of "ticks" (time measurement in the MIDI file) that
 # corresponds to one beat. This number is somewhat arbitrary, but should be chosen
@@ -373,8 +373,7 @@ class MIDITrack(object):
                 self.MIDIEventList.append(event)
 
             else:
-                print("Error in MIDITrack: Unknown event type")
-                sys.exit(2)
+                raise ValueError("Error in MIDITrack: Unknown event type %s" % thing.type)
             
         # Assumptions in the code expect the list to be time-sorted.
         self.MIDIEventList.sort(key=sort_events)
