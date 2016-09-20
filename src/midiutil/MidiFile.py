@@ -177,12 +177,12 @@ class ControllerEvent(GenericEvent):
     '''A class that encapsulates a program change event.
     '''
     
-    def __init__(self,  channel,  time,  contoller_number, parameter, ordinal=1, insertion_order=0):
+    def __init__(self,  channel,  time,  controller_number, parameter, ordinal=1, insertion_order=0):
         GenericEvent.__init__(self, time,)
         self.type = 'controllerEvent'
         self.parameter = parameter
         self.channel = channel
-        self.contoller_number = contoller_number
+        self.controller_number = controller_number
         self.ord = ordinal
         self.insertion_order = insertion_order
         super(ControllerEvent, self).__init__(time)
@@ -342,7 +342,7 @@ class MIDITrack(object):
                 event = MIDIEvent()
                 event.type = "ControllerEvent"
                 event.time = thing.time * TICKSPERBEAT
-                event.contoller_number = thing.contoller_number
+                event.contoller_number = thing.controller_number
                 event.channel = thing.channel
                 event.parameter = thing.parameter
                 event.ord = thing.ord
