@@ -1,3 +1,5 @@
+    * Changed the controller event parameter names to make them
+      clearer.
     * Added support for Registered and Non-Registered parameter
       calls (``makeRPNCall`` and ``makeNRPNCall``).
     * General refactoring and clean-up.
@@ -18,9 +20,8 @@
       and ordered series of control change events all occurring at the 
       same time and of the same type.
     * Added 'annotation' as a parameter to note addition function. 
-      This can be used to attach an arbitrary python 
-      object to the note event. This is
-      useful for extension development.
+      This can be used to attach an arbitrary python object to the 
+      note event. This is useful for extension development.
 
 Date:       1 December 2013
 Version:    0.89
