@@ -177,12 +177,12 @@ class ControllerEvent(GenericEvent):
     '''A class that encapsulates a program change event.
     '''
     
-    def __init__(self,  channel,  time,  eventType,  parameter1,ordinal=1, insertion_order=0):
+    def __init__(self,  channel,  time,  contoller_number, parameter, ordinal=1, insertion_order=0):
         GenericEvent.__init__(self, time,)
         self.type = 'controllerEvent'
-        self.parameter1 = parameter1
+        self.parameter = parameter
         self.channel = channel
-        self.eventType = eventType
+        self.contoller_number = contoller_number
         self.ord = ordinal
         self.insertion_order = insertion_order
         super(ControllerEvent, self).__init__(time)
@@ -222,13 +222,13 @@ class MIDITrack(object):
         self.eventList.append(Note(channel, pitch,time,duration,volume,annotation=annotation,
                                    insertion_order = insertion_order))
         
-    def addControllerEvent(self,channel,time,eventType, paramerter1, insertion_order=0):
+    def addControllerEvent(self,channel,time,contoller_number, parameter, insertion_order=0):
         '''
         Add a controller event.
         '''
         
-        self.eventList.append(ControllerEvent(channel,time,eventType, \
-                                             paramerter1, insertion_order=insertion_order))
+        self.eventList.append(ControllerEvent(channel,time,contoller_number, \
+                                             parameter, insertion_order=insertion_order))
         
     def addTempo(self,time,tempo, insertion_order=0):
         '''
@@ -342,9 +342,9 @@ class MIDITrack(object):
                 event = MIDIEvent()
                 event.type = "ControllerEvent"
                 event.time = thing.time * TICKSPERBEAT
-                event.eventType = thing.eventType
+                event.contoller_number = thing.contoller_number
                 event.channel = thing.channel
-                event.paramerter1 = thing.parameter1
+                event.parameter = thing.parameter
                 event.ord = thing.ord
                 event.insertion_order = thing.insertion_order
                 self.MIDIEventList.append(event)
@@ -528,8 +528,8 @@ class MIDITrack(object):
                 for timeByte in varTime:
                     self.MIDIdata = self.MIDIdata + struct.pack('>B',timeByte).decode("ISO-8859-1")
                 self.MIDIdata = self.MIDIdata + struct.pack('>B',code).decode("ISO-8859-1")
-                self.MIDIdata = self.MIDIdata + struct.pack('>B',event.eventType).decode("ISO-8859-1")
-                self.MIDIdata = self.MIDIdata + struct.pack('>B',event.paramerter1).decode("ISO-8859-1")
+                self.MIDIdata = self.MIDIdata + struct.pack('>B',event.contoller_number).decode("ISO-8859-1")
+                self.MIDIdata = self.MIDIdata + struct.pack('>B',event.parameter).decode("ISO-8859-1")
             elif event.type == "SysEx":
                 code = 0xF0
                 varTime = writeVarLength(event.time)
@@ -777,21 +777,21 @@ class MIDIFile(object):
             insertion_order = self.event_counter)
         self.event_counter = self.event_counter + 1
     
-    def addControllerEvent(self,track, channel, time, eventType, paramerter1):
+    def addControllerEvent(self,track, channel, time, contoller_number, parameter):
         """
         Add a MIDI controller event.
         
         Use:
-            MyMIDI.addControllerEvent(track, channel, time, eventType, parameter1)
+            MyMIDI.addControllerEvent(track, channel, time, contoller_number, parameter)
             
         Arguments:
             track: The track to which the event is added. [Integer, 0-127].
             channel: The channel the event is assigned to. [Integer, 0-15].
             time: The time at which the event is added, in beats. [Float].
-            eventType: the controller event type.
-            parameter1: The event's parameter. The meaning of which varies by event type.
+            contoller_number: the controller event type.
+            parameter: The event's parameter. The meaning of which varies by event type.
         """
-        self.tracks[track].addControllerEvent(channel,time,eventType, paramerter1, 
+        self.tracks[track].addControllerEvent(channel,time,contoller_number, parameter, 
             insertion_order = self.event_counter)
         self.event_counter = self.event_counter + 1
         
