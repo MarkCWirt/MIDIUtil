@@ -76,20 +76,12 @@ class GenericEvent(object):
                 return False
         if self.type == 'controllerEvent':
             return False
-            if self.parameter1 != other.parameter1 or \
-                self.channel != other.channel or \
-                self.eventType != other.eventType:
-                return False
                 
         if self.type == 'SysEx':
-            if self.manID != other.manID:
-                return False
+            return False
                 
         if self.type == 'UniversalSysEx':
-            if self.code != other.code or\
-                self.subcode != other.subcode or \
-                self.sysExChannel != other.sysExChannel:
-                return False
+            return False
                 
         return True
         
