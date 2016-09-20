@@ -185,6 +185,123 @@ class TestMIDIUtils(unittest.TestCase):
         self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[4].encode("ISO-8859-1"))[0], 0x01)
         self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[5].encode("ISO-8859-1"))[0], 0xf7)
         
+    def testTempo(self):
+        #import pdb; pdb.set_trace()
+        tempo = 60
+        MyMIDI = MIDIFile(1)
+        MyMIDI.addTempo(0, 0, tempo)
+        MyMIDI.close()
+        self.assertEqual(MyMIDI.tracks[0].MIDIEventList[0].type, 'Tempo')
+        self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[0].encode("ISO-8859-1"))[0], 0x00) # time
+        self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[1].encode("ISO-8859-1"))[0], 0xff) # Code
+        self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[2].encode("ISO-8859-1"))[0], 0x51)
+        self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[3].encode("ISO-8859-1"))[0], 0x03)
+        self.assertEqual(MyMIDI.tracks[0].MIDIdata[4:7].encode("ISO-8859-1"), struct.pack('>L', int(60000000/tempo))[1:4])
+        
+    def testProgramChange(self):
+        #import pdb; pdb.set_trace()
+        program = 10
+        channel = 0
+        MyMIDI = MIDIFile(1)
+        MyMIDI.addProgramChange(0, channel, 0, program)
+        MyMIDI.close()
+        self.assertEqual(MyMIDI.tracks[0].MIDIEventList[0].type, 'ProgramChange')
+        self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[0].encode("ISO-8859-1"))[0], 0x00) # time
+        self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[1].encode("ISO-8859-1"))[0], 0xC << 4 | channel) # Code
+        self.assertEqual(MyMIDI.tracks[0].MIDIdata[2].encode("ISO-8859-1"), struct.pack('>B', program))
+        
+    def testTrackName(self):
+        #import pdb; pdb.set_trace()
+        track_name = "track"
+        MyMIDI = MIDIFile(1)
+        MyMIDI.addTrackName(0, 0, track_name)
+        MyMIDI.close()
+        self.assertEqual(MyMIDI.tracks[0].MIDIEventList[0].type, 'TrackName')
+        self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[0].encode("ISO-8859-1"))[0], 0x00) # time
+        self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[1].encode("ISO-8859-1"))[0], 0xFF) # Code
+        self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[2].encode("ISO-8859-1"))[0], 0x03) # subcodes
+        #self.assertEqual(MyMIDI.tracks[0].MIDIdata[2].encode("ISO-8859-1"), struct.pack('>B', program))
+        
+    def testTuningBank(self):
+        #import pdb; pdb.set_trace()
+        bank = 1
+        channel = 0
+        MyMIDI = MIDIFile(1)
+        MyMIDI.changeTuningBank(0, 0, 0, bank)
+        MyMIDI.close()
+        self.assertEqual(MyMIDI.tracks[0].MIDIEventList[0].type, 'ControllerEvent')
+        self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[0].encode("ISO-8859-1"))[0], 0x00) # time
+        self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[1].encode("ISO-8859-1"))[0], 0xB << 4 | channel) # Code
+        self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[2].encode("ISO-8859-1"))[0], 0x65) # Controller Number
+        self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[3].encode("ISO-8859-1"))[0], 0x0) # Controller Value
+        self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[4].encode("ISO-8859-1"))[0], 0x00) # time
+        self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[5].encode("ISO-8859-1"))[0], 0xB << 4 | channel) # Code
+        self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[6].encode("ISO-8859-1"))[0], 0x64) # Controller Number
+        self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[7].encode("ISO-8859-1"))[0], 0x4) # Controller Value
+        self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[8].encode("ISO-8859-1"))[0], 0x00) # time
+        self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[9].encode("ISO-8859-1"))[0], 0xB << 4 | channel) # Code
+        self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[10].encode("ISO-8859-1"))[0], 0x06) # Bank MSB
+        self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[11].encode("ISO-8859-1"))[0], 0x00) # Value
+        self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[12].encode("ISO-8859-1"))[0], 0x00) # time
+        self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[13].encode("ISO-8859-1"))[0], 0xB << 4 | channel) # Code
+        self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[14].encode("ISO-8859-1"))[0], 0x26) # Bank LSB
+        self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[15].encode("ISO-8859-1"))[0], 0x01) # Bank value (bank number)
+        
+    def testTuningProgram(self):
+        #import pdb; pdb.set_trace()
+        program = 1
+        channel = 0
+        MyMIDI = MIDIFile(1)
+        MyMIDI.changeTuningProgram(0, 0, 0, program)
+        MyMIDI.close()
+        self.assertEqual(MyMIDI.tracks[0].MIDIEventList[0].type, 'ControllerEvent')
+        self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[0].encode("ISO-8859-1"))[0], 0x00) # time
+        self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[1].encode("ISO-8859-1"))[0], 0xB << 4 | channel) # Code
+        self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[2].encode("ISO-8859-1"))[0], 0x65) # Controller Number
+        self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[3].encode("ISO-8859-1"))[0], 0x0) # Controller Value
+        self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[4].encode("ISO-8859-1"))[0], 0x00) # time
+        self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[5].encode("ISO-8859-1"))[0], 0xB << 4 | channel) # Code
+        self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[6].encode("ISO-8859-1"))[0], 0x64) # Controller Number
+        self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[7].encode("ISO-8859-1"))[0], 0x03) # Controller Value
+        self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[8].encode("ISO-8859-1"))[0], 0x00) # time
+        self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[9].encode("ISO-8859-1"))[0], 0xB << 4 | channel) # Code
+        self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[10].encode("ISO-8859-1"))[0], 0x06) # Bank MSB
+        self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[11].encode("ISO-8859-1"))[0], 0x00) # Value
+        self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[12].encode("ISO-8859-1"))[0], 0x00) # time
+        self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[13].encode("ISO-8859-1"))[0], 0xB << 4 | channel) # Code
+        self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[14].encode("ISO-8859-1"))[0], 0x26) # Bank LSB
+        self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[15].encode("ISO-8859-1"))[0], 0x01) # Bank value (bank number)
+        
+    def testNRPNCall(self):
+        #import pdb; pdb.set_trace()
+        track = 0
+        time = 0
+        channel = 0
+        controller_msb = 1
+        controller_lsb =  2
+        data_msb = 3
+        data_lsb = 4
+        MyMIDI = MIDIFile(1)
+        MyMIDI.makeNRPNCall(track, channel, time, controller_msb, controller_lsb, data_msb, data_lsb)
+        MyMIDI.close()
+        self.assertEqual(MyMIDI.tracks[0].MIDIEventList[0].type, 'ControllerEvent')
+        self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[0].encode("ISO-8859-1"))[0], 0x00) # time
+        self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[1].encode("ISO-8859-1"))[0], 0xB << 4 | channel) # Code
+        self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[2].encode("ISO-8859-1"))[0], 99) # Controller Number
+        self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[3].encode("ISO-8859-1"))[0], controller_msb) # Controller Value
+        self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[4].encode("ISO-8859-1"))[0], 0x00) # time
+        self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[5].encode("ISO-8859-1"))[0], 0xB << 4 | channel) # Code
+        self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[6].encode("ISO-8859-1"))[0], 98) # Controller Number
+        self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[7].encode("ISO-8859-1"))[0], controller_lsb) # Controller Value
+        self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[8].encode("ISO-8859-1"))[0], 0x00) # time
+        self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[9].encode("ISO-8859-1"))[0], 0xB << 4 | channel) # Code
+        self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[10].encode("ISO-8859-1"))[0], 0x06) # Bank MSB
+        self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[11].encode("ISO-8859-1"))[0], data_msb) # Value
+        self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[12].encode("ISO-8859-1"))[0], 0x00) # time
+        self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[13].encode("ISO-8859-1"))[0], 0xB << 4 | channel) # Code
+        self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[14].encode("ISO-8859-1"))[0], 0x26) # Bank LSB
+        self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[15].encode("ISO-8859-1"))[0], data_lsb) # Bank value (bank number)
+        
     def testUniversalSysEx(self):
         MyMIDI = MIDIFile(1)
         MyMIDI.addUniversalSysEx(0,0, 1, 2, struct.pack('>B', 0x01))
@@ -223,6 +340,13 @@ class TestMIDIUtils(unittest.TestCase):
         self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[15].encode("ISO-8859-1"))[0], 0)
         self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[16].encode("ISO-8859-1"))[0], 0)
         self.assertEqual(struct.unpack('>B', MyMIDI.tracks[0].MIDIdata[17].encode("ISO-8859-1"))[0], 0xf7)
+        
+    def testWriteFile(self):
+        # Just to make sure the stream can be written without throwing an error.
+        MyMIDI = MIDIFile(1)
+        MyMIDI.addNote(0, 0, 100,0,1,100)
+        with open("/tmp/test.mid", "wb") as output_file:
+            MyMIDI.writeFile(output_file)
 
 def suite():
     MIDISuite = unittest.TestLoader().loadTestsFromTestCase(TestMIDIUtils)
