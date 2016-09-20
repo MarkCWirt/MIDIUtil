@@ -75,6 +75,7 @@ class GenericEvent(object):
             if self.trackName != other.trackName:
                 return False
         if self.type == 'controllerEvent':
+            return False
             if self.parameter1 != other.parameter1 or \
                 self.channel != other.channel or \
                 self.eventType != other.eventType:
@@ -407,6 +408,7 @@ class MIDITrack(object):
         self.eventList = list(tempDict.keys())
         
         self.eventList.sort(key=sort_events)
+
 
     def closeTrack(self):
         '''Called to close a track before writing
@@ -800,6 +802,41 @@ class MIDIFile(object):
         self.tracks[track].addControllerEvent(channel,time,eventType, paramerter1, 
             insertion_order = self.event_counter)
         self.event_counter = self.event_counter + 1
+        
+    def changeTuningBankAndProgram(self,track, channel, time, bank, program):
+        '''
+        .. py:function:: changeTuningBankAndProgram(self,track, channel, time, bank, program)
+        
+            Change the tuning bank and program for a selected track
+            
+            :param track: The track to which the data should be written
+            :param channel: The channel for the events
+            :param time: The time of the events
+            :param bank: The tuning bank (0-127)
+            :param program: The tuning program number (0-127)
+            
+            Note that this is a convenience function, as the same functionality is available
+            from directly sequencing ccontroller events.
+            
+            The specified tuning should already have been written to the stream with ``changeNoteTuning``.
+        '''
+        self.tracks[track].addControllerEvent(channel,time, 101, 0,       insertion_order = self.event_counter)
+        self.event_counter = self.event_counter + 1
+        self.tracks[track].addControllerEvent(channel,time, 100, 4,       insertion_order = self.event_counter)
+        self.event_counter = self.event_counter + 1
+        self.tracks[track].addControllerEvent(channel,time, 6,   0,       insertion_order = self.event_counter)
+        self.event_counter = self.event_counter + 1
+        self.tracks[track].addControllerEvent(channel,time, 38,  bank,    insertion_order = self.event_counter)
+        self.event_counter = self.event_counter + 1
+        self.tracks[track].addControllerEvent(channel,time, 101, 0,       insertion_order = self.event_counter)
+        self.event_counter = self.event_counter + 1
+        self.tracks[track].addControllerEvent(channel,time, 100, 3,       insertion_order = self.event_counter)
+        self.event_counter = self.event_counter + 1
+        self.tracks[track].addControllerEvent(channel,time, 6,   0,       insertion_order = self.event_counter)
+        self.event_counter = self.event_counter + 1
+        self.tracks[track].addControllerEvent(channel,time, 38,  program, insertion_order = self.event_counter)
+        self.event_counter = self.event_counter + 1
+        
         
     def changeNoteTuning(self,  track,  tunings,   sysExChannel=0x7F,  \
                          realTime=False,  tuningProgam=0):

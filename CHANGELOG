@@ -1,5 +1,21 @@
-    * Added 'annotation' as a parameter to note addition function. This can be used
-      to attach an arbitrary python object to the note event. This is
+    * Added function to select tuning program and bank.
+      Some synthesizers, such as fluidsynth, require that
+      uploaded tunings be explicitly assigned to a channel.
+      This can be used after ``setNoteTuning`` in such a
+      case.
+    * Completed port to Python 3 / Unification of code base.
+      Support for python < 2.6 has been dropped so that the
+      Python 2 and 3 codebases could be unified.
+    * Changes the way that sorting works, simplifying it and making
+      it more expressive. The primary sort is on time; secondary on 
+      ordinality for the class (which is user-definable); and the 
+      third is the order in which the events were added.  Thus 
+      is becomes easier to, say, make an RPN call, which entails 
+      and ordered series of control change events all occurring at the 
+      same time and of the same type.
+    * Added 'annotation' as a parameter to note addition function. 
+      This can be used to attach an arbitrary python 
+      object to the note event. This is
       useful for extension development.
 
 Date:       1 December 2013
