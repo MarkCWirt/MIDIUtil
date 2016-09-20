@@ -1,5 +1,5 @@
 --------------------------------------------------------------------------
-MIDUTIL, Copyright (c) 2009, Mark Conway Wirt 
+MIDUTIL, Copyright (c) 2009-2016, Mark Conway Wirt 
                        <emergentmusics) at (gmail . com>
 
 This software is distributed under an Open Source license, the
