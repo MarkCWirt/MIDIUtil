@@ -1,3 +1,6 @@
+    * Added support for Registered and Non-Registered parameter
+      calls (``makeRPNCall`` and ``makeNRPNCall``).
+    * General refactoring and clean-up.
     * Added function to select tuning program and bank.
       Some synthesizers, such as fluidsynth, require that
       uploaded tunings be explicitly assigned to a channel.
@@ -8,7 +11,8 @@
       Python 2 and 3 codebases could be unified.
     * Changes the way that sorting works, simplifying it and making
       it more expressive. The primary sort is on time; secondary on 
-      ordinality for the class (which is user-definable); and the 
+      ordinality for the event (which is user-definable, but defaults
+      to an ordinality for the class); and the 
       third is the order in which the events were added.  Thus 
       is becomes easier to, say, make an RPN call, which entails 
       and ordered series of control change events all occurring at the 

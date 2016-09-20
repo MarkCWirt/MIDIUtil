@@ -785,7 +785,7 @@ class MIDIFile(object):
             insertion_order = self.event_counter)
         self.event_counter = self.event_counter + 1
     
-    def addControllerEvent(self,track, channel,time,eventType, paramerter1):
+    def addControllerEvent(self,track, channel, time, eventType, paramerter1):
         """
         Add a MIDI controller event.
         
@@ -803,16 +803,96 @@ class MIDIFile(object):
             insertion_order = self.event_counter)
         self.event_counter = self.event_counter + 1
         
-    def changeTuningBankAndProgram(self,track, channel, time, bank, program):
+    def makeRPNCall(self, track, channel, time, contoller_msb, controller_lsb, data_msb, data_lsb):
         '''
-        .. py:function:: changeTuningBankAndProgram(self,track, channel, time, bank, program)
+        .. py:function:: makeRPNCall(self, track, channel, time, contoller_msb, controller_lsb, data_msb, data_lsb)
         
-            Change the tuning bank and program for a selected track
+            Perform a Registered Parameter Number Call
+            
+            :param track: The track to which this applies
+            :param channel: The channel to which this applies
+            :param time: The time of the event
+            :param controller_msb: The Most Significan Byte of the controller. In common usage
+                this will usually be 0
+            :param contoller_lsb: The Least Significant Byte for the controller message. For example, for
+                a fine-tunning change this would be 01.
+            :param data_msb: The Most Significant Byte of the controller's parameter.
+            :param data_lsb: The Least Significant Byte of the controller's parameter. If non needed this
+                sould be set to ``None``
+                
+            As an example, if one were to change a channel's tuning program::
+            
+                makeRPNCall(track, channel, time, 0, 3, 0, program)
+                
+            (Note, however, that there is a conveneince function, ``changeTuningProgram``, that does
+            this for you.)
+                
+        '''
+        self.tracks[track].addControllerEvent(channel,time, 101, contoller_msb,   insertion_order = self.event_counter)
+        self.event_counter = self.event_counter + 1
+        self.tracks[track].addControllerEvent(channel,time, 100, controller_lsb,  insertion_order = self.event_counter)
+        self.event_counter = self.event_counter + 1
+        self.tracks[track].addControllerEvent(channel,time, 6,   data_msb,        insertion_order = self.event_counter)
+        self.event_counter = self.event_counter + 1
+        if data_lsb is not None:
+            self.tracks[track].addControllerEvent(channel,time, 38,  data_lsb, insertion_order = self.event_counter)
+            self.event_counter = self.event_counter + 1
+            
+    def makeNRPNCall(self, track, channel, time, contoller_msb, controller_lsb, data_msb, data_lsb):
+        '''
+        .. py:function:: makeNRPNCall(self, track, channel, time, contoller_msb, controller_lsb, data_msb, data_lsb)
+        
+            Perform a Non-Registered Parameter Number Call
+            
+            :param track: The track to which this applies
+            :param channel: The channel to which this applies
+            :param time: The time of the event
+            :param controller_msb: The Most Significan Byte of the controller. In common usage
+                this will usually be 0
+            :param contoller_lsb: The Least Significant Byte for the controller message. For example, for
+                a fine-tunning change this would be 01.
+            :param data_msb: The Most Significant Byte of the controller's parameter.
+            :param data_lsb: The Least Significant Byte of the controller's parameter. If non needed this
+                sould be set to ``None``
+                
+        '''
+        self.tracks[track].addControllerEvent(channel,time, 99, contoller_msb,   insertion_order = self.event_counter)
+        self.event_counter = self.event_counter + 1
+        self.tracks[track].addControllerEvent(channel,time, 98, controller_lsb,  insertion_order = self.event_counter)
+        self.event_counter = self.event_counter + 1
+        self.tracks[track].addControllerEvent(channel,time, 6,   data_msb,        insertion_order = self.event_counter)
+        self.event_counter = self.event_counter + 1
+        if data_lsb is not None:
+            self.tracks[track].addControllerEvent(channel,time, 38,  data_lsb, insertion_order = self.event_counter)
+            self.event_counter = self.event_counter + 1
+        
+    def changeTuningBank(self,track, channel, time, bank):
+        '''
+        .. py:function:: changeTuningBank(self,track, channel, time, bank)
+        
+            Change the tuning bank for a selected track
             
             :param track: The track to which the data should be written
             :param channel: The channel for the events
             :param time: The time of the events
             :param bank: The tuning bank (0-127)
+            
+            Note that this is a convenience function, as the same functionality is available
+            from directly sequencing ccontroller events.
+            
+            The specified tuning should already have been written to the stream with ``changeNoteTuning``.
+        '''
+        self.makeRPNCall(track, channel, time, 0, 4, 0, bank)
+        
+    def changeTuningProgram(self,track, channel, time, program):
+        '''
+        .. py:function:: changeTuningProgram(self,track, channel, time, program)
+        
+            Change the tuning program for a selected track
+            
+            :param track: The track to which the data should be written
+            :param channel: The channel for the events
+            :param time: The time of the events
             :param program: The tuning program number (0-127)
             
             Note that this is a convenience function, as the same functionality is available
@@ -820,22 +900,10 @@ class MIDIFile(object):
             
             The specified tuning should already have been written to the stream with ``changeNoteTuning``.
         '''
-        self.tracks[track].addControllerEvent(channel,time, 101, 0,       insertion_order = self.event_counter)
-        self.event_counter = self.event_counter + 1
-        self.tracks[track].addControllerEvent(channel,time, 100, 4,       insertion_order = self.event_counter)
-        self.event_counter = self.event_counter + 1
-        self.tracks[track].addControllerEvent(channel,time, 6,   0,       insertion_order = self.event_counter)
-        self.event_counter = self.event_counter + 1
-        self.tracks[track].addControllerEvent(channel,time, 38,  bank,    insertion_order = self.event_counter)
-        self.event_counter = self.event_counter + 1
-        self.tracks[track].addControllerEvent(channel,time, 101, 0,       insertion_order = self.event_counter)
-        self.event_counter = self.event_counter + 1
-        self.tracks[track].addControllerEvent(channel,time, 100, 3,       insertion_order = self.event_counter)
-        self.event_counter = self.event_counter + 1
-        self.tracks[track].addControllerEvent(channel,time, 6,   0,       insertion_order = self.event_counter)
-        self.event_counter = self.event_counter + 1
-        self.tracks[track].addControllerEvent(channel,time, 38,  program, insertion_order = self.event_counter)
-        self.event_counter = self.event_counter + 1
+        self.makeRPNCall(track, channel, time, 0, 3, 0, program)
+
+        
+
         
         
     def changeNoteTuning(self,  track,  tunings,   sysExChannel=0x7F,  \
