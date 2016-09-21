@@ -21,22 +21,10 @@ anyone with a good working knowledge of the MIDI file format and a good,
 working knowledge of Python. Documentation for extending the library
 is provided.
 
-This software was originally developed with Python 2.5.2 and it makes use
-of some features that were introduced in 2.5. I have used it extensively
-in Python 2.6.+. [Note that soon I plan on unifying the Python 2 and 3
-version, at which point the code will probably require python 2.7 to
-run.]
-
-Included in this version is an initial port to Python 3 (but which should
-work in 2.6.X also). The file is called MidiFile3.py. To use it, use
-the following import line in your code:
-
-.. code:: python
-
-        from midiutil.MidiFile3 import MIDIFile
-
-(This assumes that the code has been installed into your system path or that
-the midiutil directory is copied into your script's working directory.)
+This software was originally developed with Python 2.5.2 and made use
+of some features that were introduced in 2.5. More recently Python 2 and
+3 support has been unified, so the code should work in both environments.
+However, support for versions of Python previous to 2.6 has been dropped.
 
 This software is distributed under an Open Source license and you are
 free to use it as you see fit, provided that attribution is maintained.
@@ -48,17 +36,15 @@ Installation
 To use the library one can either install it on one's system or
 copy the midiutil directory of the source distribution to your
 project's directory (or to any directory pointed to  by the PYTHONPATH
-environment variable). For the Windows platforms an executable installer
-is provided. Alternately the source distribution can be downloaded,
+environment variable). The source distribution can be downloaded,
 un-zipped (or un-tarred), and installed in the standard way:
 
 .. code:: bash
 
     python setup.py install
 
-On non-Windows platforms (Linux, MacOS, etc.) the software should be
-installed in this way. MIDIUtil is pure Python and should work on any
-platform to which Python has been ported.
+MIDIUtil is pure Python and should work on any platform to which
+Python has been ported.
 
 If you do not wish to install in on your system, just copy the
 src/midiutil directory to your project's directory or elsewhere on
