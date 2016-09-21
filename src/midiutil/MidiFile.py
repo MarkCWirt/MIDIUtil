@@ -194,7 +194,7 @@ class TrackName(GenericEvent):
     def __init__(self,  time,  trackName, ordinal=0, insertion_order=0):
         #GenericEvent.__init__(self, time,)
         self.type = 'trackName'
-        self.trackName = trackName
+        self.trackName = trackName.encode("ISO-8859-1")
         self.ord = ordinal
         self.insertion_order = insertion_order
         super(TrackName, self).__init__(time)
@@ -206,9 +206,9 @@ class MIDITrack(object):
     def __init__(self, removeDuplicates,  deinterleave):
         '''Initialize the MIDITrack object.
         '''
-        self.headerString = struct.pack('cccc',b'M',b'T',b'r',b'k').decode()
+        self.headerString = struct.pack('cccc',b'M',b'T',b'r',b'k')
         self.dataLength = 0 # Is calculated after the data is in place
-        self.MIDIdata = ""
+        self.MIDIdata = b""
         self.closed = False
         self.eventList = []
         self.MIDIEventList = []
@@ -433,7 +433,7 @@ class MIDITrack(object):
         # Write MIDI close event.
 
         self.MIDIdata = self.MIDIdata + struct.pack('BBBB',0x00,0xFF, \
-            0x2F,0x00).decode("ISO-8859-1")
+            0x2F,0x00)
         
         # Calculate the entire length of the data and write to the header
         
@@ -452,10 +452,10 @@ class MIDITrack(object):
             # Convert the time to variable length and back, to see how much
             # error is introduced
 
-            testBuffer = ""
+            testBuffer = b""
             varTime = writeVarLength(event.time)
             for timeByte in varTime:
-                testBuffer = testBuffer + struct.pack('>B',timeByte).decode("ISO-8859-1")
+                testBuffer = testBuffer + struct.pack('>B',timeByte)
             (roundedVal,discard) = readVarLength(0,testBuffer)
             roundedTime = actualTime + roundedVal
 
@@ -466,10 +466,10 @@ class MIDITrack(object):
 
             # Now update the actualTime value, using the updated event time.
 
-            testBuffer = ""
+            testBuffer = b""
             varTime = writeVarLength(event.time)
             for timeByte in varTime:
-                testBuffer = testBuffer + struct.pack('>B',timeByte).decode("ISO-8859-1")
+                testBuffer = testBuffer + struct.pack('>B',timeByte)
 
             (roundedVal,discard) = readVarLength(0,testBuffer)
             actualTime = actualTime + roundedVal
@@ -479,18 +479,18 @@ class MIDITrack(object):
                 code = 0x9 << 4 | event.channel
                 varTime = writeVarLength(event.time)
                 for timeByte in varTime:
-                    self.MIDIdata = self.MIDIdata + struct.pack('>B',timeByte).decode("ISO-8859-1")
-                self.MIDIdata = self.MIDIdata + struct.pack('>B',code).decode("ISO-8859-1")
-                self.MIDIdata = self.MIDIdata + struct.pack('>B',event.pitch).decode("ISO-8859-1")
-                self.MIDIdata = self.MIDIdata + struct.pack('>B',event.volume).decode("ISO-8859-1")
+                    self.MIDIdata = self.MIDIdata + struct.pack('>B',timeByte)
+                self.MIDIdata = self.MIDIdata + struct.pack('>B',code)
+                self.MIDIdata = self.MIDIdata + struct.pack('>B',event.pitch)
+                self.MIDIdata = self.MIDIdata + struct.pack('>B',event.volume)
             elif event.type == "NoteOff":
                 code = 0x8 << 4 | event.channel
                 varTime = writeVarLength(event.time)
                 for timeByte in varTime:
-                    self.MIDIdata = self.MIDIdata + struct.pack('>B',timeByte).decode("ISO-8859-1")
-                self.MIDIdata = self.MIDIdata + struct.pack('>B',code).decode("ISO-8859-1")
-                self.MIDIdata = self.MIDIdata + struct.pack('>B',event.pitch).decode("ISO-8859-1")
-                self.MIDIdata = self.MIDIdata + struct.pack('>B',event.volume).decode("ISO-8859-1")
+                    self.MIDIdata = self.MIDIdata + struct.pack('>B',timeByte)
+                self.MIDIdata = self.MIDIdata + struct.pack('>B',code)
+                self.MIDIdata = self.MIDIdata + struct.pack('>B',event.pitch)
+                self.MIDIdata = self.MIDIdata + struct.pack('>B',event.volume)
             elif event.type == "Tempo":
                 code = 0xFF
                 subcode = 0x51
@@ -498,73 +498,73 @@ class MIDITrack(object):
                 threebite = fourbite[1:4]       # Just discard the MSB
                 varTime = writeVarLength(event.time)
                 for timeByte in varTime:
-                    self.MIDIdata = self.MIDIdata + struct.pack('>B',timeByte).decode("ISO-8859-1")
-                self.MIDIdata = self.MIDIdata + struct.pack('>B',code).decode("ISO-8859-1")
-                self.MIDIdata = self.MIDIdata + struct.pack('>B',subcode).decode("ISO-8859-1")
-                self.MIDIdata = self.MIDIdata + struct.pack('>B', 0x03).decode("ISO-8859-1") # Data length: 3
-                self.MIDIdata = self.MIDIdata + threebite.decode("ISO-8859-1")
+                    self.MIDIdata = self.MIDIdata + struct.pack('>B',timeByte)
+                self.MIDIdata = self.MIDIdata + struct.pack('>B',code)
+                self.MIDIdata = self.MIDIdata + struct.pack('>B',subcode)
+                self.MIDIdata = self.MIDIdata + struct.pack('>B', 0x03)
+                self.MIDIdata = self.MIDIdata + threebite
             elif event.type == 'ProgramChange':
                 code = 0xC << 4 | event.channel
                 varTime = writeVarLength(event.time)
                 for timeByte in varTime:
-                    self.MIDIdata = self.MIDIdata + struct.pack('>B',timeByte).decode("ISO-8859-1")
-                self.MIDIdata = self.MIDIdata + struct.pack('>B',code).decode("ISO-8859-1")
-                self.MIDIdata = self.MIDIdata + struct.pack('>B',event.programNumber).decode("ISO-8859-1")
+                    self.MIDIdata = self.MIDIdata + struct.pack('>B',timeByte)
+                self.MIDIdata = self.MIDIdata + struct.pack('>B',code)
+                self.MIDIdata = self.MIDIdata + struct.pack('>B',event.programNumber)
             elif event.type == 'TrackName':
                 varTime = writeVarLength(event.time)
                 for timeByte in varTime:
-                    self.MIDIdata = self.MIDIdata + struct.pack('>B',timeByte).decode("ISO-8859-1")
-                self.MIDIdata = self.MIDIdata + struct.pack('B',0xFF).decode("ISO-8859-1") # Meta-event
-                self.MIDIdata = self.MIDIdata + struct.pack('B',0X03).decode("ISO-8859-1") # Event Type
+                    self.MIDIdata = self.MIDIdata + struct.pack('>B',timeByte)
+                self.MIDIdata = self.MIDIdata + struct.pack('B',0xFF)
+                self.MIDIdata = self.MIDIdata + struct.pack('B',0X03)
                 dataLength = len(event.trackName)
                 dataLenghtVar = writeVarLength(dataLength)
                 for i in range(0,len(dataLenghtVar)):
-                    self.MIDIdata = self.MIDIdata + struct.pack("b",dataLenghtVar[i]).decode("ISO-8859-1")
+                    self.MIDIdata = self.MIDIdata + struct.pack("b",dataLenghtVar[i])
                 self.MIDIdata = self.MIDIdata + event.trackName
             elif event.type == "ControllerEvent":
                 code = 0xB << 4 | event.channel
                 varTime = writeVarLength(event.time)
                 for timeByte in varTime:
-                    self.MIDIdata = self.MIDIdata + struct.pack('>B',timeByte).decode("ISO-8859-1")
-                self.MIDIdata = self.MIDIdata + struct.pack('>B',code).decode("ISO-8859-1")
-                self.MIDIdata = self.MIDIdata + struct.pack('>B',event.contoller_number).decode("ISO-8859-1")
-                self.MIDIdata = self.MIDIdata + struct.pack('>B',event.parameter).decode("ISO-8859-1")
+                    self.MIDIdata = self.MIDIdata + struct.pack('>B',timeByte)
+                self.MIDIdata = self.MIDIdata + struct.pack('>B',code)
+                self.MIDIdata = self.MIDIdata + struct.pack('>B',event.contoller_number)
+                self.MIDIdata = self.MIDIdata + struct.pack('>B',event.parameter)
             elif event.type == "SysEx":
                 code = 0xF0
                 varTime = writeVarLength(event.time)
                 for timeByte in varTime:
-                    self.MIDIdata = self.MIDIdata + struct.pack('>B',timeByte).decode("ISO-8859-1")
-                self.MIDIdata = self.MIDIdata + struct.pack('>B', code).decode("ISO-8859-1")
+                    self.MIDIdata = self.MIDIdata + struct.pack('>B',timeByte)
+                self.MIDIdata = self.MIDIdata + struct.pack('>B', code)
                 
                 payloadLength = writeVarLength(len(event.payload)+2)
                 for lenByte in payloadLength:
-                    self.MIDIdata = self.MIDIdata + struct.pack('>B',lenByte).decode("ISO-8859-1")
+                    self.MIDIdata = self.MIDIdata + struct.pack('>B',lenByte)
                     
-                self.MIDIdata = self.MIDIdata + struct.pack('>B', event.manID).decode("ISO-8859-1")
-                self.MIDIdata = self.MIDIdata + event.payload.decode("ISO-8859-1")
-                self.MIDIdata = self.MIDIdata + struct.pack('>B',0xF7).decode("ISO-8859-1")
+                self.MIDIdata = self.MIDIdata + struct.pack('>B', event.manID)
+                self.MIDIdata = self.MIDIdata + event.payload
+                self.MIDIdata = self.MIDIdata + struct.pack('>B',0xF7)
             elif event.type == "UniversalSysEx":
                 code = 0xF0
                 varTime = writeVarLength(event.time)
                 for timeByte in varTime:
-                    self.MIDIdata = self.MIDIdata + struct.pack('>B',timeByte).decode("ISO-8859-1")
-                self.MIDIdata = self.MIDIdata + struct.pack('>B', code).decode("ISO-8859-1")
+                    self.MIDIdata = self.MIDIdata + struct.pack('>B',timeByte)
+                self.MIDIdata = self.MIDIdata + struct.pack('>B', code)
                 
                 # Do we need to add a length?
                 payloadLength = writeVarLength(len(event.payload)+5)
                 for lenByte in payloadLength:
-                    self.MIDIdata = self.MIDIdata + struct.pack('>B',lenByte).decode("ISO-8859-1")
+                    self.MIDIdata = self.MIDIdata + struct.pack('>B',lenByte)
                 
                 if event.realTime :
-                    self.MIDIdata = self.MIDIdata + struct.pack('>B', 0x7F).decode("ISO-8859-1")
+                    self.MIDIdata = self.MIDIdata + struct.pack('>B', 0x7F)
                 else:
-                    self.MIDIdata = self.MIDIdata + struct.pack('>B', 0x7E).decode("ISO-8859-1")
+                    self.MIDIdata = self.MIDIdata + struct.pack('>B', 0x7E)
                     
-                self.MIDIdata = self.MIDIdata + struct.pack('>B', event.sysExChannel).decode("ISO-8859-1")
-                self.MIDIdata = self.MIDIdata + struct.pack('>B', event.code).decode("ISO-8859-1")
-                self.MIDIdata = self.MIDIdata + struct.pack('>B', event.subcode).decode("ISO-8859-1")
-                self.MIDIdata = self.MIDIdata + event.payload.decode("ISO-8859-1")
-                self.MIDIdata = self.MIDIdata + struct.pack('>B',0xF7).decode("ISO-8859-1")
+                self.MIDIdata = self.MIDIdata + struct.pack('>B', event.sysExChannel)
+                self.MIDIdata = self.MIDIdata + struct.pack('>B', event.code)
+                self.MIDIdata = self.MIDIdata + struct.pack('>B', event.subcode)
+                self.MIDIdata = self.MIDIdata + event.payload
+                self.MIDIdata = self.MIDIdata + struct.pack('>B',0xF7)
         
     def deInterleaveNotes(self):
         '''Correct Interleaved notes.
@@ -631,9 +631,9 @@ class MIDITrack(object):
         if not self.closed:
             self.closeTrack()
             
-        fileHandle.write(self.headerString.encode("ISO-8859-1"))
+        fileHandle.write(self.headerString)
         fileHandle.write(self.dataLength)
-        fileHandle.write(self.MIDIdata.encode("ISO-8859-1"))
+        fileHandle.write(self.MIDIdata)
 
 
 class MIDIHeader(object):
@@ -649,7 +649,7 @@ class MIDIHeader(object):
     def __init__(self,numTracks):
         ''' Initialize the data structures
         '''
-        self.headerString = struct.pack('cccc',b'M',b'T',b'h',b'd').decode()
+        self.headerString = struct.pack('cccc',b'M',b'T',b'h',b'd')
         self.headerSize = struct.pack('>L',6)
         # Format 1 = multi-track file
         self.format = struct.pack('>H',1)
@@ -658,7 +658,7 @@ class MIDIHeader(object):
     
 
     def writeFile(self,fileHandle):
-        fileHandle.write(self.headerString.encode("ISO-8859-1"))
+        fileHandle.write(self.headerString)
         fileHandle.write(self.headerSize)
         fileHandle.write(self.format)
         fileHandle.write(self.numTracks)
@@ -1109,7 +1109,7 @@ def readVarLength(offset, buffer):
     bytesRead = 0
     while True:
         output = output << 7
-        byte = struct.unpack_from('>B',buffer.encode("ISO-8859-1"),toffset)[0]
+        byte = struct.unpack_from('>B',buffer,toffset)[0]
         toffset = toffset + 1
         bytesRead = bytesRead + 1
         output = output + (byte & 127)

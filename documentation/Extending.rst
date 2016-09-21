@@ -150,18 +150,18 @@ following code shows the creation of a MIDI tempo event:
 
 .. code:: python
 
-  elif event.type == "Tempo":
-      code      = 0xFF
-      subcode   = 0x51
-      fourbite  = struct.pack('>L', event.tempo)
-      threebite = fourbite[1:4]       # Just discard the MSB
-      varTime   = writeVarLength(event.time)
-      for timeByte in varTime:
-          self.MIDIdata = self.MIDIdata + struct.pack('>B',timeByte).decode("ISO-8859-1")
-      self.MIDIdata = self.MIDIdata + struct.pack('>B',code).decode("ISO-8859-1")
-      self.MIDIdata = self.MIDIdata + struct.pack('>B',subcode).decode("ISO-8859-1")
-      self.MIDIdata = self.MIDIdata + struct.pack('>B', 0x03).decode("ISO-8859-1") # Data length: 3
-      self.MIDIdata = self.MIDIdata + threebite.decode("ISO-8859-1")
+    elif event.type == "Tempo":
+        code = 0xFF
+        subcode = 0x51
+        fourbite = struct.pack('>L', event.tempo)
+        threebite = fourbite[1:4]       # Just discard the MSB
+        varTime = writeVarLength(event.time)
+        for timeByte in varTime:
+            self.MIDIdata = self.MIDIdata + struct.pack('>B',timeByte)
+        self.MIDIdata = self.MIDIdata + struct.pack('>B',code)
+        self.MIDIdata = self.MIDIdata + struct.pack('>B',subcode)
+        self.MIDIdata = self.MIDIdata + struct.pack('>B', 0x03)
+        self.MIDIdata = self.MIDIdata + threebite
 
 The event.type string ("Tempo") was the one chosen in the processEventList
 logic.
