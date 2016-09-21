@@ -43,7 +43,7 @@ the software) in the __init__() function. In the case of the tempo event:
         super(Tempo, self).__init__(time)
 
 Any class that you define should include a time, ordinal (see below),
-and an insertion order.
+type, and an insertion order.
 
 ``self.ord`` and ``self.insertion_order`` are used to order the events
 in the MIDI stream. Events are first ordered in time. Events at the
@@ -62,7 +62,7 @@ Next, if you want the code to be able to de-duplicate events with may
 lay over top of one another, the parent class, ``GenericEvent``, has a
 member function called ``__eq__()``. If two events do not coincide in
 time or type they are not equal, but it they do the ``__eq__`` function
-must be modified to show equality. In the case of the ``Temp`` class,
+must be modified to show equality. In the case of the ``Tempo`` class,
 two tempo events are considered equivalent if they are the same tempo.
 In other words, if there are two tempo events at the same time and
 the same tempo, one will be removed in the de-duplication process
@@ -74,7 +74,6 @@ turned off). From ``GenericEvent.__eq__()``:
     if self.type == 'tempo':
         if self.tempo != other.tempo:
             return False
-
 
 If events are equivalent, the code should return False. If they are not
 equivalent no return should be called.
@@ -108,16 +107,17 @@ the track number to which the event is written. So in ``MIDIFile``:
 Note that a track has been added (which is zero-origined and needs to be
 constrained by the number of tracks that the ``MIDIFile`` was created with),
 and ``insertion_order`` is taken from the class ``event_counter``
-data member, and this should be updates in each function every time an event is added.
+data member, and this should be updated in each function every
+time an event is added.
 
 This is the function you will use in your code to create an event of
 the desired type.
 
-Modify processEventList
------------------------
+Modify processEventList()
+-------------------------
 
 Next, the logic pertaining to the new event type should be added to
-``processEventList`` function of the ``MIDITrack`` class. In general this code
+``processEventList()`` function of the ``MIDITrack`` class. In general this code
 will create a MIDIEvent object and set its type, time, ordinality, and
 any specific information that is needed for the event type. This object
 is then added to the MIDIEventList.
@@ -136,11 +136,10 @@ The relevant section for the tempo event is:
         self.MIDIEventList.append(event)
 
 THe ``MIDIEvent`` class is expected to have a ``type``, and ``time``
-(which should be converted from beats to ticks are above), and an
-``ord``. You are free, of course, to add any other data items that need
-to be specified. in the case of ``Tempo`` this is the tempo to be written.
-
-The event should also be updated with the ``insertion_order``.
+(which should be converted from beats to ticks are above), an
+insertion order, and an ``ord``. You are free, of course, to add any
+other data items that need to be specified. in the case
+of ``Tempo`` this is the tempo to be written.
 
 Write the Event Data to the MIDI Stream
 ----------------------------------------
@@ -174,13 +173,14 @@ Next the data is packed into a three byte structure (or a four byte
 structure, discarding the most significant byte). Again, the MIDI
 specification determines the number of bytes used in the data payload.
 
-The event time should be converted to MIDI variable-length data with the
-w``riteVarLength()`` function before writing to the stream (as shown above).
-The MIDI standard utilizes a slightly bizarre variable length data
-record. In it, only seven bits of a word are used to store data; the
-eighth bit signifies if more bytes encoding the value follow. The total
-length may be 1 to 3 bytes, depending upon the size of the value encoded.
-The ``writeVarLength()`` function takes care of this conversion for you.
+All MIDI events begin with a time, which is stored in a slightly bizarre
+variable-length format. This time should be converted to MIDI variable-length
+data with the ``writeVarLength()`` function before writing to the stream.
+In the MIDI standard's variable length data only seven bits of a word are
+used to store data; the eighth bit signifies if more bytes encoding the
+value follow. The total length may be 1 to 3 bytes, depending upon the size of
+the value encoded. The ``writeVarLength()`` function takes care of this
+conversion for you.
 
 Now the data is written to the binary object ``self.MIDIdata``, which is
 the actual MIDI-encoded data stream. As per the MIDI standard, first we
@@ -188,3 +188,36 @@ write our variable-length time value. Next we add the event type code and
 sub-code. Then we write the length of the data payload, which in the case
 of the tempo event is three bytes. Lastly, we write the actual payload,
 which has been packed into the variable ``threebite``.
+
+The reason that there are separate classes for ``GenericEvent`` and ``MIDIEvent``
+is that there need not be a one-to-one correspondance. For example, the
+code defines a ``Note`` object, but when this is processed in
+``processEventList()`` two ``MIDIEvent`` objects are created, one for
+the ``note on`` event, one for the ``note off`` event.
+
+.. code:: python
+
+    if thing.type == 'note':
+        event = MIDIEvent()
+        event.type = "NoteOn"
+        event.time = thing.time * TICKSPERBEAT
+        event.pitch = thing.pitch
+        event.volume = thing.volume
+        event.channel = thing.channel
+        event.ord = thing.ord
+        event.insertion_order = thing.insertion_order
+        self.MIDIEventList.append(event)
+
+        event = MIDIEvent()
+        event.type = "NoteOff"
+        event.time = (thing.time + thing.duration) * TICKSPERBEAT
+        event.pitch = thing.pitch
+        event.volume = thing.volume
+        event.channel = thing.channel
+        event.ord = thing.ord - 0.1
+        event.insertion_order = thing.insertion_order
+        self.MIDIEventList.append(event)
+
+Note that the ``NoteOff`` event is created with a slightly lower ordinality
+than the ``NoteOn`` event. This is so that at any given time the note off
+events will be processed before the note on events.
