@@ -292,11 +292,11 @@ class TestMIDIUtils(unittest.TestCase):
         self.assertEqual(data.unpack_into_byte(12), 0x00)               # time
         self.assertEqual(data.unpack_into_byte(13), 0xB << 4 | channel) # Code
         self.assertEqual(data.unpack_into_byte(14), 0x26)               # Bank LSB
-        self.assertEqual(data.unpack_into_byte(15), 0x01)               # Bank value (bank number)
+        self.assertEqual(data.unpack_into_byte(15), bank)               # Bank value (bank number)
         
     def testTuningProgram(self):
         #import pdb; pdb.set_trace()
-        program = 1
+        program = 10
         channel = 0
         MyMIDI = MIDIFile(1)
         MyMIDI.changeTuningProgram(0, 0, 0, program)
@@ -321,7 +321,7 @@ class TestMIDIUtils(unittest.TestCase):
         self.assertEqual(data.unpack_into_byte(12), 0x00)              # time
         self.assertEqual(data.unpack_into_byte(13), 0xB << 4 | channel) # Code
         self.assertEqual(data.unpack_into_byte(14), 0x26)               # Bank LSB
-        self.assertEqual(data.unpack_into_byte(15), 0x01)               # Bank value (bank number)
+        self.assertEqual(data.unpack_into_byte(15), program)            # Bank value (bank number)
         
     def testNRPNCall(self):
         #import pdb; pdb.set_trace()
@@ -378,27 +378,43 @@ class TestMIDIUtils(unittest.TestCase):
         self.assertEqual(data.unpack_into_byte(3), parameter) # Controller Value
         
     def testNonRealTimeUniversalSysEx(self):
-        MyMIDI = MIDIFile(1)
-        MyMIDI.addUniversalSysEx(0,0, 1, 2, struct.pack('>B', 0x01), realTime=False)
+        code           = 1
+        subcode        = 2
+        payload_number = 42
+        
+        payload = struct.pack('>B', payload_number)
+
+        MyMIDI = MIDIFile(1, adjust_origin=False)
+        
+        # Just for fun we'll use a multi-byte time
+        time = 1
+        time_bytes = writeVarLength(time*TICKSPERBEAT)
+        MyMIDI.addUniversalSysEx(0, time, code, subcode, payload, realTime=False)
         MyMIDI.close()
         
         data = Decoder(MyMIDI.tracks[0].MIDIdata)
         
         self.assertEqual(MyMIDI.tracks[0].MIDIEventList[0].type, 'UniversalSysEx')
         
-        self.assertEqual(data.unpack_into_byte(0), 0x00)
-        self.assertEqual(data.unpack_into_byte(1), 0xf0)
-        self.assertEqual(data.unpack_into_byte(2), 6)
-        self.assertEqual(data.unpack_into_byte(3), 0x7E)
-        self.assertEqual(data.unpack_into_byte(4), 0x7F)
-        self.assertEqual(data.unpack_into_byte(5), 0x01)
-        self.assertEqual(data.unpack_into_byte(6), 0x02)
-        self.assertEqual(data.unpack_into_byte(7), 0x01)
-        self.assertEqual(data.unpack_into_byte(8), 0xf7)
+        self.assertEqual(data.unpack_into_byte(0), time_bytes[0]) # Time
+        self.assertEqual(data.unpack_into_byte(1), time_bytes[1]) # Time
+        self.assertEqual(data.unpack_into_byte(2), 0xf0) # UniversalSysEx == 0xF0
+        self.assertEqual(data.unpack_into_byte(3), 5 + len(payload))    # Payload length = 5+actual pyayload
+        self.assertEqual(data.unpack_into_byte(4), 0x7E) # 0x7E == non-realtime
+        self.assertEqual(data.unpack_into_byte(5), 0x7F) # Sysex channel (always 0x7F)
+        self.assertEqual(data.unpack_into_byte(6), code)
+        self.assertEqual(data.unpack_into_byte(7), subcode)
+        self.assertEqual(data.unpack_into_byte(8), payload_number) # Data
+        self.assertEqual(data.unpack_into_byte(9), 0xf7) # End of message
         
     def testRealTimeUniversalSysEx(self):
+        code           = 1
+        subcode        = 2
+        payload_number = 47
+        
+        payload = struct.pack('>B', payload_number)
         MyMIDI = MIDIFile(1)
-        MyMIDI.addUniversalSysEx(0,0, 1, 2, struct.pack('>B', 0x01), realTime=True)
+        MyMIDI.addUniversalSysEx(0, 0, code, subcode, payload, realTime=True)
         MyMIDI.close()
         
         data = Decoder(MyMIDI.tracks[0].MIDIdata)
@@ -407,12 +423,12 @@ class TestMIDIUtils(unittest.TestCase):
         
         self.assertEqual(data.unpack_into_byte(0), 0x00)
         self.assertEqual(data.unpack_into_byte(1), 0xf0)
-        self.assertEqual(data.unpack_into_byte(2), 6)
-        self.assertEqual(data.unpack_into_byte(3), 0x7F)
+        self.assertEqual(data.unpack_into_byte(2), 5 + len(payload))
+        self.assertEqual(data.unpack_into_byte(3), 0x7F) # 0x7F == real-time
         self.assertEqual(data.unpack_into_byte(4), 0x7F)
-        self.assertEqual(data.unpack_into_byte(5), 0x01)
-        self.assertEqual(data.unpack_into_byte(6), 0x02)
-        self.assertEqual(data.unpack_into_byte(7), 0x01)
+        self.assertEqual(data.unpack_into_byte(5), code)
+        self.assertEqual(data.unpack_into_byte(6), subcode)
+        self.assertEqual(data.unpack_into_byte(7), payload_number)
         self.assertEqual(data.unpack_into_byte(8), 0xf7)
         
     def testTuning(self):
