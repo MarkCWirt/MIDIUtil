@@ -11,7 +11,7 @@
 #-----------------------------------------------------------------------------
 
 from __future__ import division, print_function
-import struct,  math
+import struct,  math, warnings
 
 # TICKSPERBEAT is the number of "ticks" (time measurement in the MIDI file) that
 # corresponds to one beat. This number is somewhat arbitrary, but should be chosen
@@ -691,7 +691,7 @@ class MIDIFile(object):
         software will need to figure out how to interpret NoteOff events upon playback.
     '''
     
-    def __init__(self, numTracks, removeDuplicates=True,  deinterleave=True):
+    def __init__(self, numTracks, removeDuplicates=True,  deinterleave=True, adjust_origin=None):
         '''
         Initialize the class
         '''
@@ -700,6 +700,12 @@ class MIDIFile(object):
         self.tracks = list()
         self.numTracks = numTracks
         self.closed = False
+        if adjust_origin is None:
+            self.adjust_origin = True
+            warnings.warn("Please explicitly set adjust_origin. Default behaviour will change in a future version.", 
+                          FutureWarning)
+        else:
+            self.adjust_origin = adjust_origin
         
         for i in range(0,numTracks):
             self.tracks.append(MIDITrack(removeDuplicates,  deinterleave))
@@ -945,7 +951,7 @@ class MIDIFile(object):
         self.tracks[track].addSysEx(time,manID, payload, insertion_order = self.event_counter)
         self.event_counter = self.event_counter + 1
     
-    def addUniversalSysEx(self,track,  time,code, subcode, payload,  \
+    def addUniversalSysEx(self, track, time, code, subcode, payload,  \
                           sysExChannel=0x7F,  realTime=False):
         """
         Add a Universal SysEx event.
@@ -971,7 +977,7 @@ class MIDIFile(object):
         in MIDITrack.
         """
         
-        self.tracks[track].addUniversalSysEx(time,code, subcode, payload,  sysExChannel,\
+        self.tracks[track].addUniversalSysEx(time, code, subcode, payload,  sysExChannel,\
                                                realTime, insertion_order = self.event_counter)
         self.event_counter = self.event_counter + 1
 
@@ -1044,7 +1050,8 @@ class MIDIFile(object):
         origin = self.findOrigin()
 
         for i in range(0,self.numTracks):
-            self.tracks[i].adjustTime(origin)
+            if self.adjust_origin:
+                self.tracks[i].adjustTime(origin)
             self.tracks[i].writeMIDIStream()
             
         self.closed = True
