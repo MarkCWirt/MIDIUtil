@@ -31,6 +31,9 @@ class Decoder(object):
         
     def __getitem__(self, key):
         return self.data[key].encode("ISO-8859-1")
+        
+    def unpack_into_byte(self, key):
+        return struct.unpack('>B', self[key])[0]
 
 class TestMIDIUtils(unittest.TestCase):
     
@@ -203,16 +206,17 @@ class TestMIDIUtils(unittest.TestCase):
         MyMIDI = MIDIFile(1)
         MyMIDI.addSysEx(0,0, 0, struct.pack('>B', 0x01))
         MyMIDI.close()
+        
         data = Decoder(MyMIDI.tracks[0].MIDIdata)
         
         self.assertEqual(MyMIDI.tracks[0].MIDIEventList[0].type, 'SysEx')
         
-        self.assertEqual(struct.unpack('>B', data[0])[0], 0x00)
-        self.assertEqual(struct.unpack('>B', data[1])[0], 0xf0)
-        self.assertEqual(struct.unpack('>B', data[2])[0], 3)
-        self.assertEqual(struct.unpack('>B', data[3])[0], 0x00)
-        self.assertEqual(struct.unpack('>B', data[4])[0], 0x01)
-        self.assertEqual(struct.unpack('>B', data[5])[0], 0xf7)
+        self.assertEqual(data.unpack_into_byte(0), 0x00)
+        self.assertEqual(data.unpack_into_byte(1), 0xf0)
+        self.assertEqual(data.unpack_into_byte(2), 3)
+        self.assertEqual(data.unpack_into_byte(3), 0x00)
+        self.assertEqual(data.unpack_into_byte(4), 0x01)
+        self.assertEqual(data.unpack_into_byte(5), 0xf7)
         
     def testTempo(self):
         #import pdb; pdb.set_trace()
@@ -225,10 +229,10 @@ class TestMIDIUtils(unittest.TestCase):
         
         self.assertEqual(MyMIDI.tracks[0].MIDIEventList[0].type, 'Tempo')
         
-        self.assertEqual(struct.unpack('>B', data[0])[0], 0x00) # time
-        self.assertEqual(struct.unpack('>B', data[1])[0], 0xff) # Code
-        self.assertEqual(struct.unpack('>B', data[2])[0], 0x51)
-        self.assertEqual(struct.unpack('>B', data[3])[0], 0x03)
+        self.assertEqual(data.unpack_into_byte(0), 0x00) # time
+        self.assertEqual(data.unpack_into_byte(1), 0xff) # Code
+        self.assertEqual(data.unpack_into_byte(2), 0x51)
+        self.assertEqual(data.unpack_into_byte(3), 0x03)
         self.assertEqual(data[4:7], struct.pack('>L', int(60000000/tempo))[1:4])
         
     def testProgramChange(self):
@@ -242,9 +246,9 @@ class TestMIDIUtils(unittest.TestCase):
         data = Decoder(MyMIDI.tracks[0].MIDIdata)
         
         self.assertEqual(MyMIDI.tracks[0].MIDIEventList[0].type, 'ProgramChange')
-        self.assertEqual(struct.unpack('>B', data[0])[0], 0x00) # time
-        self.assertEqual(struct.unpack('>B', data[1])[0], 0xC << 4 | channel) # Code
-        self.assertEqual(struct.unpack('>B', data[2])[0], program)
+        self.assertEqual(data.unpack_into_byte(0), 0x00) # time
+        self.assertEqual(data.unpack_into_byte(1), 0xC << 4 | channel) # Code
+        self.assertEqual(data.unpack_into_byte(2), program)
         
     def testTrackName(self):
         #import pdb; pdb.set_trace()
@@ -256,9 +260,10 @@ class TestMIDIUtils(unittest.TestCase):
         data = Decoder(MyMIDI.tracks[0].MIDIdata)
 
         self.assertEqual(MyMIDI.tracks[0].MIDIEventList[0].type, 'TrackName')
-        self.assertEqual(struct.unpack('>B', data[0])[0], 0x00) # time
-        self.assertEqual(struct.unpack('>B', data[1])[0], 0xFF) # Code
-        self.assertEqual(struct.unpack('>B', data[2])[0], 0x03) # subcodes
+        
+        self.assertEqual(data.unpack_into_byte(0), 0x00) # time
+        self.assertEqual(data.unpack_into_byte(1), 0xFF) # Code
+        self.assertEqual(data.unpack_into_byte(2), 0x03) # subcodes
         
     def testTuningBank(self):
         #import pdb; pdb.set_trace()
@@ -272,22 +277,22 @@ class TestMIDIUtils(unittest.TestCase):
         
         self.assertEqual(MyMIDI.tracks[0].MIDIEventList[0].type, 'ControllerEvent')
         
-        self.assertEqual(struct.unpack('>B', data[0])[0],  0x00) # time
-        self.assertEqual(struct.unpack('>B', data[1])[0],  0xB << 4 | channel) # Code
-        self.assertEqual(struct.unpack('>B', data[2])[0],  0x65) # Controller Number
-        self.assertEqual(struct.unpack('>B', data[3])[0],  0x0) # Controller Value
-        self.assertEqual(struct.unpack('>B', data[4])[0],  0x00) # time
-        self.assertEqual(struct.unpack('>B', data[5])[0],  0xB << 4 | channel) # Code
-        self.assertEqual(struct.unpack('>B', data[6])[0],  0x64) # Controller Number
-        self.assertEqual(struct.unpack('>B', data[7])[0],  0x4) # Controller Value
-        self.assertEqual(struct.unpack('>B', data[8])[0],  0x00) # time
-        self.assertEqual(struct.unpack('>B', data[9])[0],  0xB << 4 | channel) # Code
-        self.assertEqual(struct.unpack('>B', data[10])[0], 0x06) # Bank MSB
-        self.assertEqual(struct.unpack('>B', data[11])[0], 0x00) # Value
-        self.assertEqual(struct.unpack('>B', data[12])[0], 0x00) # time
-        self.assertEqual(struct.unpack('>B', data[13])[0], 0xB << 4 | channel) # Code
-        self.assertEqual(struct.unpack('>B', data[14])[0], 0x26) # Bank LSB
-        self.assertEqual(struct.unpack('>B', data[15])[0], 0x01) # Bank value (bank number)
+        self.assertEqual(data.unpack_into_byte(0),  0x00)               # time
+        self.assertEqual(data.unpack_into_byte(1),  0xB << 4 | channel) # Code
+        self.assertEqual(data.unpack_into_byte(2),  0x65)               # Controller Number
+        self.assertEqual(data.unpack_into_byte(3),  0x0)                # Controller Value
+        self.assertEqual(data.unpack_into_byte(4),  0x00)               # time
+        self.assertEqual(data.unpack_into_byte(5),  0xB << 4 | channel) # Code
+        self.assertEqual(data.unpack_into_byte(6),  0x64)               # Controller Number
+        self.assertEqual(data.unpack_into_byte(7),  0x4)                # Controller Value
+        self.assertEqual(data.unpack_into_byte(8),  0x00)               # time
+        self.assertEqual(data.unpack_into_byte(9),  0xB << 4 | channel) # Code
+        self.assertEqual(data.unpack_into_byte(10), 0x06)               # Bank MSB
+        self.assertEqual(data.unpack_into_byte(11), 0x00)               # Value
+        self.assertEqual(data.unpack_into_byte(12), 0x00)               # time
+        self.assertEqual(data.unpack_into_byte(13), 0xB << 4 | channel) # Code
+        self.assertEqual(data.unpack_into_byte(14), 0x26)               # Bank LSB
+        self.assertEqual(data.unpack_into_byte(15), 0x01)               # Bank value (bank number)
         
     def testTuningProgram(self):
         #import pdb; pdb.set_trace()
@@ -301,22 +306,22 @@ class TestMIDIUtils(unittest.TestCase):
         
         self.assertEqual(MyMIDI.tracks[0].MIDIEventList[0].type, 'ControllerEvent')
         
-        self.assertEqual(struct.unpack('>B', data[0])[0], 0x00) # time
-        self.assertEqual(struct.unpack('>B', data[1])[0], 0xB << 4 | channel) # Code
-        self.assertEqual(struct.unpack('>B', data[2])[0], 0x65) # Controller Number
-        self.assertEqual(struct.unpack('>B', data[3])[0], 0x0) # Controller Value
-        self.assertEqual(struct.unpack('>B', data[4])[0], 0x00) # time
-        self.assertEqual(struct.unpack('>B', data[5])[0], 0xB << 4 | channel) # Code
-        self.assertEqual(struct.unpack('>B', data[6])[0], 0x64) # Controller Number
-        self.assertEqual(struct.unpack('>B', data[7])[0], 0x03) # Controller Value
-        self.assertEqual(struct.unpack('>B', data[8])[0], 0x00) # time
-        self.assertEqual(struct.unpack('>B', data[9])[0], 0xB << 4 | channel) # Code
-        self.assertEqual(struct.unpack('>B', data[10])[0], 0x06) # Bank MSB
-        self.assertEqual(struct.unpack('>B', data[11])[0], 0x00) # Value
-        self.assertEqual(struct.unpack('>B', data[12])[0], 0x00) # time
-        self.assertEqual(struct.unpack('>B', data[13])[0], 0xB << 4 | channel) # Code
-        self.assertEqual(struct.unpack('>B', data[14])[0], 0x26) # Bank LSB
-        self.assertEqual(struct.unpack('>B', data[15])[0], 0x01) # Bank value (bank number)
+        self.assertEqual(data.unpack_into_byte(0), 0x00)               # time
+        self.assertEqual(data.unpack_into_byte(1), 0xB << 4 | channel) # Code
+        self.assertEqual(data.unpack_into_byte(2), 0x65)               # Controller Number
+        self.assertEqual(data.unpack_into_byte(3), 0x0)                # Controller Value
+        self.assertEqual(data.unpack_into_byte(4), 0x00)               # time
+        self.assertEqual(data.unpack_into_byte(5), 0xB << 4 | channel) # Code
+        self.assertEqual(data.unpack_into_byte(6), 0x64)               # Controller Number
+        self.assertEqual(data.unpack_into_byte(7), 0x03)               # Controller Value
+        self.assertEqual(data.unpack_into_byte(8), 0x00)               # time
+        self.assertEqual(data.unpack_into_byte(9), 0xB << 4 | channel) # Code
+        self.assertEqual(data.unpack_into_byte(10), 0x06)              # Bank MSB
+        self.assertEqual(data.unpack_into_byte(11), 0x00)              # Value
+        self.assertEqual(data.unpack_into_byte(12), 0x00)              # time
+        self.assertEqual(data.unpack_into_byte(13), 0xB << 4 | channel) # Code
+        self.assertEqual(data.unpack_into_byte(14), 0x26)               # Bank LSB
+        self.assertEqual(data.unpack_into_byte(15), 0x01)               # Bank value (bank number)
         
     def testNRPNCall(self):
         #import pdb; pdb.set_trace()
@@ -335,22 +340,22 @@ class TestMIDIUtils(unittest.TestCase):
         
         self.assertEqual(MyMIDI.tracks[0].MIDIEventList[0].type, 'ControllerEvent')
         
-        self.assertEqual(struct.unpack('>B', data[0])[0], 0x00) # time
-        self.assertEqual(struct.unpack('>B', data[1])[0], 0xB << 4 | channel) # Code
-        self.assertEqual(struct.unpack('>B', data[2])[0], 99) # Controller Number
-        self.assertEqual(struct.unpack('>B', data[3])[0], controller_msb) # Controller Value
-        self.assertEqual(struct.unpack('>B', data[4])[0], 0x00) # time
-        self.assertEqual(struct.unpack('>B', data[5])[0], 0xB << 4 | channel) # Code
-        self.assertEqual(struct.unpack('>B', data[6])[0], 98) # Controller Number
-        self.assertEqual(struct.unpack('>B', data[7])[0], controller_lsb) # Controller Value
-        self.assertEqual(struct.unpack('>B', data[8])[0], 0x00) # time
-        self.assertEqual(struct.unpack('>B', data[9])[0], 0xB << 4 | channel) # Code
-        self.assertEqual(struct.unpack('>B', data[10])[0], 0x06) # Bank MSB
-        self.assertEqual(struct.unpack('>B', data[11])[0], data_msb) # Value
-        self.assertEqual(struct.unpack('>B', data[12])[0], 0x00) # time
-        self.assertEqual(struct.unpack('>B', data[13])[0], 0xB << 4 | channel) # Code
-        self.assertEqual(struct.unpack('>B', data[14])[0], 0x26) # Bank LSB
-        self.assertEqual(struct.unpack('>B', data[15])[0], data_lsb) # Bank value (bank number)
+        self.assertEqual(data.unpack_into_byte(0), 0x00)               # time
+        self.assertEqual(data.unpack_into_byte(1), 0xB << 4 | channel) # Code
+        self.assertEqual(data.unpack_into_byte(2), 99)                 # Controller Number
+        self.assertEqual(data.unpack_into_byte(3), controller_msb)     # Controller Value
+        self.assertEqual(data.unpack_into_byte(4), 0x00)               # time
+        self.assertEqual(data.unpack_into_byte(5), 0xB << 4 | channel) # Code
+        self.assertEqual(data.unpack_into_byte(6), 98)                 # Controller Number
+        self.assertEqual(data.unpack_into_byte(7), controller_lsb)     # Controller Value
+        self.assertEqual(data.unpack_into_byte(8), 0x00)               # time
+        self.assertEqual(data.unpack_into_byte(9), 0xB << 4 | channel) # Code
+        self.assertEqual(data.unpack_into_byte(10), 0x06)              # Bank MSB
+        self.assertEqual(data.unpack_into_byte(11), data_msb)          # Value
+        self.assertEqual(data.unpack_into_byte(12), 0x00)              # time
+        self.assertEqual(data.unpack_into_byte(13), 0xB << 4 | channel) # Code
+        self.assertEqual(data.unpack_into_byte(14), 0x26)               # Bank LSB
+        self.assertEqual(data.unpack_into_byte(15), data_lsb) # Bank value (bank number)
         
     def testAddControllerEvent(self):
         #import pdb; pdb.set_trace()
@@ -367,10 +372,10 @@ class TestMIDIUtils(unittest.TestCase):
         
         self.assertEqual(MyMIDI.tracks[0].MIDIEventList[0].type, 'ControllerEvent')
 
-        self.assertEqual(struct.unpack('>B', data[0])[0], 0x00) # time
-        self.assertEqual(struct.unpack('>B', data[1])[0], 0xB << 4 | channel) # Code
-        self.assertEqual(struct.unpack('>B', data[2])[0], controller_number) # Controller Number
-        self.assertEqual(struct.unpack('>B', data[3])[0], parameter) # Controller Value
+        self.assertEqual(data.unpack_into_byte(0), 0x00) # time
+        self.assertEqual(data.unpack_into_byte(1), 0xB << 4 | channel) # Code
+        self.assertEqual(data.unpack_into_byte(2), controller_number) # Controller Number
+        self.assertEqual(data.unpack_into_byte(3), parameter) # Controller Value
         
     def testNonRealTimeUniversalSysEx(self):
         MyMIDI = MIDIFile(1)
@@ -381,15 +386,15 @@ class TestMIDIUtils(unittest.TestCase):
         
         self.assertEqual(MyMIDI.tracks[0].MIDIEventList[0].type, 'UniversalSysEx')
         
-        self.assertEqual(struct.unpack('>B', data[0])[0], 0x00)
-        self.assertEqual(struct.unpack('>B', data[1])[0], 0xf0)
-        self.assertEqual(struct.unpack('>B', data[2])[0], 6)
-        self.assertEqual(struct.unpack('>B', data[3])[0], 0x7E)
-        self.assertEqual(struct.unpack('>B', data[4])[0], 0x7F)
-        self.assertEqual(struct.unpack('>B', data[5])[0], 0x01)
-        self.assertEqual(struct.unpack('>B', data[6])[0], 0x02)
-        self.assertEqual(struct.unpack('>B', data[7])[0], 0x01)
-        self.assertEqual(struct.unpack('>B', data[8])[0], 0xf7)
+        self.assertEqual(data.unpack_into_byte(0), 0x00)
+        self.assertEqual(data.unpack_into_byte(1), 0xf0)
+        self.assertEqual(data.unpack_into_byte(2), 6)
+        self.assertEqual(data.unpack_into_byte(3), 0x7E)
+        self.assertEqual(data.unpack_into_byte(4), 0x7F)
+        self.assertEqual(data.unpack_into_byte(5), 0x01)
+        self.assertEqual(data.unpack_into_byte(6), 0x02)
+        self.assertEqual(data.unpack_into_byte(7), 0x01)
+        self.assertEqual(data.unpack_into_byte(8), 0xf7)
         
     def testRealTimeUniversalSysEx(self):
         MyMIDI = MIDIFile(1)
@@ -400,15 +405,15 @@ class TestMIDIUtils(unittest.TestCase):
         
         self.assertEqual(MyMIDI.tracks[0].MIDIEventList[0].type, 'UniversalSysEx')
         
-        self.assertEqual(struct.unpack('>B', data[0])[0], 0x00)
-        self.assertEqual(struct.unpack('>B', data[1])[0], 0xf0)
-        self.assertEqual(struct.unpack('>B', data[2])[0], 6)
-        self.assertEqual(struct.unpack('>B', data[3])[0], 0x7F)
-        self.assertEqual(struct.unpack('>B', data[4])[0], 0x7F)
-        self.assertEqual(struct.unpack('>B', data[5])[0], 0x01)
-        self.assertEqual(struct.unpack('>B', data[6])[0], 0x02)
-        self.assertEqual(struct.unpack('>B', data[7])[0], 0x01)
-        self.assertEqual(struct.unpack('>B', data[8])[0], 0xf7)
+        self.assertEqual(data.unpack_into_byte(0), 0x00)
+        self.assertEqual(data.unpack_into_byte(1), 0xf0)
+        self.assertEqual(data.unpack_into_byte(2), 6)
+        self.assertEqual(data.unpack_into_byte(3), 0x7F)
+        self.assertEqual(data.unpack_into_byte(4), 0x7F)
+        self.assertEqual(data.unpack_into_byte(5), 0x01)
+        self.assertEqual(data.unpack_into_byte(6), 0x02)
+        self.assertEqual(data.unpack_into_byte(7), 0x01)
+        self.assertEqual(data.unpack_into_byte(8), 0xf7)
         
     def testTuning(self):
         MyMIDI = MIDIFile(1)
@@ -419,24 +424,24 @@ class TestMIDIUtils(unittest.TestCase):
         
         self.assertEqual(MyMIDI.tracks[0].MIDIEventList[0].type, 'UniversalSysEx')
         
-        self.assertEqual(struct.unpack('>B', data[0])[0], 0x00)
-        self.assertEqual(struct.unpack('>B', data[1])[0], 0xf0)
-        self.assertEqual(struct.unpack('>B', data[2])[0], 15)
-        self.assertEqual(struct.unpack('>B', data[3])[0], 0x7E)
-        self.assertEqual(struct.unpack('>B', data[4])[0], 0x7F)
-        self.assertEqual(struct.unpack('>B', data[5])[0], 0x08)
-        self.assertEqual(struct.unpack('>B', data[6])[0], 0x02)
-        self.assertEqual(struct.unpack('>B', data[7])[0], 0x00)
-        self.assertEqual(struct.unpack('>B', data[8])[0], 0x2)
-        self.assertEqual(struct.unpack('>B', data[9])[0], 0x1)
-        self.assertEqual(struct.unpack('>B', data[10])[0], 69)
-        self.assertEqual(struct.unpack('>B', data[11])[0], 0)
-        self.assertEqual(struct.unpack('>B', data[12])[0], 0)
-        self.assertEqual(struct.unpack('>B', data[13])[0], 0x2)
-        self.assertEqual(struct.unpack('>B', data[14])[0], 81)
-        self.assertEqual(struct.unpack('>B', data[15])[0], 0)
-        self.assertEqual(struct.unpack('>B', data[16])[0], 0)
-        self.assertEqual(struct.unpack('>B', data[17])[0], 0xf7)
+        self.assertEqual(data.unpack_into_byte(0), 0x00)
+        self.assertEqual(data.unpack_into_byte(1), 0xf0)
+        self.assertEqual(data.unpack_into_byte(2), 15)
+        self.assertEqual(data.unpack_into_byte(3), 0x7E)
+        self.assertEqual(data.unpack_into_byte(4), 0x7F)
+        self.assertEqual(data.unpack_into_byte(5), 0x08)
+        self.assertEqual(data.unpack_into_byte(6), 0x02)
+        self.assertEqual(data.unpack_into_byte(7), 0x00)
+        self.assertEqual(data.unpack_into_byte(8), 0x2)
+        self.assertEqual(data.unpack_into_byte(9), 0x1)
+        self.assertEqual(data.unpack_into_byte(10), 69)
+        self.assertEqual(data.unpack_into_byte(11), 0)
+        self.assertEqual(data.unpack_into_byte(12), 0)
+        self.assertEqual(data.unpack_into_byte(13), 0x2)
+        self.assertEqual(data.unpack_into_byte(14), 81)
+        self.assertEqual(data.unpack_into_byte(15), 0)
+        self.assertEqual(data.unpack_into_byte(16), 0)
+        self.assertEqual(data.unpack_into_byte(17), 0xf7)
         
     def testWriteFile(self):
         # Just to make sure the stream can be written without throwing an error.
