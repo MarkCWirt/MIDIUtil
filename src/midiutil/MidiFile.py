@@ -35,8 +35,11 @@ class MIDIEvent(object):
 class GenericEvent(object):
     '''The event class from which specific events are derived
     '''
-    def __init__(self,time):
+    def __init__(self, event_type, time, ordinal, insertion_order):
+        self.type = event_type
         self.time = time 
+        self.ord = ordinal
+        self.insertion_order = insertion_order
         #self.type = 'Unknown'
 
         
@@ -107,54 +110,37 @@ class Note(GenericEvent):
     '''A class that encapsulates a note
     '''
     def __init__(self,channel, pitch,time,duration,volume,ordinal=3,annotation=None, insertion_order=0):
-        #GenericEvent.__init__(self,time)
         self.pitch = pitch
         self.duration = duration
         self.volume = volume
-        self.type = 'note'
         self.channel = channel
         self.annotation = annotation
-        self.ord = ordinal
-        self.insertion_order = insertion_order
-        super(Note, self).__init__(time)
+        super(Note, self).__init__('note', time, ordinal, insertion_order)
         
 class Tempo(GenericEvent):
     '''A class that encapsulates a tempo meta-event
     '''
     def __init__(self,time,tempo, ordinal=3, insertion_order=0):
-        
-        #GenericEvent.__init__(self,time)
-        self.type = 'tempo'
         self.tempo = int(60000000 / tempo)
-        self.ord = ordinal
-        self.insertion_order = insertion_order
-        super(Tempo, self).__init__(time)
+        super(Tempo, self).__init__('tempo', time, ordinal, insertion_order)
         
 class ProgramChange(GenericEvent):
     '''A class that encapsulates a program change event.
     '''
     
     def __init__(self,  channel,  time,  programNumber, ordinal=1, insertion_order=0):
-        #GenericEvent.__init__(self, time,)
-        self.type = 'programChange'
         self.programNumber = programNumber
         self.channel = channel
-        self.ord = ordinal
-        self.insertion_order = insertion_order
-        super(ProgramChange, self).__init__(time)
+        super(ProgramChange, self).__init__('programChange', time, ordinal, insertion_order)
         
 class SysExEvent(GenericEvent):
     '''A class that encapsulates a System Exclusive  event.
     '''
     
     def __init__(self,  time,  manID,  payload, ordinal=1, insertion_order=0):
-        #GenericEvent.__init__(self, time,)
-        self.type = 'SysEx'
         self.manID = manID
         self.payload = payload
-        self.ord = ordinal
-        self.insertion_order = insertion_order
-        super(SysExEvent, self).__init__(time)
+        super(SysExEvent, self).__init__('SysEx', time, ordinal, insertion_order)
         
 class UniversalSysExEvent(GenericEvent):
     '''A class that encapsulates a Universal System Exclusive  event.
@@ -162,30 +148,22 @@ class UniversalSysExEvent(GenericEvent):
     
     def __init__(self,  time,  realTime,  sysExChannel,  code,  subcode,  payload, 
                  ordinal=1, insertion_order=0):
-        #GenericEvent.__init__(self, time,)
-        self.type = 'UniversalSysEx'
         self.realTime = realTime
         self.sysExChannel = sysExChannel
         self.code = code
         self.subcode = subcode
         self.payload = payload
-        self.ord = ordinal
-        self.insertion_order = insertion_order
-        super(UniversalSysExEvent, self).__init__(time)
+        super(UniversalSysExEvent, self).__init__('UniversalSysEx', time, ordinal, insertion_order)
         
 class ControllerEvent(GenericEvent):
     '''A class that encapsulates a program change event.
     '''
     
     def __init__(self,  channel,  time,  controller_number, parameter, ordinal=1, insertion_order=0):
-        GenericEvent.__init__(self, time,)
-        self.type = 'controllerEvent'
         self.parameter = parameter
         self.channel = channel
         self.controller_number = controller_number
-        self.ord = ordinal
-        self.insertion_order = insertion_order
-        super(ControllerEvent, self).__init__(time)
+        super(ControllerEvent, self).__init__('controllerEvent', time, ordinal, insertion_order)
 
 class TrackName(GenericEvent):
     '''A class that encapsulates a program change event.
@@ -193,11 +171,8 @@ class TrackName(GenericEvent):
     
     def __init__(self,  time,  trackName, ordinal=0, insertion_order=0):
         #GenericEvent.__init__(self, time,)
-        self.type = 'trackName'
         self.trackName = trackName.encode("ISO-8859-1")
-        self.ord = ordinal
-        self.insertion_order = insertion_order
-        super(TrackName, self).__init__(time)
+        super(TrackName, self).__init__('trackName', time, ordinal, insertion_order)
         
 class MIDITrack(object):
     '''A class that encapsulates a MIDI track

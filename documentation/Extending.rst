@@ -26,24 +26,21 @@ instance data that is needed for the MIDI event to be written. In
 the case of the tempo event, it is the actual tempo (which is defined
 in the MIDI standard to be 60000000 divided by the tempo in beats per
 minute). This class should also call the superclass' initializer with
-the event time and set the event type (a unique string used internally by
-the software) in the __init__() function. In the case of the tempo event:
+the event time, ordinal, and insertion order,  and set the event type
+(a unique string used internally by the software).
+In the case of the tempo event:
 
 .. code:: python
 
-  class Tempo(GenericEvent):
-    '''
-    A class that encapsulates a tempo change event
-    '''
-    def __init__(self,time,tempo, ordinal=3, insertion_order=0):
-        self.type = 'tempo'
-        self.tempo = int(60000000 / tempo)
-        self.ord = ordinal
-        self.insertion_order = insertion_order
-        super(Tempo, self).__init__(time)
+    class Tempo(GenericEvent):
+        '''A class that encapsulates a tempo meta-event
+        '''
+        def __init__(self,time,tempo, ordinal=3, insertion_order=0):
+            self.tempo = int(60000000 / tempo)
+            super(Tempo, self).__init__('tempo', time, ordinal, insertion_order)
 
-Any class that you define should include a time, ordinal (see below),
-type, and an insertion order.
+Any class that you define should include a type, time, ordinal (see below),
+and an insertion order.
 
 ``self.ord`` and ``self.insertion_order`` are used to order the events
 in the MIDI stream. Events are first ordered in time. Events at the
@@ -221,3 +218,8 @@ the ``note on`` event, one for the ``note off`` event.
 Note that the ``NoteOff`` event is created with a slightly lower ordinality
 than the ``NoteOn`` event. This is so that at any given time the note off
 events will be processed before the note on events.
+
+Write Some Tests
+----------------
+
+Yea, it's a hassle, but you know it's the right thing to do!
