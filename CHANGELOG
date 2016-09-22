@@ -1,3 +1,6 @@
+    * Added ability to *not* adjust the MIDIFile's time origin.
+      Default behaviour is maintained, but will change in a future
+      version (by default the origin is currently adjusted).
     * Changed the controller event parameter names to make them
       clearer.
     * Added support for Registered and Non-Registered parameter
