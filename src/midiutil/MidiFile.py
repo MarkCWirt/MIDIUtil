@@ -263,7 +263,7 @@ class MIDITrack(object):
         '''
         self.eventList.append(TrackName(time,trackName, insertion_order = insertion_order))
         
-    def changeNoteTuning(self,  tunings,   sysExChannel=0x7F,  realTime=False,  \
+    def changeNoteTuning(self,  tunings,   sysExChannel=0x7F,  realTime=True,  \
         tuningProgam=0, insertion_order=0):
         '''Change the tuning of MIDI notes
         '''
@@ -904,7 +904,7 @@ class MIDIFile(object):
         
         
     def changeNoteTuning(self,  track,  tunings,   sysExChannel=0x7F,  \
-                         realTime=False,  tuningProgam=0):
+                         realTime=True,  tuningProgam=0):
         """
         Change a note's tuning using SysEx change tuning program.
             

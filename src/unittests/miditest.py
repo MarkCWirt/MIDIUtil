@@ -443,7 +443,7 @@ class TestMIDIUtils(unittest.TestCase):
         self.assertEqual(data.unpack_into_byte(0), 0x00)
         self.assertEqual(data.unpack_into_byte(1), 0xf0)
         self.assertEqual(data.unpack_into_byte(2), 15)
-        self.assertEqual(data.unpack_into_byte(3), 0x7E)
+        self.assertEqual(data.unpack_into_byte(3), 0x7F)
         self.assertEqual(data.unpack_into_byte(4), 0x7F)
         self.assertEqual(data.unpack_into_byte(5), 0x08)
         self.assertEqual(data.unpack_into_byte(6), 0x02)
