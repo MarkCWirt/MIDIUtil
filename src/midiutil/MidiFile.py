@@ -27,10 +27,11 @@ class MIDIEvent(object):
     '''
     The class to contain the MIDI Event (placed on MIDIEventList.
     '''
-    def __init__(self):
-        self.type='unknown'
-        self.time=0
-        self.ord = 0
+    def __init__(self, type="unknown", time = 0, ordinal=0, insertion_order=0):
+        self.type=type
+        self.time=time
+        self.ord = ordinal
+        self.insertion_order=insertion_order
 
 class GenericEvent(object):
     '''The event class from which specific events are derived
@@ -265,86 +266,56 @@ class MIDITrack(object):
         
         for thing in self.eventList:
             if thing.type == 'note':
-                event = MIDIEvent()
-                event.type = "NoteOn"
-                event.time = thing.time * TICKSPERBEAT
-                event.pitch = thing.pitch
-                event.volume = thing.volume
+                event         = MIDIEvent("NoteOn", thing.time * TICKSPERBEAT, thing.ord, thing.insertion_order)
+                event.pitch   = thing.pitch
+                event.volume  = thing.volume
                 event.channel = thing.channel
-                event.ord = thing.ord
-                event.insertion_order = thing.insertion_order
                 self.MIDIEventList.append(event)
 
-                event = MIDIEvent()
-                event.type = "NoteOff"
-                event.time = (thing.time + thing.duration) * TICKSPERBEAT
-                event.pitch = thing.pitch
-                event.volume = thing.volume
+                event         = MIDIEvent("NoteOff", (thing.time+ thing.duration) * TICKSPERBEAT, thing.ord -0.1,
+                                            thing.insertion_order)
+                event.pitch   = thing.pitch
+                event.volume  = thing.volume
                 event.channel = thing.channel
-                event.ord = thing.ord - 0.1
-                event.insertion_order = thing.insertion_order
                 self.MIDIEventList.append(event)
 
             elif thing.type == 'tempo':
-                event = MIDIEvent()
-                event.type = "Tempo"
-                event.time = thing.time * TICKSPERBEAT
+                event = MIDIEvent("Tempo", thing.time * TICKSPERBEAT, thing.ord, thing.insertion_order)
                 event.tempo = thing.tempo
-                event.ord = thing.ord
-                event.insertion_order = thing.insertion_order
                 self.MIDIEventList.append(event)
 
             elif thing.type == 'programChange':
-                event = MIDIEvent()
-                event.type = "ProgramChange"
-                event.time = thing.time * TICKSPERBEAT
+                event               = MIDIEvent("ProgramChange", thing.time * TICKSPERBEAT, thing.ord, 
+                                                thing.insertion_order)
                 event.programNumber = thing.programNumber
-                event.channel = thing.channel
-                event.ord = thing.ord
-                event.insertion_order = thing.insertion_order
+                event.channel       = thing.channel
                 self.MIDIEventList.append(event)
 
             elif thing.type == 'trackName':
-                event = MIDIEvent()
-                event.type = "TrackName"
-                event.time = thing.time * TICKSPERBEAT
+                event = MIDIEvent("TrackName", thing.time * TICKSPERBEAT, thing.ord, thing.insertion_order)
                 event.trackName = thing.trackName
-                event.ord = thing.ord
-                event.insertion_order = thing.insertion_order
                 self.MIDIEventList.append(event)
 
             elif thing.type == 'controllerEvent':
-                event = MIDIEvent()
-                event.type = "ControllerEvent"
-                event.time = thing.time * TICKSPERBEAT
+                event = MIDIEvent("ControllerEvent", thing.time * TICKSPERBEAT, thing.ord, thing.insertion_order)
                 event.contoller_number = thing.controller_number
                 event.channel = thing.channel
                 event.parameter = thing.parameter
-                event.ord = thing.ord
-                event.insertion_order = thing.insertion_order
                 self.MIDIEventList.append(event)
 
             elif thing.type == 'SysEx':
-                event = MIDIEvent()
-                event.type = "SysEx"
-                event.time = thing.time * TICKSPERBEAT
+                event = MIDIEvent("SysEx", thing.time * TICKSPERBEAT, thing.ord, thing.insertion_order)
                 event.manID = thing.manID
                 event.payload = thing.payload
-                event.ord = thing.ord
-                event.insertion_order = thing.insertion_order
                 self.MIDIEventList.append(event)
 
             elif thing.type == 'UniversalSysEx':
-                event = MIDIEvent()
-                event.type = "UniversalSysEx"
+                event = MIDIEvent("UniversalSysEx", thing.time * TICKSPERBEAT, thing.ord, thing.insertion_order)
                 event.realTime = thing.realTime
                 event.sysExChannel = thing.sysExChannel
-                event.time = thing.time * TICKSPERBEAT
                 event.code = thing.code
                 event.subcode = thing.subcode
                 event.payload = thing.payload
-                event.ord = thing.ord
-                event.insertion_order = thing.insertion_order
                 self.MIDIEventList.append(event)
 
             else:

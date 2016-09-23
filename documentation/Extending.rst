@@ -123,19 +123,15 @@ The relevant section for the tempo event is:
 .. code:: python
 
     elif thing.type == 'tempo':
-        event = MIDIEvent()
-        event.type = "Tempo"
-        event.time = thing.time * TICKSPERBEAT
+        event = MIDIEvent("Tempo", thing.time * TICKSPERBEAT, thing.ord, thing.insertion_order)
         event.tempo = thing.tempo
-        event.ord = thing.ord
-        event.insertion_order = thing.insertion_order
         self.MIDIEventList.append(event)
 
-THe ``MIDIEvent`` class is expected to have a ``type``, and ``time``
-(which should be converted from beats to ticks are above), an
-insertion order, and an ``ord``. You are free, of course, to add any
-other data items that need to be specified. in the case
-of ``Tempo`` this is the tempo to be written.
+THe ``MIDIEvent`` class is expected to have a ``type``, ``time``
+(which should be converted from beats to ticks as above), ordinal, and an
+insertion order, which are similar to the values in the ``GenericEvent`` class.
+You are free, of course, to add any other data items that need to be specified.
+In the case of ``Tempo`` this is the tempo to be written.
 
 Write the Event Data to the MIDI Stream
 ----------------------------------------
@@ -194,24 +190,19 @@ the ``note on`` event, one for the ``note off`` event.
 .. code:: python
 
     if thing.type == 'note':
-        event = MIDIEvent()
-        event.type = "NoteOn"
-        event.time = thing.time * TICKSPERBEAT
-        event.pitch = thing.pitch
-        event.volume = thing.volume
+        event         = MIDIEvent("NoteOn", thing.time * TICKSPERBEAT,
+                                    thing.ord, thing.insertion_order)
+        event.pitch   = thing.pitch
+        event.volume  = thing.volume
         event.channel = thing.channel
-        event.ord = thing.ord
-        event.insertion_order = thing.insertion_order
         self.MIDIEventList.append(event)
 
-        event = MIDIEvent()
-        event.type = "NoteOff"
-        event.time = (thing.time + thing.duration) * TICKSPERBEAT
-        event.pitch = thing.pitch
-        event.volume = thing.volume
+        event = MIDIEvent("NoteOff", (thing.time+ thing.duration) * TICKSPERBEAT,
+                                    thing.ord -0.1,
+                                    thing.insertion_order)
+        event.pitch   = thing.pitch
+        event.volume  = thing.volume
         event.channel = thing.channel
-        event.ord = thing.ord - 0.1
-        event.insertion_order = thing.insertion_order
         self.MIDIEventList.append(event)
 
 Note that the ``NoteOff`` event is created with a slightly lower ordinality
