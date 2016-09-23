@@ -1,0 +1,95 @@
+Creating the MIDIFile Object
+============================
+
+The first step in using the library is creating a ``MIDIFile`` object.
+There are only a few parameters that need be specified, but they affect
+the functioning of the library, so it's good to understand what they do.
+
+The signature of of the ``MIDIFile`` ``__init__()`` function is
+as follows:
+
+.. code:: python
+
+    def __init__(self, numTracks=1, removeDuplicates=True,
+      deinterleave=True, adjust_origin=None):
+
+where the paramters do the following:
+
+numTracks
+---------
+
+``numTracks`` specifies the number of tracks the MIDI file should have.
+It should be set to at least 1 (after all, a MIDI file without tracks isn't
+very useful), but it may be set higher for a multi-track file.
+
+This parameter defaults to ``1``.
+
+removeDuplicates
+----------------
+
+If set to ``True`` (the default), duplicate notes will be removed from
+the file. This is done on a track-by-track basis.
+
+Notes are considered duplicates if they occur at the same time, and have
+equivalent pitch, and MIDI channel. If set to ``False`` no attempt is made
+to remove notes which appear to be duplicates.
+
+``removeDuplicates()`` also attempts to remove other kinds of duplicates. For
+example, if there are two tempo events at the same time and same tempo, they
+are considered duplicates.
+
+Of course, it's best not to insert duplicate events in the first place,
+but this could be unavoidable in some instances -- for example, if the software
+is used in the creation of `Generative Music <https://en.wikipedia.org/wiki/Generative_music>`_
+using an algorithm that can create duplication of events.
+
+deinterleave
+------------
+
+If ``deinterleave`` is set to ``True`` (the default), an attempt will be made
+to remove interleaved notes.
+
+To understand what an *interleaved* note is, it is useful to have some understanding
+of the MIDI standard.
+
+To make this library more human-centric, one of the fundamental concepts used is
+that of the **note**. But the MIDI standard doesn't have notes; instead, it has
+**note on** and **note off** events. These are correlated by channel and pitch.
+
+So if, for example, you create two notes of duration 1 and separated by 1/2 of
+a beat, ie:
+
+.. code:: python
+
+  time = 0
+  duration = 1
+  MyMIDI.addNote(track,channel,pitch,time,duration,volume)
+  time = 0.5
+  MyMIDI.addNote(track,channel,pitch,time,duration,volume)
+
+you end up with a note on event at 0, another note on event a 0.5, and
+two note off events, one at 1.0 and one at 1.5. So when the first note off
+event is processed it raises the question: which note on event does it correspond to?
+The channel and pitch are the same, so there is some ambiguity in the
+way that a hardware or software instrument will respond.
+
+if ``deinterleave`` is ``True`` the library tries to disambiguate the situation
+by shifting the first note's off event to be immediately before the second
+note's on event. Thus in the example above the first note on would be at 0,
+the first note off would be at 0.5, the second note on would also be at
+0.5 (but would be processed after the note off at that time), and the last
+note off would be at 1.5.
+
+If this parameter is set to ``False`` no events will be shifted.
+
+adjust_origin
+-------------
+
+If ``adjust_origin`` is ``True`` the library will find the earliest
+event in all the tracks and shift all events so that that time is t=0.
+If it is ``False`` no time-shifting will occur.
+
+If it is left at it's default value, ``None``, ``adjust_origin`` will be
+set to ``True`` and a ``FutureWarning`` will be displayed. This is because in
+the next release the default behavior will change and no adjustment will be
+performed by default.

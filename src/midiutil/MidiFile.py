@@ -666,7 +666,7 @@ class MIDIFile(object):
         software will need to figure out how to interpret NoteOff events upon playback.
     '''
     
-    def __init__(self, numTracks, removeDuplicates=True,  deinterleave=True, adjust_origin=None):
+    def __init__(self, numTracks=1, removeDuplicates=True,  deinterleave=True, adjust_origin=None):
         '''
         Initialize the class
         '''

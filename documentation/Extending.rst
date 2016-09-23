@@ -104,8 +104,7 @@ the track number to which the event is written. So in ``MIDIFile``:
 Note that a track has been added (which is zero-origined and needs to be
 constrained by the number of tracks that the ``MIDIFile`` was created with),
 and ``insertion_order`` is taken from the class ``event_counter``
-data member, and this should be updated in each function every
-time an event is added.
+data member. This should be followed in each function you add.
 
 This is the function you will use in your code to create an event of
 the desired type.

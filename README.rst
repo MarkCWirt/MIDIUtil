@@ -25,6 +25,8 @@ This software was originally developed with Python 2.5.2 and made use
 of some features that were introduced in 2.5. More recently Python 2 and
 3 support has been unified, so the code should work in both environments.
 However, support for versions of Python previous to 2.6 has been dropped.
+I have verified correct functioning with Python 2.6.8, but it is possible
+that it will work with earlier versions of 2.6.
 
 This software is distributed under an Open Source license and you are
 free to use it as you see fit, provided that attribution is maintained.
@@ -90,12 +92,12 @@ the track, and write it to disk.
         MyMIDI.addTempo(track,time,120)
 
         # Add a note. addNote expects the following information:
-        track = 0
+        track = 0    # We only have one track
         channel = 0
-        pitch = 60
-        time = 0
-        duration = 1
-        volume = 100
+        pitch = 60   # MIDI note number
+        time = 0     # In beats
+        duration = 1 # In beats
+        volume = 100 # 0-127, 127 being full volume
 
         # Now add the note.
         MyMIDI.addNote(track,channel,pitch,time,duration,volume)
