@@ -1,4 +1,5 @@
 *.pyc
 *.swp
 _build
+dist
 
