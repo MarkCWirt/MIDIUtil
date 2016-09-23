@@ -115,5 +115,7 @@ Example:
 Additional Public Function
 --------------------------
 
-The above list is not exhaustive. Please see the class reference for a more
-complete list of public functions.
+The above list is not exhaustive. For example, the library includes methods
+to create arbitrary channel control events, SysEx and Universal SysEx events,
+Registered Parameter calls and Non-Registered Parameter calls, etc. Please see the
+:ref:`ClassRef` for a more complete list of public functions.

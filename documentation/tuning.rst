@@ -20,6 +20,9 @@ The main function to support a tuning change is ``changeNoteTuning``.
 
 .. automethod:: MIDIFile.changeNoteTuning
 
+Tuning Program
+--------------
+
 With some instruments, such as `timidity <http://timidity.sourceforge.net/>`_, this
 is all you need to do: timidity will apply the tuning change to the notes.
 Other instruments, such as `fluidsynth <http://www.fluidsynth.org/>`_, require
@@ -28,10 +31,16 @@ that the tuning program be explicitly assigned. This is done with the
 
 .. automethod:: MIDIFile.changeTuningProgram
 
+Tuning Bank
+-----------
+
 The tuning bank can also be specified (fluidsynth assumes that any tuning
 you transmit via ``changeNoteTuning`` is assigned to bank one):
 
 .. automethod:: MIDIFile.changeTuningBank
+
+An Example
+----------
 
 So, as a complete example, the following code fragment would get rid of that
 pesky 440 Hz A and tell the instrument to use the tuning that you just
@@ -48,6 +57,3 @@ transmitted:
   MyMIDI.changeNoteTuning(track, tuning, tuningProgam=program)
   MyMIDI.changeTuningBank(track, channel, time, bank) # may or may not be needed
   MyMIDI.changeTuningProgram(track, channel, time, program) # ditto
-
-
-  

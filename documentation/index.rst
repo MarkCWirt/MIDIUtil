@@ -6,6 +6,19 @@
 MIDIUtil
 ========
 
+Contents
+--------
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+
+   creating
+   common
+   tuning
+   extending
+   class
+
 Introduction
 ------------
 
@@ -133,19 +146,6 @@ fixes,  and suggestions on the library:
 * Egg Syntax
 * Nils Gey
 * Francis G.
-
-
-Contents
---------
-
-.. toctree::
-   :maxdepth: 1
-
-   creating
-   common
-   tuning
-   extending
-   class
 
 Indices and tables
 ------------------
