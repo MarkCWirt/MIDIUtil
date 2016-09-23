@@ -142,11 +142,13 @@ Contents
    :maxdepth: 1
 
    creating
+   common
    Extending
+   tuning
+   class
 
 Indices and tables
 ------------------
 
 * :ref:`genindex`
-* :ref:`modindex`
 * :ref:`search`
