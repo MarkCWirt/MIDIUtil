@@ -143,7 +143,7 @@ Contents
 
    creating
    common
-   Extending
+   extending
    tuning
    class
 
