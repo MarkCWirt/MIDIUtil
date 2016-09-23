@@ -57,3 +57,8 @@ transmitted:
   MyMIDI.changeNoteTuning(track, tuning, tuningProgam=program)
   MyMIDI.changeTuningBank(track, channel, time, bank) # may or may not be needed
   MyMIDI.changeTuningProgram(track, channel, time, program) # ditto
+
+To Do
+-----
+
+* Implement the tuning change with bank select event type.
