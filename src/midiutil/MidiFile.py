@@ -25,7 +25,7 @@ controllerEventTypes = {
                         
 class MIDIEvent(object):
     '''
-    The class to contain the MIDI Event (placed on MIDIEventList.
+    The class to contain the MIDI Event (placed on MIDIEventList).
     '''
     def __init__(self, type="unknown", time = 0, ordinal=0, insertion_order=0):
         self.type=type
@@ -34,7 +34,8 @@ class MIDIEvent(object):
         self.insertion_order=insertion_order
 
 class GenericEvent(object):
-    '''The event class from which specific events are derived
+    '''
+    The event class from which specific events are derived
     '''
     def __init__(self, event_type, time, ordinal, insertion_order):
         self.type = event_type
@@ -108,7 +109,8 @@ class GenericEvent(object):
         return a
 
 class Note(GenericEvent):
-    '''A class that encapsulates a note
+    '''
+    A class that encapsulates a note
     '''
     def __init__(self,channel, pitch,time,duration,volume,ordinal=3,annotation=None, insertion_order=0):
         self.pitch = pitch
@@ -119,14 +121,16 @@ class Note(GenericEvent):
         super(Note, self).__init__('note', time, ordinal, insertion_order)
         
 class Tempo(GenericEvent):
-    '''A class that encapsulates a tempo meta-event
+    '''
+    A class that encapsulates a tempo meta-event
     '''
     def __init__(self,time,tempo, ordinal=3, insertion_order=0):
         self.tempo = int(60000000 / tempo)
         super(Tempo, self).__init__('tempo', time, ordinal, insertion_order)
         
 class ProgramChange(GenericEvent):
-    '''A class that encapsulates a program change event.
+    '''
+    A class that encapsulates a program change event.
     '''
     
     def __init__(self,  channel,  time,  programNumber, ordinal=1, insertion_order=0):
@@ -135,7 +139,8 @@ class ProgramChange(GenericEvent):
         super(ProgramChange, self).__init__('programChange', time, ordinal, insertion_order)
         
 class SysExEvent(GenericEvent):
-    '''A class that encapsulates a System Exclusive  event.
+    '''
+    A class that encapsulates a System Exclusive  event.
     '''
     
     def __init__(self,  time,  manID,  payload, ordinal=1, insertion_order=0):
@@ -144,7 +149,8 @@ class SysExEvent(GenericEvent):
         super(SysExEvent, self).__init__('SysEx', time, ordinal, insertion_order)
         
 class UniversalSysExEvent(GenericEvent):
-    '''A class that encapsulates a Universal System Exclusive  event.
+    '''
+    A class that encapsulates a Universal System Exclusive  event.
     '''
     
     def __init__(self,  time,  realTime,  sysExChannel,  code,  subcode,  payload, 
@@ -157,7 +163,8 @@ class UniversalSysExEvent(GenericEvent):
         super(UniversalSysExEvent, self).__init__('UniversalSysEx', time, ordinal, insertion_order)
         
 class ControllerEvent(GenericEvent):
-    '''A class that encapsulates a program change event.
+    '''
+    A class that encapsulates a program change event.
     '''
     
     def __init__(self,  channel,  time,  controller_number, parameter, ordinal=1, insertion_order=0):
@@ -167,7 +174,8 @@ class ControllerEvent(GenericEvent):
         super(ControllerEvent, self).__init__('controllerEvent', time, ordinal, insertion_order)
 
 class TrackName(GenericEvent):
-    '''A class that encapsulates a program change event.
+    '''
+    A class that encapsulates a program change event.
     '''
     
     def __init__(self,  time,  trackName, ordinal=0, insertion_order=0):
@@ -176,7 +184,8 @@ class TrackName(GenericEvent):
         super(TrackName, self).__init__('trackName', time, ordinal, insertion_order)
         
 class MIDITrack(object):
-    '''A class that encapsulates a MIDI track
+    '''
+    A class that encapsulates a MIDI track
     '''                        
             
     def __init__(self, removeDuplicates,  deinterleave):
@@ -193,17 +202,18 @@ class MIDITrack(object):
         
     def addNoteByNumber(self,channel, pitch,time,duration,volume,annotation=None, 
                         insertion_order=0):
-        '''Add a note by chromatic MIDI number
+        '''
+        Add a note by chromatic MIDI number
         '''
         self.eventList.append(Note(channel, pitch,time,duration,volume,annotation=annotation,
                                    insertion_order = insertion_order))
         
-    def addControllerEvent(self,channel,time,contoller_number, parameter, insertion_order=0):
+    def addControllerEvent(self,channel,time,controller_number, parameter, insertion_order=0):
         '''
         Add a controller event.
         '''
         
-        self.eventList.append(ControllerEvent(channel,time,contoller_number, \
+        self.eventList.append(ControllerEvent(channel,time,controller_number, \
                                              parameter, insertion_order=insertion_order))
         
     def addTempo(self,time,tempo, insertion_order=0):
@@ -241,7 +251,8 @@ class MIDITrack(object):
         
     def changeNoteTuning(self,  tunings,   sysExChannel=0x7F,  realTime=True,  \
         tuningProgam=0, insertion_order=0):
-        '''Change the tuning of MIDI notes
+        '''
+        Change the tuning of MIDI notes
         '''
         payload = struct.pack('>B',  tuningProgam)
         payload = payload + struct.pack('>B',  len(tunings))
@@ -298,7 +309,7 @@ class MIDITrack(object):
 
             elif thing.type == 'controllerEvent':
                 event = MIDIEvent("ControllerEvent", thing.time * TICKSPERBEAT, thing.ord, thing.insertion_order)
-                event.contoller_number = thing.controller_number
+                event.controller_number = thing.controller_number
                 event.channel = thing.channel
                 event.parameter = thing.parameter
                 self.MIDIEventList.append(event)
@@ -348,7 +359,8 @@ class MIDITrack(object):
 
 
     def closeTrack(self):
-        '''Called to close a track before writing
+        '''
+        Called to close a track before writing
         
         This function should be called to "close a track," that is to
         prepare the actual data stream for writing. Duplicate events are
@@ -473,7 +485,7 @@ class MIDITrack(object):
                 for timeByte in varTime:
                     self.MIDIdata = self.MIDIdata + struct.pack('>B',timeByte)
                 self.MIDIdata = self.MIDIdata + struct.pack('>B',code)
-                self.MIDIdata = self.MIDIdata + struct.pack('>B',event.contoller_number)
+                self.MIDIdata = self.MIDIdata + struct.pack('>B',event.controller_number)
                 self.MIDIdata = self.MIDIdata + struct.pack('>B',event.parameter)
             elif event.type == "SysEx":
                 code = 0xF0
@@ -513,7 +525,8 @@ class MIDITrack(object):
                 self.MIDIdata = self.MIDIdata + struct.pack('>B',0xF7)
         
     def deInterleaveNotes(self):
-        '''Correct Interleaved notes.
+        '''
+        Correct Interleaved notes.
         
         Because we are writing multiple notes in no particular order, we
         can have notes which are interleaved with respect to their start
@@ -626,7 +639,7 @@ class MIDIFile(object):
             Initialize the MIDIFile class
             
             :param numTracks: The number of tracks the file contains. Integer, one or greater
-            :param removeDuplicates: If set to ``True`` remove dumplicate events before writing
+            :param removeDuplicates: If set to ``True`` remove duplicate events before writing
                 to disk
             :param deinterleave: If set to ``True`` deinterleave the notes in the stream
             :param adjust_origin: If set to ``True`` (of left at the default of ``None``) shift all the
@@ -732,48 +745,48 @@ class MIDIFile(object):
             insertion_order = self.event_counter)
         self.event_counter = self.event_counter + 1
     
-    def addControllerEvent(self,track, channel, time, contoller_number, parameter):
+    def addControllerEvent(self,track, channel, time, controller_number, parameter):
         """
-        .. py:function::  addControllerEvent(self,track, channel, time, contoller_number, parameter)
+        .. py:function::  addControllerEvent(self,track, channel, time, controller_number, parameter)
         
             Add a channel control event
             
             :param track: The track to which the event is added.
             :param channel: the MIDI channel to assign to the event. [Integer, 0-15]
             :param time: The time (in beats) at which the event is placed [Float].
-            :param contoller_number: The controller ID of the event.
+            :param controller_number: The controller ID of the event.
             :param parameter: The event's parameter, the meaning of which varies by event type.
         """
-        self.tracks[track].addControllerEvent(channel,time,contoller_number, parameter, 
+        self.tracks[track].addControllerEvent(channel,time,controller_number, parameter, 
             insertion_order = self.event_counter)
         self.event_counter = self.event_counter + 1
         
-    def makeRPNCall(self, track, channel, time, contoller_msb, controller_lsb, data_msb, data_lsb):
+    def makeRPNCall(self, track, channel, time, controller_msb, controller_lsb, data_msb, data_lsb):
         '''
-        .. py:function:: makeRPNCall(self, track, channel, time, contoller_msb, controller_lsb, data_msb, data_lsb)
+        .. py:function:: makeRPNCall(self, track, channel, time, controller_msb, controller_lsb, data_msb, data_lsb)
         
             Perform a Registered Parameter Number Call
             
             :param track: The track to which this applies
             :param channel: The channel to which this applies
             :param time: The time of the event
-            :param controller_msb: The Most Significan Byte of the controller. In common usage
+            :param controller_msb: The Most significant byte of the controller. In common usage
                 this will usually be 0
-            :param contoller_lsb: The Least Significant Byte for the controller message. For example, for
-                a fine-tunning change this would be 01.
+            :param controller_lsb: The Least significant Byte for the controller message. For example, for
+                a fine-tuning change this would be 01.
             :param data_msb: The Most Significant Byte of the controller's parameter.
             :param data_lsb: The Least Significant Byte of the controller's parameter. If non needed this
-                sould be set to ``None``
+                should be set to ``None``
                 
             As an example, if one were to change a channel's tuning program::
             
                 makeRPNCall(track, channel, time, 0, 3, 0, program)
                 
-            (Note, however, that there is a conveneince function, ``changeTuningProgram``, that does
+            (Note, however, that there is a convenience function, ``changeTuningProgram``, that does
             this for you.)
                 
         '''
-        self.tracks[track].addControllerEvent(channel,time, 101, contoller_msb,   insertion_order = self.event_counter)
+        self.tracks[track].addControllerEvent(channel,time, 101, controller_msb,   insertion_order = self.event_counter)
         self.event_counter = self.event_counter + 1
         self.tracks[track].addControllerEvent(channel,time, 100, controller_lsb,  insertion_order = self.event_counter)
         self.event_counter = self.event_counter + 1
@@ -783,25 +796,25 @@ class MIDIFile(object):
             self.tracks[track].addControllerEvent(channel,time, 38,  data_lsb, insertion_order = self.event_counter)
             self.event_counter = self.event_counter + 1
             
-    def makeNRPNCall(self, track, channel, time, contoller_msb, controller_lsb, data_msb, data_lsb):
+    def makeNRPNCall(self, track, channel, time, controller_msb, controller_lsb, data_msb, data_lsb):
         '''
-        .. py:function:: makeNRPNCall(self, track, channel, time, contoller_msb, controller_lsb, data_msb, data_lsb)
+        .. py:function:: makeNRPNCall(self, track, channel, time, controller_msb, controller_lsb, data_msb, data_lsb)
         
             Perform a Non-Registered Parameter Number Call
             
             :param track: The track to which this applies
             :param channel: The channel to which this applies
             :param time: The time of the event
-            :param controller_msb: The Most Significan Byte of the controller. In common usage
+            :param controller_msb: The Most significant byte of the controller. In common usage
                 this will usually be 0
-            :param contoller_lsb: The Least Significant Byte for the controller message. For example, for
+            :param controller_lsb: The least significant byte for the controller message. For example, for
                 a fine-tunning change this would be 01.
-            :param data_msb: The Most Significant Byte of the controller's parameter.
-            :param data_lsb: The Least Significant Byte of the controller's parameter. If none is needed this
+            :param data_msb: The most significant byte of the controller's parameter.
+            :param data_lsb: The least significant byte of the controller's parameter. If none is needed this
                 should be set to ``None``
                 
         '''
-        self.tracks[track].addControllerEvent(channel,time, 99, contoller_msb,   insertion_order = self.event_counter)
+        self.tracks[track].addControllerEvent(channel,time, 99, controller_msb,   insertion_order = self.event_counter)
         self.event_counter = self.event_counter + 1
         self.tracks[track].addControllerEvent(channel,time, 98, controller_lsb,  insertion_order = self.event_counter)
         self.event_counter = self.event_counter + 1
@@ -823,7 +836,7 @@ class MIDIFile(object):
             :param bank: The tuning bank (0-127)
             
             Note that this is a convenience function, as the same functionality is available
-            from directly sequencing ccontroller events.
+            from directly sequencing controller events.
             
             The specified tuning should already have been written to the stream with ``changeNoteTuning``.
         '''
@@ -841,7 +854,7 @@ class MIDIFile(object):
             :param program: The tuning program number (0-127)
             
             Note that this is a convenience function, as the same functionality is available
-            from directly sequencing ccontroller events.
+            from directly sequencing controller events.
             
             The specified tuning should already have been written to the stream with ``changeNoteTuning``.
         '''
@@ -861,7 +874,7 @@ class MIDIFile(object):
             :param track: The track to which the tuning is applied.
             :param tunings: A list to tuples representing the tuning. See below for an
                 explanation.
-            :param sysExChannel: The SysEx channel of the event. This is mapped to "manufacurer ID"
+            :param sysExChannel: The SysEx channel of the event. This is mapped to "manufacturer ID"
                 in the event which is written. Unless there is a specific reason for changing it, it
                 should be left at its default value.
             :param realTime: Speicifes if the Universal SysEx event should be flagged as real-time or
@@ -870,13 +883,13 @@ class MIDIFile(object):
             :param tuningProgram: The tuning program number.
             
             This function specifically implements the "real time single note tuning
-            change" (although the name is misleding, as multiple notes can be included in
+            change" (although the name is misleading, as multiple notes can be included in
             each event). It should be noted that not all hardware or software implements the
             MIDI tuning standard, and that which does often does not implement it in its
             entirety.
             
             The ``tunings`` argument is a list of tuples, in (*note number*, *frequency*) format.
-            As an exmaple, if one wanted to change the frequency on MIDI note 69 to 500 (it is normally
+            As an example, if one wanted to change the frequency on MIDI note 69 to 500 (it is normally
             440 Hz), one could do it thus:
             
             .. code:: python
@@ -901,7 +914,7 @@ class MIDIFile(object):
             :param track: The track to which the event should be written
             :param time: The time of the event.
             :param manID: The manufacturer ID for the event
-            :param payload: The payload for the event. This should be a binay-packed
+            :param payload: The payload for the event. This should be a binary-packed
                 value, and will vary for each type and function.
                 
             **Note**: This is a low-level MIDI function, so care must be used in
@@ -924,7 +937,7 @@ class MIDIFile(object):
             :param time: The time of the event, in beats.
             :param code: The event code. [Integer]
             :param subcode: The event sub-code [Integer]
-            :param payload: The payload for the event. This should be a binay-packed
+            :param payload: The payload for the event. This should be a binary-packed
                 value, and will vary for each type and function.
             :param sysExChannel: The SysEx channel.
             :param realTime: Sets the real-time flag. Defaults to non-real-time.
@@ -992,7 +1005,8 @@ class MIDIFile(object):
     #End Public Functions ########################
     
     def close(self):
-        '''Close the MIDIFile for further writing.
+        '''
+        Close the MIDIFile for further writing.
         
         To close the File for events, we must close the tracks, adjust the time to be
         zero-origined, and have the tracks write to their MIDI Stream data structure.
@@ -1018,7 +1032,8 @@ class MIDIFile(object):
     
     
     def findOrigin(self):
-        '''Find the earliest time in the file's tracks.append.
+        '''
+        Find the earliest time in the file's tracks.append.
         '''
         origin = 1000000 # A little silly, but we'll assume big enough
 
@@ -1035,7 +1050,8 @@ class MIDIFile(object):
         return origin
             
 def writeVarLength(i):
-    '''Accept an input, and write a MIDI-compatible variable length stream
+    '''
+    Accept an input, and write a MIDI-compatible variable length stream
     
     The MIDI format is a little strange, and makes use of so-called variable
     length quantities. These quantities are a stream of bytes. If the most
@@ -1066,7 +1082,8 @@ def writeVarLength(i):
 # readVarLength is taken from the MidiFile class.
 
 def readVarLength(offset, buffer):
-    '''A function to read a MIDI variable length variable.
+    '''
+    A function to read a MIDI variable length variable.
 
     It returns a tuple of the value read and the number of bytes processed. The
     input is an offset into the buffer, and the buffer itself.
@@ -1085,7 +1102,8 @@ def readVarLength(offset, buffer):
     return (output, bytesRead)
 
 def frequencyTransform(freq):
-    '''Returns a three-byte transform of a frequencyTransform
+    '''
+    Returns a three-byte transform of a frequency.
     '''
     resolution = 16384
     freq = float(freq)
@@ -1127,15 +1145,15 @@ def sort_events(event):
         This function should be provided as the ``key`` for both ``list.sort()``
         and ``sorted()``. By using it sorting will be as follows:
         
-        * Events are ordered in time. An event that takes place earier will
-          appear eariler
+        * Events are ordered in time. An event that takes place earlier will
+          appear earlier
         * If two events happen at the same time, the secondary sort key is
-          ``ord``. Thus a class of events can be processed eariler than another.
+          ``ord``. Thus a class of events can be processed earlier than another.
           One place this is used in the code is to make sure that note off events
           are processed before note on events.
         * If time and ordinality are the same, they are sorted in the order in which
           they were originally added to the list. Thus, for example, if one is making
-          an RPN call one can specify the contoller change events in the proper order
+          an RPN call one can specify the controller change events in the proper order
           and be sure that they will end up in the file that way.
     '''
     
