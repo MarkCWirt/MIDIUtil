@@ -35,7 +35,7 @@ Tuning Bank
 -----------
 
 The tuning bank can also be specified (fluidsynth assumes that any tuning
-you transmit via ``changeNoteTuning`` is assigned to bank one):
+you transmit via ``changeNoteTuning`` is assigned to bank zero):
 
 .. automethod:: MIDIFile.changeTuningBank
 
