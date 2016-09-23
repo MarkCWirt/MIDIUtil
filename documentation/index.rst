@@ -143,8 +143,8 @@ Contents
 
    creating
    common
-   extending
    tuning
+   extending
    class
 
 Indices and tables
