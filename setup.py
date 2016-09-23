@@ -1,7 +1,7 @@
 from distutils.core import setup
 
 setup(name='MIDIUtil',
-      version='HEAD',
+      version='1.0.0',
       description='MIDIUtil, a MIDI Interface for Python',
       author='Mark Conway Wirt',
       author_email='emergentmusics) at (gmail . com',
