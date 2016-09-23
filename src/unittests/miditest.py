@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 #-----------------------------------------------------------------------------
 # Name:        miditest.py
 # Purpose:     Unit testing harness for midiutil
