@@ -50,6 +50,15 @@ See License.txt in the source distribution for details.
 Installation
 ------------
 
+The code is available on Github, and be cloned with one of the following
+URLS::
+
+    git clone git@github.com:MarkCWirt/MIDIUtil.git
+    # or
+    git clone https://github.com/MarkCWirt/MIDIUtil.git
+
+depending on if you want to use SSH or HTTPS.
+
 To use the library one can either install it on one's system or
 copy the midiutil directory of the source distribution to your
 project's directory (or to any directory pointed to  by the PYTHONPATH
