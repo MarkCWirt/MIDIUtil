@@ -1,9 +1,6 @@
 MIDIUtil
 ========
 
-This file is just a brief adumbration. Full documentation can be
-found on `Read The Docs <http://midiutil.readthedocs.io/en/latest/>`_.
-
 Introduction
 ------------
 
