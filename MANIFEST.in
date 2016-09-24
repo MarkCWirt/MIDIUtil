@@ -1,0 +1,9 @@
+include *.py *.rst *.txt VERSION CHANGELOG
+recursive-include documentation *
+recursive-include examples *.py
+recursive-exclude build  *
+recursive-exclude dist  *
+recursive-exclude .  *.pyc __pycache__
+recursive-include src *
+
+

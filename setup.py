@@ -1,18 +1,33 @@
-from distutils.core import setup
+from setuptools import setup, find_packages
 
 setup(name='MIDIUtil',
-      version='HEAD',
-      description='MIDIUtil, a MIDI Interface for Python',
+      version='1.0.1',
+      description='A pure python library for creating multi-track MIDI files',
       author='Mark Conway Wirt',
-      author_email='emergentmusics) at (gmail . com',
-      license='Copyright (C) 2009, Mark Conway Wirt. See License.txt for details.',
-      url='www.emergentmusics.org',
-      packages=["midiutil"],
-      package_dir = {'midiutil': 'src/midiutil'},
-      package_data={'midiutil' : ['../../documentation/*']},
-      scripts=['examples/single-note-example.py'],
+      author_email='markcwirt) at (gmail . com',
+      license='MIT',
+      url='https://github.com/MarkCWirt/MIDIUtil',
+      packages=find_packages(where="src"),
+      package_dir = {'': 'src'},
+      package_data={
+          '' : ['License.txt', 'README.rst', 'documentation/*'],
+          'examples' : ['single-note-example.py']},
+      include_package_data = True,
       platforms='Platform Independent',
+      classifiers=[
+            'Development Status :: 4 - Beta',
+            'Intended Audience :: Developers',
+            'Programming Language :: Python :: 2',
+            'Programming Language :: Python :: 2.6',
+            'Programming Language :: Python :: 2.7',
+            'Programming Language :: Python :: 3',
+            'Programming Language :: Python :: 3.2',
+            'Programming Language :: Python :: 3.3',
+            'Programming Language :: Python :: 3.4',
+            'Programming Language :: Python :: 3.5',
+            'License :: OSI Approved :: MIT License',
+          ],
+      keywords = 'Music MIDI',
       long_description='''
-This package provides a simple interface to allow Python programs to
-write multi-track MIDI files.'''
+This package provides a simple interface to allow Python programs to write multi-track MIDI files.'''
      )
