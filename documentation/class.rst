@@ -7,4 +7,4 @@ Class Reference
 
 .. autoclass:: MIDIFile
   :members: addNote, addTrackName, addTempo, addProgramChange, addControllerEvent, makeRPNCall, makeNRPNCall, changeTuningBank, changeTuningProgram,
-    changeNoteTuning, addSysEx, addUniversalSysEx, writeFile
+    changeNoteTuning, addSysEx, addUniversalSysEx, writeFile, __init__

@@ -634,28 +634,27 @@ class MIDIFile(object):
     
     def __init__(self, numTracks=1, removeDuplicates=True,  deinterleave=True, adjust_origin=None):
         '''
-        .. py:function:: __init__(self, numTracks=1, removeDuplicates=True,  deinterleave=True, adjust_origin=None):
         
-            Initialize the MIDIFile class
+        Initialize the MIDIFile class
+        
+        :param numTracks: The number of tracks the file contains. Integer, one or greater
+        :param removeDuplicates: If set to ``True`` remove duplicate events before writing
+            to disk
+        :param deinterleave: If set to ``True`` deinterleave the notes in the stream
+        :param adjust_origin: If set to ``True`` (of left at the default of ``None``) shift all the
+            events in the tracks so that the first event takes place at time t=0
             
-            :param numTracks: The number of tracks the file contains. Integer, one or greater
-            :param removeDuplicates: If set to ``True`` remove duplicate events before writing
-                to disk
-            :param deinterleave: If set to ``True`` deinterleave the notes in the stream
-            :param adjust_origin: If set to ``True`` (of left at the default of ``None``) shift all the
-                events in the tracks so that the first event takes place at time t=0
-                
-            Note that the default for ``adjust_origin`` will change in a future release, so one should probably
-            explicitly set it.
-            
-            Example:
-            
-            .. code::
-            
-                # Create a two-track MIDIFile
-            
-                from midiutil.MidiFile import MIDIFile
-                midi_file = MIDIFile(2)
+        Note that the default for ``adjust_origin`` will change in a future release, so one should probably
+        explicitly set it.
+        
+        Example:
+        
+        .. code::
+        
+            # Create a two-track MIDIFile
+        
+            from midiutil.MidiFile import MIDIFile
+            midi_file = MIDIFile(2)
         '''
         self.header = MIDIHeader(numTracks)
         
@@ -680,23 +679,22 @@ class MIDIFile(object):
     
     def addNote(self,track, channel, pitch, time, duration, volume, annotation=None):
         """
-        .. py:function::  addNote(self,track, channel, pitch,time,duration,volume,annotation=None)
         
-            Add notes to the MIDIFile object
-            
-            :param track: The track to which the note is added.
-            :param channel: the MIDI channel to assign to the note. [Integer, 0-15]
-            :param pitch: the MIDI pitch number [Integer, 0-127].
-            :param time: the time (in beats) at which the note sounds [Float].
-            :param duration: the duration of the note (in beats) [Float].
-            :param volume: the volume (velocity) of the note. [Integer, 0-127].
-            :param annotation: Arbitrary data to attach to the note.
-            
-            The ``annotation`` parameter attaches arbitrary data to the note. This 
-            is not used in the code, but can be useful anyway. As an example,
-            I have created a project that uses MIDIFile to write 
-            `csound <http://csound.github.io/>`_ orchestra files directly from the
-            class ``EventList``.
+        Add notes to the MIDIFile object
+        
+        :param track: The track to which the note is added.
+        :param channel: the MIDI channel to assign to the note. [Integer, 0-15]
+        :param pitch: the MIDI pitch number [Integer, 0-127].
+        :param time: the time (in beats) at which the note sounds [Float].
+        :param duration: the duration of the note (in beats) [Float].
+        :param volume: the volume (velocity) of the note. [Integer, 0-127].
+        :param annotation: Arbitrary data to attach to the note.
+        
+        The ``annotation`` parameter attaches arbitrary data to the note. This 
+        is not used in the code, but can be useful anyway. As an example,
+        I have created a project that uses MIDIFile to write 
+        `csound <http://csound.github.io/>`_ orchestra files directly from the
+        class ``EventList``.
         """
         self.tracks[track].addNoteByNumber(channel, pitch, time, duration, volume, 
             annotation = annotation, insertion_order = self.event_counter)
@@ -704,42 +702,39 @@ class MIDIFile(object):
 
     def addTrackName(self,track, time,trackName):
         """
-        .. py:function::  addTrackName(self,track, time,trackName)
         
-            Name a track.
-            
-            :param track: The track to which the name is assigned.
-            :param time: The time (in beats) at which the track name event is placed.
-                In general this should probably be time 0 (the beginning of the track).
-            :param trackName: The name to assign to the track [String]
+        Name a track.
+        
+        :param track: The track to which the name is assigned.
+        :param time: The time (in beats) at which the track name event is placed.
+            In general this should probably be time 0 (the beginning of the track).
+        :param trackName: The name to assign to the track [String]
         """
         self.tracks[track].addTrackName(time,trackName, insertion_order = self.event_counter)
         self.event_counter = self.event_counter + 1
         
     def addTempo(self,track, time,tempo):
         """
-        .. py:function::  addTempo(self,track, time,tempo)
         
-            Add notes to the MIDIFile object
-            
-            :param track: The track to which the tempo event  is added.
-            :param time: The time (in beats) at which tempo event is placed
-            :param tempo: The tempo, in Beats per Minute. [Integer]
-        """
+        Add notes to the MIDIFile object
+        
+        :param track: The track to which the tempo event  is added.
+        :param time: The time (in beats) at which tempo event is placed
+        :param tempo: The tempo, in Beats per Minute. [Integer]
+    """
         self.tracks[track].addTempo(time,tempo, insertion_order = self.event_counter)
         self.event_counter = self.event_counter + 1
         
     def addProgramChange(self,track, channel, time, program):
         """
-        .. py:function::  addProgramChange(self,track, channel, time, program)
         
-            Add a MIDI program change event.
-            
-            :param track: The track to which program change event is added.
-            :param channel: the MIDI channel to assign to the event. [Integer, 0-15]
-            :param time: The time (in beats) at which the program change event is placed [Float].
-            :param annotation: Arbitrary data to attach to the note.
-            :param program: the program number. [Integer, 0-127].
+        Add a MIDI program change event.
+        
+        :param track: The track to which program change event is added.
+        :param channel: the MIDI channel to assign to the event. [Integer, 0-15]
+        :param time: The time (in beats) at which the program change event is placed [Float].
+        :param annotation: Arbitrary data to attach to the note.
+        :param program: the program number. [Integer, 0-127].
         """
         self.tracks[track].addProgramChange(channel, time, program, 
             insertion_order = self.event_counter)
@@ -747,15 +742,14 @@ class MIDIFile(object):
     
     def addControllerEvent(self,track, channel, time, controller_number, parameter):
         """
-        .. py:function::  addControllerEvent(self,track, channel, time, controller_number, parameter)
         
-            Add a channel control event
-            
-            :param track: The track to which the event is added.
-            :param channel: the MIDI channel to assign to the event. [Integer, 0-15]
-            :param time: The time (in beats) at which the event is placed [Float].
-            :param controller_number: The controller ID of the event.
-            :param parameter: The event's parameter, the meaning of which varies by event type.
+        Add a channel control event
+        
+        :param track: The track to which the event is added.
+        :param channel: the MIDI channel to assign to the event. [Integer, 0-15]
+        :param time: The time (in beats) at which the event is placed [Float].
+        :param controller_number: The controller ID of the event.
+        :param parameter: The event's parameter, the meaning of which varies by event type.
         """
         self.tracks[track].addControllerEvent(channel,time,controller_number, parameter, 
             insertion_order = self.event_counter)
@@ -763,27 +757,26 @@ class MIDIFile(object):
         
     def makeRPNCall(self, track, channel, time, controller_msb, controller_lsb, data_msb, data_lsb):
         '''
-        .. py:function:: makeRPNCall(self, track, channel, time, controller_msb, controller_lsb, data_msb, data_lsb)
         
-            Perform a Registered Parameter Number Call
+        Perform a Registered Parameter Number Call
+        
+        :param track: The track to which this applies
+        :param channel: The channel to which this applies
+        :param time: The time of the event
+        :param controller_msb: The Most significant byte of the controller. In common usage
+            this will usually be 0
+        :param controller_lsb: The Least significant Byte for the controller message. For example, for
+            a fine-tuning change this would be 01.
+        :param data_msb: The Most Significant Byte of the controller's parameter.
+        :param data_lsb: The Least Significant Byte of the controller's parameter. If non needed this
+            should be set to ``None``
             
-            :param track: The track to which this applies
-            :param channel: The channel to which this applies
-            :param time: The time of the event
-            :param controller_msb: The Most significant byte of the controller. In common usage
-                this will usually be 0
-            :param controller_lsb: The Least significant Byte for the controller message. For example, for
-                a fine-tuning change this would be 01.
-            :param data_msb: The Most Significant Byte of the controller's parameter.
-            :param data_lsb: The Least Significant Byte of the controller's parameter. If non needed this
-                should be set to ``None``
-                
-            As an example, if one were to change a channel's tuning program::
+        As an example, if one were to change a channel's tuning program::
+        
+            makeRPNCall(track, channel, time, 0, 3, 0, program)
             
-                makeRPNCall(track, channel, time, 0, 3, 0, program)
-                
-            (Note, however, that there is a convenience function, ``changeTuningProgram``, that does
-            this for you.)
+        (Note, however, that there is a convenience function, ``changeTuningProgram``, that does
+        this for you.)
                 
         '''
         self.tracks[track].addControllerEvent(channel,time, 101, controller_msb,   insertion_order = self.event_counter)
@@ -798,20 +791,19 @@ class MIDIFile(object):
             
     def makeNRPNCall(self, track, channel, time, controller_msb, controller_lsb, data_msb, data_lsb):
         '''
-        .. py:function:: makeNRPNCall(self, track, channel, time, controller_msb, controller_lsb, data_msb, data_lsb)
         
-            Perform a Non-Registered Parameter Number Call
-            
-            :param track: The track to which this applies
-            :param channel: The channel to which this applies
-            :param time: The time of the event
-            :param controller_msb: The Most significant byte of the controller. In common usage
-                this will usually be 0
-            :param controller_lsb: The least significant byte for the controller message. For example, for
-                a fine-tunning change this would be 01.
-            :param data_msb: The most significant byte of the controller's parameter.
-            :param data_lsb: The least significant byte of the controller's parameter. If none is needed this
-                should be set to ``None``
+        Perform a Non-Registered Parameter Number Call
+        
+        :param track: The track to which this applies
+        :param channel: The channel to which this applies
+        :param time: The time of the event
+        :param controller_msb: The Most significant byte of the controller. In common usage
+            this will usually be 0
+        :param controller_lsb: The least significant byte for the controller message. For example, for
+            a fine-tunning change this would be 01.
+        :param data_msb: The most significant byte of the controller's parameter.
+        :param data_lsb: The least significant byte of the controller's parameter. If none is needed this
+            should be set to ``None``
                 
         '''
         self.tracks[track].addControllerEvent(channel,time, 99, controller_msb,   insertion_order = self.event_counter)
@@ -826,37 +818,35 @@ class MIDIFile(object):
         
     def changeTuningBank(self,track, channel, time, bank):
         '''
-        .. py:function:: changeTuningBank(self,track, channel, time, bank)
         
-            Change the tuning bank for a selected track
-            
-            :param track: The track to which the data should be written
-            :param channel: The channel for the events
-            :param time: The time of the events
-            :param bank: The tuning bank (0-127)
-            
-            Note that this is a convenience function, as the same functionality is available
-            from directly sequencing controller events.
-            
-            The specified tuning should already have been written to the stream with ``changeNoteTuning``.
+        Change the tuning bank for a selected track
+        
+        :param track: The track to which the data should be written
+        :param channel: The channel for the events
+        :param time: The time of the events
+        :param bank: The tuning bank (0-127)
+        
+        Note that this is a convenience function, as the same functionality is available
+        from directly sequencing controller events.
+        
+        The specified tuning should already have been written to the stream with ``changeNoteTuning``.
         '''
         self.makeRPNCall(track, channel, time, 0, 4, 0, bank)
         
     def changeTuningProgram(self,track, channel, time, program):
         '''
-        .. py:function:: changeTuningProgram(self,track, channel, time, program)
         
-            Change the tuning program for a selected track
-            
-            :param track: The track to which the data should be written
-            :param channel: The channel for the events
-            :param time: The time of the events
-            :param program: The tuning program number (0-127)
-            
-            Note that this is a convenience function, as the same functionality is available
-            from directly sequencing controller events.
-            
-            The specified tuning should already have been written to the stream with ``changeNoteTuning``.
+        Change the tuning program for a selected track
+        
+        :param track: The track to which the data should be written
+        :param channel: The channel for the events
+        :param time: The time of the events
+        :param program: The tuning program number (0-127)
+        
+        Note that this is a convenience function, as the same functionality is available
+        from directly sequencing controller events.
+        
+        The specified tuning should already have been written to the stream with ``changeNoteTuning``.
         '''
         self.makeRPNCall(track, channel, time, 0, 3, 0, program)
 
@@ -866,38 +856,36 @@ class MIDIFile(object):
         
     def changeNoteTuning(self,  track,  tunings,   sysExChannel=0x7F,  \
                          realTime=True,  tuningProgam=0):
-        """
-        .. py:function::  changeNoteTuning(self,  track,  tunings,   sysExChannel=0x7F, realTime=True,  tuningProgam=0):
+        """        
+        Add a real-time MIDI tuning standard update to a track.
         
-            Add a real-time MIDI tuning standard update to a track.
-            
-            :param track: The track to which the tuning is applied.
-            :param tunings: A list to tuples representing the tuning. See below for an
-                explanation.
-            :param sysExChannel: The SysEx channel of the event. This is mapped to "manufacturer ID"
-                in the event which is written. Unless there is a specific reason for changing it, it
-                should be left at its default value.
-            :param realTime: Speicifes if the Universal SysEx event should be flagged as real-time or
-                non-real-time. As with the ``sysExChannel`` argument, this should in general
-                be left at it's default value.
-            :param tuningProgram: The tuning program number.
-            
-            This function specifically implements the "real time single note tuning
-            change" (although the name is misleading, as multiple notes can be included in
-            each event). It should be noted that not all hardware or software implements the
-            MIDI tuning standard, and that which does often does not implement it in its
-            entirety.
-            
-            The ``tunings`` argument is a list of tuples, in (*note number*, *frequency*) format.
-            As an example, if one wanted to change the frequency on MIDI note 69 to 500 (it is normally
-            440 Hz), one could do it thus:
-            
-            .. code:: python
-            
-                from midiutil.MidiFile import MIDIFile
-                MyMIDI = MIDIFile(1)
-                tuning = [(69, 500)]
-                MyMIDI.changeNoteTuning(0, tuning, tuningProgam=0)
+        :param track: The track to which the tuning is applied.
+        :param tunings: A list to tuples representing the tuning. See below for an
+            explanation.
+        :param sysExChannel: The SysEx channel of the event. This is mapped to "manufacturer ID"
+            in the event which is written. Unless there is a specific reason for changing it, it
+            should be left at its default value.
+        :param realTime: Speicifes if the Universal SysEx event should be flagged as real-time or
+            non-real-time. As with the ``sysExChannel`` argument, this should in general
+            be left at it's default value.
+        :param tuningProgram: The tuning program number.
+        
+        This function specifically implements the "real time single note tuning
+        change" (although the name is misleading, as multiple notes can be included in
+        each event). It should be noted that not all hardware or software implements the
+        MIDI tuning standard, and that which does often does not implement it in its
+        entirety.
+        
+        The ``tunings`` argument is a list of tuples, in (*note number*, *frequency*) format.
+        As an example, if one wanted to change the frequency on MIDI note 69 to 500 (it is normally
+        440 Hz), one could do it thus:
+        
+        .. code:: python
+        
+            from midiutil.MidiFile import MIDIFile
+            MyMIDI = MIDIFile(1)
+            tuning = [(69, 500)]
+            MyMIDI.changeNoteTuning(0, tuning, tuningProgam=0)
         """
         self.tracks[track].changeNoteTuning(tunings,   sysExChannel,  realTime,\
             tuningProgam, insertion_order = self.event_counter)
@@ -907,20 +895,19 @@ class MIDIFile(object):
 
     def addSysEx(self,track, time, manID, payload):
         '''
-        .. py:function:: addSysEx(self,track, time, manID, payload)
         
-            Add a System Exclusive event.
+        Add a System Exclusive event.
+        
+        :param track: The track to which the event should be written
+        :param time: The time of the event.
+        :param manID: The manufacturer ID for the event
+        :param payload: The payload for the event. This should be a binary-packed
+            value, and will vary for each type and function.
             
-            :param track: The track to which the event should be written
-            :param time: The time of the event.
-            :param manID: The manufacturer ID for the event
-            :param payload: The payload for the event. This should be a binary-packed
-                value, and will vary for each type and function.
-                
-            **Note**: This is a low-level MIDI function, so care must be used in
-            constructing the payload. It is recommended that higher-level helper
-            functions be written to wrap this function and construct the payload if
-            a developer finds him or herself using the function heavily.
+        **Note**: This is a low-level MIDI function, so care must be used in
+        constructing the payload. It is recommended that higher-level helper
+        functions be written to wrap this function and construct the payload if
+        a developer finds him or herself using the function heavily.
 
         '''
         self.tracks[track].addSysEx(time,manID, payload, insertion_order = self.event_counter)
@@ -929,27 +916,26 @@ class MIDIFile(object):
     def addUniversalSysEx(self, track, time, code, subcode, payload,  \
                           sysExChannel=0x7F,  realTime=False):
         '''
-        .. py:function:: addUniversalSysEx(self, track, time, code, subcode, payload, sysExChannel=0x7F,  realTime=False)
         
-            Add a Univeral System Exclusive event.
+        Add a Univeral System Exclusive event.
+        
+        :param track: The track to which the event should be written
+        :param time: The time of the event, in beats.
+        :param code: The event code. [Integer]
+        :param subcode: The event sub-code [Integer]
+        :param payload: The payload for the event. This should be a binary-packed
+            value, and will vary for each type and function.
+        :param sysExChannel: The SysEx channel.
+        :param realTime: Sets the real-time flag. Defaults to non-real-time.
+        :param manID: The manufacturer ID for the event
+        
             
-            :param track: The track to which the event should be written
-            :param time: The time of the event, in beats.
-            :param code: The event code. [Integer]
-            :param subcode: The event sub-code [Integer]
-            :param payload: The payload for the event. This should be a binary-packed
-                value, and will vary for each type and function.
-            :param sysExChannel: The SysEx channel.
-            :param realTime: Sets the real-time flag. Defaults to non-real-time.
-            :param manID: The manufacturer ID for the event
-            
-                
-            **Note**: This is a low-level MIDI function, so care must be used in
-            constructing the payload. It is recommended that higher-level helper
-            functions be written to wrap this function and construct the payload if
-            a developer finds him or herself using the function heavily. As an example
-            of such a helper function, see the ``changeNoteTuning()`` function,
-            which uses the event to create a real-time note tuning update.
+        **Note**: This is a low-level MIDI function, so care must be used in
+        constructing the payload. It is recommended that higher-level helper
+        functions be written to wrap this function and construct the payload if
+        a developer finds him or herself using the function heavily. As an example
+        of such a helper function, see the ``changeNoteTuning()`` function,
+        which uses the event to create a real-time note tuning update.
 
         '''
         self.tracks[track].addUniversalSysEx(time, code, subcode, payload,  sysExChannel,\
@@ -958,11 +944,9 @@ class MIDIFile(object):
 
     def writeFile(self,fileHandle):
         '''
-        .. py:function:: writeFile(self,fileHandle)
+        Write the MIDI File.
         
-            Write the MIDI File.
-            
-            :param fileHandle: A file handle that has been opened for binary writing.
+        :param fileHandle: A file handle that has been opened for binary writing.
         '''
         
         self.header.writeFile(fileHandle)
