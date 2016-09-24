@@ -1,3 +1,12 @@
+Date:       23 September 2016
+Version:    1.0.1
+    * Minor updates to build system so that code can be hosted at
+      Pypi (https://pypi.python.org/pypi/MIDIUtil/).
+
+Date:       23 September 2016
+Version:    1.0.0
+    * Code ported to GitHub
+    * Extensive updates to documentation, ported to Sphinx.
     * Added ability to *not* adjust the MIDIFile's time origin.
       Default behaviour is maintained, but will change in a future
       version (by default the origin is currently adjusted).
