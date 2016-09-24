@@ -59,6 +59,11 @@ URLS::
 
 depending on if you want to use SSH or HTTPS.
 
+The code is also indexed on the Python Package Index and can be installed
+via ``pip``::
+
+    pip install MIDIUtil
+
 To use the library one can either install it on one's system or
 copy the midiutil directory of the source distribution to your
 project's directory (or to any directory pointed to  by the PYTHONPATH
