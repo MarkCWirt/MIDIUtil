@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(name='MIDIUtil',
-      version='1.0.1',
+      version='HEAD',
       description='A pure python library for creating multi-track MIDI files',
       author='Mark Conway Wirt',
       author_email='markcwirt) at (gmail . com',
