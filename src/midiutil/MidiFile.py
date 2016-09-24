@@ -721,7 +721,7 @@ class MIDIFile(object):
         :param track: The track to which the tempo event  is added.
         :param time: The time (in beats) at which tempo event is placed
         :param tempo: The tempo, in Beats per Minute. [Integer]
-    """
+        """
         self.tracks[track].addTempo(time,tempo, insertion_order = self.event_counter)
         self.event_counter = self.event_counter + 1
         
