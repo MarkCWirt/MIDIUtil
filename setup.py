@@ -11,7 +11,7 @@ setup(name='MIDIUtil',
       package_dir = {'': 'src'},
       package_data={
           '' : ['License.txt', 'README.rst', 'documentation/*'],
-          'examples' : ['single-note-example.py']},
+          'examples' : ['single-note-example.py', 'c-major-scale.py']},
       include_package_data = True,
       platforms='Platform Independent',
       classifiers=[

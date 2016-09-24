@@ -101,40 +101,32 @@ Using the software is easy:
 
 Detailed documentation is provided; what follows is a simple example
 to get you going quickly. In this example we'll create a one track MIDI
-File, assign a name and tempo to the track, add a one beat middle-C to
-the track, and write it to disk.
+File, assign a tempo to the track, and write a C-Major scale. Then we
+write it to disk.
 
 .. code:: python
 
-        #Import the library
-        from midiutil.MidiFile import MIDIFile
+    #!/usr/bin/env python
 
-        # Create the MIDIFile Object with 1 track
-        MyMIDI = MIDIFile(1)
+    from midiutil.MidiFile import MIDIFile
 
-        # Tracks are numbered from zero. Times are measured in beats.
-        track = 0
-        time = 0
+    degrees  = [60, 62, 64, 65, 67, 69, 71, 72] # MIDI note number
+    track    = 0
+    channel  = 0
+    time     = 0   # In beats
+    duration = 1   # In beats
+    tempo    = 60  # In BPM
+    volume   = 100 # 0-127, as per the MIDI standard
 
-        # Add track name and tempo.
-        MyMIDI.addTrackName(track,time,"Sample Track")
-        MyMIDI.addTempo(track,time,120)
+    MyMIDI = MIDIFile(1) # One track
+    MyMIDI.addTempo(track,time, tempo)
 
-        # Add a note. addNote expects the following information:
-        track = 0    # We only have one track
-        channel = 0
-        pitch = 60   # MIDI note number
-        time = 0     # In beats
-        duration = 1 # In beats
-        volume = 100 # 0-127, 127 being full volume
+    for pitch in degrees:
+        MyMIDI.addNote(track, channel, pitch, time, duration, volume)
+        time = time + 1
 
-        # Now add the note.
-        MyMIDI.addNote(track,channel,pitch,time,duration,volume)
-
-        # And write it to disk.
-        binfile = open("output.mid", 'wb')
-        MyMIDI.writeFile(binfile)
-        binfile.close()
+    with open("major-scale.mid", "wb") as output_file:
+        MyMIDI.writeFile(output_file)
 
 There are several additional event types that can be added and there are
 various options available for creating the MIDIFile object, but the above
