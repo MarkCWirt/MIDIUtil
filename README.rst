@@ -150,9 +150,8 @@ I've actually been off email for a few years, so I'm sure there are lots
 of suggestions waiting. Stay tuned for updates and bug fixes!
 
 .. |docs| image:: https://readthedocs.org/projects/midiutil/badge/?version=latest
-  :target: http://midiutil.readthedocs.io/en/latest/?badge=latest
-  :alt: Documentation Status
+   :target: http://midiutil.readthedocs.io/en/latest/?badge=latest
+   :alt: Documentation Status
 
 .. |build| image:: https://travis-ci.org/MarkCWirt/MIDIUtil.svg?branch=master
-  :taget: https://travis-ci.org/MarkCWirt/MIDIUtil.svg?branch=master
-  :alt: Build Status
+   :target: https://travis-ci.org/MarkCWirt/MIDIUtil
