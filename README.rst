@@ -150,4 +150,3 @@ of suggestions waiting. Stay tuned for updates and bug fixes!
 .. |docs| image:: https://readthedocs.org/projects/midiutil/badge/?version=latest
   :target: http://midiutil.readthedocs.io/en/latest/?badge=latest
   :alt: Documentation Status
-  :align: center
