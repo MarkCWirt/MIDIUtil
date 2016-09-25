@@ -4,6 +4,12 @@ MIDIUtil
 This is just a breif adumbration. Full documentation  can be
 found at `Read the Docs <http://midiutil.readthedocs.io/en/latest/>`_.
 
+.. image:: https://readthedocs.org/projects/midiutil/badge/?version=latest
+
+  :target: http://midiutil.readthedocs.io/en/latest/?badge=latest
+  :alt: Documentation Status
+  :align: center
+
 Introduction
 ------------
 
