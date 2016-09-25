@@ -4,11 +4,7 @@ MIDIUtil
 This is just a breif adumbration. Full documentation  can be
 found at `Read the Docs <http://midiutil.readthedocs.io/en/latest/>`_.
 
-.. image:: https://readthedocs.org/projects/midiutil/badge/?version=latest
-
-  :target: http://midiutil.readthedocs.io/en/latest/?badge=latest
-  :alt: Documentation Status
-  :align: center
+|docs|
 
 Introduction
 ------------
@@ -150,3 +146,8 @@ fixes,  and suggestions on the library:
 
 I've actually been off email for a few years, so I'm sure there are lots
 of suggestions waiting. Stay tuned for updates and bug fixes!
+
+.. |docs| image:: https://readthedocs.org/projects/midiutil/badge/?version=latest
+  :target: http://midiutil.readthedocs.io/en/latest/?badge=latest
+  :alt: Documentation Status
+  :align: center
