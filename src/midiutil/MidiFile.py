@@ -183,6 +183,17 @@ class TrackName(GenericEvent):
         self.trackName = trackName.encode("ISO-8859-1")
         super(TrackName, self).__init__('trackName', time, ordinal, insertion_order)
         
+class TimeSignature(GenericEvent):
+    '''
+    A class that encapsulates a time signature.
+    '''
+    
+    def __init__(self,  time,  numerator, denominator, clocks_per_beat, ordinal=0, insertion_order=0):
+        self.numerator = numerator
+        self.denominator = denominator
+        self.clocks_per_beat = clocks_per_beat
+        super(TimeSignature, self).__init__('TimeSignature', time, ordinal, insertion_order)
+        
 class MIDITrack(object):
     '''
     A class that encapsulates a MIDI track
@@ -248,6 +259,13 @@ class MIDITrack(object):
         Add a track name event.
         '''
         self.eventList.append(TrackName(time,trackName, insertion_order = insertion_order))
+        
+    def addTimeSignature(self, time, numerator, denominator, clocks_per_beat, insertion_order = 0):
+        '''
+        Add a time signature.
+        '''
+        self.eventList.append(TimeSignature(time, numerator, denominator, 
+                                            clocks_per_beat, insertion_order = insertion_order))
         
     def changeNoteTuning(self,  tunings,   sysExChannel=0x7F,  realTime=True,  \
         tuningProgam=0, insertion_order=0):
@@ -327,6 +345,13 @@ class MIDITrack(object):
                 event.code = thing.code
                 event.subcode = thing.subcode
                 event.payload = thing.payload
+                self.MIDIEventList.append(event)
+                
+            elif thing.type == 'TimeSignature':
+                event = MIDIEvent("TimeSignature", thing.time * TICKSPERBEAT, thing.ord, thing.insertion_order)
+                event.numerator = thing.numerator
+                event.denominator = thing.denominator
+                event.clocks_per_beat = thing.clocks_per_beat
                 self.MIDIEventList.append(event)
 
             else:
@@ -461,6 +486,19 @@ class MIDITrack(object):
                 self.MIDIdata = self.MIDIdata + struct.pack('>B',subcode)
                 self.MIDIdata = self.MIDIdata + struct.pack('>B', 0x03)
                 self.MIDIdata = self.MIDIdata + threebite
+            elif event.type == "TimeSignature":
+                code = 0xFF
+                subcode = 0x58
+                varTime = writeVarLength(event.time)
+                for timeByte in varTime:
+                    self.MIDIdata = self.MIDIdata + struct.pack('>B',timeByte)
+                self.MIDIdata = self.MIDIdata + struct.pack('>B',code)
+                self.MIDIdata = self.MIDIdata + struct.pack('>B',subcode)
+                self.MIDIdata = self.MIDIdata + struct.pack('>B', 0x04)
+                self.MIDIdata = self.MIDIdata + struct.pack('>B', event.numerator)
+                self.MIDIdata = self.MIDIdata + struct.pack('>B', event.denominator)
+                self.MIDIdata = self.MIDIdata + struct.pack('>B', event.clocks_per_beat)
+                self.MIDIdata = self.MIDIdata + struct.pack('>B', 0x08) # 32nd notes per quarter note
             elif event.type == 'ProgramChange':
                 code = 0xC << 4 | event.channel
                 varTime = writeVarLength(event.time)
@@ -635,26 +673,26 @@ class MIDIFile(object):
     def __init__(self, numTracks=1, removeDuplicates=True,  deinterleave=True, adjust_origin=None):
         '''
         
-        Initialize the MIDIFile class
-        
-        :param numTracks: The number of tracks the file contains. Integer, one or greater
-        :param removeDuplicates: If set to ``True`` remove duplicate events before writing
-            to disk
-        :param deinterleave: If set to ``True`` deinterleave the notes in the stream
-        :param adjust_origin: If set to ``True`` (of left at the default of ``None``) shift all the
-            events in the tracks so that the first event takes place at time t=0
+            Initialize the MIDIFile class
             
-        Note that the default for ``adjust_origin`` will change in a future release, so one should probably
-        explicitly set it.
-        
-        Example:
-        
-        .. code::
-        
-            # Create a two-track MIDIFile
-        
-            from midiutil.MidiFile import MIDIFile
-            midi_file = MIDIFile(2)
+            :param numTracks: The number of tracks the file contains. Integer, one or greater
+            :param removeDuplicates: If set to ``True`` remove duplicate events before writing
+                to disk
+            :param deinterleave: If set to ``True`` deinterleave the notes in the stream
+            :param adjust_origin: If set to ``True`` (of left at the default of ``None``) shift all the
+                events in the tracks so that the first event takes place at time t=0
+                
+            Note that the default for ``adjust_origin`` will change in a future release, so one should probably
+            explicitly set it.
+            
+            Example:
+            
+            .. code::
+            
+                # Create a two-track MIDIFile
+            
+                from midiutil.MidiFile import MIDIFile
+                midi_file = MIDIFile(2)
         '''
         self.header = MIDIHeader(numTracks)
         
@@ -702,7 +740,6 @@ class MIDIFile(object):
 
     def addTrackName(self,track, time,trackName):
         """
-        
         Name a track.
         
         :param track: The track to which the name is assigned.
@@ -713,146 +750,185 @@ class MIDIFile(object):
         self.tracks[track].addTrackName(time,trackName, insertion_order = self.event_counter)
         self.event_counter = self.event_counter + 1
         
+    def addTimeSignature(self, track, time, numerator, denominator, clocks_per_beat):
+        '''
+        Add a time signature event.
+        
+        :param track: The track to which the signature is assigned.
+        :param time: The time (in beats) at which the event is placed.
+            In general this should probably be time 0 (the beginning of the track).
+        :param numerator: The numerator of the time signature. [Int]
+        :param denominator: The denominator of the time signature, expressed as
+            a power of two (see below). [Int]
+        :param clocks_per_beat: The number of MIDI clock ticks per beat (see below).
+        
+        The data format for this event is a little obscure. 
+        
+        The ``denominator`` should be specified as a power of 2, with
+        a half note being one, a quarter note being two, and eight note
+        being three, etc. Thus, for example, a 4/4 time signature would
+        have a ``numerator`` of 4 and a ``denominator`` of 2. A 7/8 time
+        signature would be a ``numerator`` of 7 and a ``denominator``
+        of 3.
+
+        The ``clocks_per_beat`` argument specifies the number of clock
+        ticks per metronome click. By definition there are 24 ticks in
+        a quarter note, so a metronome click per quarter note would be
+        24. A beat every third eighth note would be 3 * 12 = 36.  
+        '''
+
+        self.tracks[track].addTimeSignature(time, numerator, denominator,
+            clocks_per_beat, insertion_order = self.event_counter)
+        self.event_counter = self.event_counter + 1
+
     def addTempo(self,track, time,tempo):
         """
-        
+
         Add notes to the MIDIFile object
-        
+
         :param track: The track to which the tempo event  is added.
-        :param time: The time (in beats) at which tempo event is placed
+        :param time: The time (in beats) at which tempo event is placed 
         :param tempo: The tempo, in Beats per Minute. [Integer]
-        """
+        """ 
+        
         self.tracks[track].addTempo(time,tempo, insertion_order = self.event_counter)
         self.event_counter = self.event_counter + 1
-        
+
     def addProgramChange(self,track, channel, time, program):
         """
-        
+
         Add a MIDI program change event.
-        
+
         :param track: The track to which program change event is added.
-        :param channel: the MIDI channel to assign to the event. [Integer, 0-15]
-        :param time: The time (in beats) at which the program change event is placed [Float].
-        :param annotation: Arbitrary data to attach to the note.
+        :param channel: the MIDI channel to assign to the event. [Integer, 0-15] 
+        :param time: The time (in beats) at which the program change event is placed [Float].  
+        :param annotation: Arbitrary data to attach to the note.  
         :param program: the program number. [Integer, 0-127].
-        """
-        self.tracks[track].addProgramChange(channel, time, program, 
+        """ 
+        self.tracks[track].addProgramChange(channel, time, program,
             insertion_order = self.event_counter)
         self.event_counter = self.event_counter + 1
-    
+
     def addControllerEvent(self,track, channel, time, controller_number, parameter):
         """
-        
+
         Add a channel control event
-        
-        :param track: The track to which the event is added.
-        :param channel: the MIDI channel to assign to the event. [Integer, 0-15]
-        :param time: The time (in beats) at which the event is placed [Float].
-        :param controller_number: The controller ID of the event.
+
+        :param track: The track to which the event is added.  
+        :param channel: the MIDI channel to assign to the event. [Integer, 0-15] 
+        :param time: The time (in beats) at which the event is placed [Float].  
+        :param controller_number: The controller ID of the event.  
         :param parameter: The event's parameter, the meaning of which varies by event type.
         """
-        self.tracks[track].addControllerEvent(channel,time,controller_number, parameter, 
+        self.tracks[track].addControllerEvent(channel,time,controller_number, parameter,
             insertion_order = self.event_counter)
         self.event_counter = self.event_counter + 1
-        
-    def makeRPNCall(self, track, channel, time, controller_msb, controller_lsb, data_msb, data_lsb):
+
+    def makeRPNCall(self, track, channel, time, controller_msb, controller_lsb, data_msb, 
+                    data_lsb):
         '''
-        
+
         Perform a Registered Parameter Number Call
-        
-        :param track: The track to which this applies
-        :param channel: The channel to which this applies
-        :param time: The time of the event
+
+        :param track: The track to which this applies 
+        :param channel: The channel to which this applies 
+        :param time: The time of the event 
         :param controller_msb: The Most significant byte of the controller. In common usage
             this will usually be 0
         :param controller_lsb: The Least significant Byte for the controller message. For example, for
             a fine-tuning change this would be 01.
-        :param data_msb: The Most Significant Byte of the controller's parameter.
+        :param data_msb: The Most Significant Byte of the controller's parameter.  
         :param data_lsb: The Least Significant Byte of the controller's parameter. If non needed this
             should be set to ``None``
-            
+
         As an example, if one were to change a channel's tuning program::
-        
+
             makeRPNCall(track, channel, time, 0, 3, 0, program)
-            
-        (Note, however, that there is a convenience function, ``changeTuningProgram``, that does
-        this for you.)
-                
-        '''
-        self.tracks[track].addControllerEvent(channel,time, 101, controller_msb,   insertion_order = self.event_counter)
+
+        (Note, however, that there is a convenience function,
+        ``changeTuningProgram``, that does this for you.)
+
+        ''' 
+        self.tracks[track].addControllerEvent(channel,time, 101, controller_msb,   
+            insertion_order = self.event_counter)
         self.event_counter = self.event_counter + 1
-        self.tracks[track].addControllerEvent(channel,time, 100, controller_lsb,  insertion_order = self.event_counter)
-        self.event_counter = self.event_counter + 1
-        self.tracks[track].addControllerEvent(channel,time, 6,   data_msb,        insertion_order = self.event_counter)
-        self.event_counter = self.event_counter + 1
+        self.tracks[track].addControllerEvent(channel,time, 100, controller_lsb,  
+            insertion_order = self.event_counter)
+        self.event_counter = self.event_counter + 1 
+        self.tracks[track].addControllerEvent(channel,time, 6,   data_msb,        
+            insertion_order = self.event_counter)
+        self.event_counter = self.event_counter + 1 
         if data_lsb is not None:
-            self.tracks[track].addControllerEvent(channel,time, 38,  data_lsb, insertion_order = self.event_counter)
+            self.tracks[track].addControllerEvent(channel,time, 38, data_lsb, 
+                insertion_order = self.event_counter)
             self.event_counter = self.event_counter + 1
-            
-    def makeNRPNCall(self, track, channel, time, controller_msb, controller_lsb, data_msb, data_lsb):
+
+    def makeNRPNCall(self, track, channel, time, controller_msb,
+                     controller_lsb, data_msb, data_lsb):
         '''
-        
+
         Perform a Non-Registered Parameter Number Call
-        
-        :param track: The track to which this applies
-        :param channel: The channel to which this applies
-        :param time: The time of the event
-        :param controller_msb: The Most significant byte of the controller. In common usage
+
+        :param track: The track to which this applies 
+        :param channel: The channel to which this applies 
+        :param time: The time of the event 
+        :param controller_msb: The Most significant byte of thecontroller. In common usage
             this will usually be 0
         :param controller_lsb: The least significant byte for the controller message. For example, for
             a fine-tunning change this would be 01.
-        :param data_msb: The most significant byte of the controller's parameter.
+        :param data_msb: The most significant byte of the controller's parameter.  
         :param data_lsb: The least significant byte of the controller's parameter. If none is needed this
             should be set to ``None``
-                
-        '''
-        self.tracks[track].addControllerEvent(channel,time, 99, controller_msb,   insertion_order = self.event_counter)
+
+        ''' 
+        self.tracks[track].addControllerEvent(channel,time, 99, controller_msb,
+            insertion_order = self.event_counter)
         self.event_counter = self.event_counter + 1
-        self.tracks[track].addControllerEvent(channel,time, 98, controller_lsb,  insertion_order = self.event_counter)
-        self.event_counter = self.event_counter + 1
-        self.tracks[track].addControllerEvent(channel,time, 6,   data_msb,        insertion_order = self.event_counter)
-        self.event_counter = self.event_counter + 1
+        self.tracks[track].addControllerEvent(channel,time, 98, controller_lsb,  
+            insertion_order = self.event_counter)
+        self.event_counter = self.event_counter + 1 
+        self.tracks[track].addControllerEvent(channel,time, 6,   data_msb, 
+            insertion_order = self.event_counter)
+        self.event_counter = self.event_counter + 1 
         if data_lsb is not None:
-            self.tracks[track].addControllerEvent(channel,time, 38,  data_lsb, insertion_order = self.event_counter)
+            self.tracks[track].addControllerEvent(channel,time, 38,  data_lsb, 
+                insertion_order = self.event_counter)
             self.event_counter = self.event_counter + 1
-        
+
     def changeTuningBank(self,track, channel, time, bank):
         '''
-        
+
         Change the tuning bank for a selected track
-        
+
         :param track: The track to which the data should be written
-        :param channel: The channel for the events
-        :param time: The time of the events
+        :param channel: The channel for the events 
+        :param time: The time of the events 
         :param bank: The tuning bank (0-127)
-        
-        Note that this is a convenience function, as the same functionality is available
-        from directly sequencing controller events.
-        
-        The specified tuning should already have been written to the stream with ``changeNoteTuning``.
-        '''
+
+        Note that this is a convenience function, as the same
+        functionality is available from directly sequencing controller
+        events.
+
+        The specified tuning should already have been written to the
+        stream with ``changeNoteTuning``.  ''' 
         self.makeRPNCall(track, channel, time, 0, 4, 0, bank)
-        
+
     def changeTuningProgram(self,track, channel, time, program):
         '''
-        
+
         Change the tuning program for a selected track
-        
+
         :param track: The track to which the data should be written
-        :param channel: The channel for the events
-        :param time: The time of the events
-        :param program: The tuning program number (0-127)
-        
-        Note that this is a convenience function, as the same functionality is available
-        from directly sequencing controller events.
-        
-        The specified tuning should already have been written to the stream with ``changeNoteTuning``.
-        '''
+        :param channel: The channel for the events 
+        :param time: The time of the events :param program: The tuning program number (0-127)
+
+        Note that this is a convenience function, as the same
+        functionality is available from directly sequencing controller
+        events.
+
+        The specified tuning should already have been written to the
+        stream with ``changeNoteTuning``.  ''' 
         self.makeRPNCall(track, channel, time, 0, 3, 0, program)
-
-        
-
-        
         
     def changeNoteTuning(self,  track,  tunings,   sysExChannel=0x7F,  \
                          realTime=True,  tuningProgam=0):

@@ -236,6 +236,29 @@ class TestMIDIUtils(unittest.TestCase):
         self.assertEqual(data.unpack_into_byte(3), 0x03)
         self.assertEqual(data[4:7], struct.pack('>L', int(60000000/tempo))[1:4])
         
+    def testTimeSignature(self):
+        time = 0
+        track = 0
+        numerator = 4
+        denominator = 2
+        clocks_per_beat = 24
+        MyMIDI = MIDIFile(1)
+        MyMIDI.addTimeSignature(track, time, numerator, denominator, clocks_per_beat)
+        MyMIDI.close()
+        
+        data = Decoder(MyMIDI.tracks[0].MIDIdata)
+        
+        self.assertEqual(MyMIDI.tracks[0].MIDIEventList[0].type, 'TimeSignature')
+        
+        self.assertEqual(data.unpack_into_byte(0), 0x00) # time
+        self.assertEqual(data.unpack_into_byte(1), 0xFF) # Code
+        self.assertEqual(data.unpack_into_byte(2), 0x58) # subcode
+        self.assertEqual(data.unpack_into_byte(3), 0x04) # Data length
+        self.assertEqual(data.unpack_into_byte(4), numerator)
+        self.assertEqual(data.unpack_into_byte(5), denominator)
+        self.assertEqual(data.unpack_into_byte(6), clocks_per_beat) # Data length
+        self.assertEqual(data.unpack_into_byte(7), 0x08) # 32nd notes per quarter note
+        
     def testProgramChange(self):
         #import pdb; pdb.set_trace()
         program = 10
