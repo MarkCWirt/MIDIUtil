@@ -241,9 +241,9 @@ class TestMIDIUtils(unittest.TestCase):
         track = 0
         numerator = 4
         denominator = 2
-        clocks_per_beat = 24
+        clocks_per_tick = 24
         MyMIDI = MIDIFile(1)
-        MyMIDI.addTimeSignature(track, time, numerator, denominator, clocks_per_beat)
+        MyMIDI.addTimeSignature(track, time, numerator, denominator, clocks_per_tick)
         MyMIDI.close()
         
         data = Decoder(MyMIDI.tracks[0].MIDIdata)
@@ -256,7 +256,7 @@ class TestMIDIUtils(unittest.TestCase):
         self.assertEqual(data.unpack_into_byte(3), 0x04) # Data length
         self.assertEqual(data.unpack_into_byte(4), numerator)
         self.assertEqual(data.unpack_into_byte(5), denominator)
-        self.assertEqual(data.unpack_into_byte(6), clocks_per_beat) # Data length
+        self.assertEqual(data.unpack_into_byte(6), clocks_per_tick) # Data length
         self.assertEqual(data.unpack_into_byte(7), 0x08) # 32nd notes per quarter note
         
     def testProgramChange(self):

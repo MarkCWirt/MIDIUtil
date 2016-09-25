@@ -188,10 +188,10 @@ class TimeSignature(GenericEvent):
     A class that encapsulates a time signature.
     '''
     
-    def __init__(self,  time,  numerator, denominator, clocks_per_beat, ordinal=0, insertion_order=0):
+    def __init__(self,  time,  numerator, denominator, clocks_per_tick, ordinal=0, insertion_order=0):
         self.numerator = numerator
         self.denominator = denominator
-        self.clocks_per_beat = clocks_per_beat
+        self.clocks_per_tick = clocks_per_tick
         super(TimeSignature, self).__init__('TimeSignature', time, ordinal, insertion_order)
         
 class MIDITrack(object):
@@ -260,12 +260,12 @@ class MIDITrack(object):
         '''
         self.eventList.append(TrackName(time,trackName, insertion_order = insertion_order))
         
-    def addTimeSignature(self, time, numerator, denominator, clocks_per_beat, insertion_order = 0):
+    def addTimeSignature(self, time, numerator, denominator, clocks_per_tick, insertion_order = 0):
         '''
         Add a time signature.
         '''
         self.eventList.append(TimeSignature(time, numerator, denominator, 
-                                            clocks_per_beat, insertion_order = insertion_order))
+                                            clocks_per_tick, insertion_order = insertion_order))
         
     def changeNoteTuning(self,  tunings,   sysExChannel=0x7F,  realTime=True,  \
         tuningProgam=0, insertion_order=0):
@@ -351,7 +351,7 @@ class MIDITrack(object):
                 event = MIDIEvent("TimeSignature", thing.time * TICKSPERBEAT, thing.ord, thing.insertion_order)
                 event.numerator = thing.numerator
                 event.denominator = thing.denominator
-                event.clocks_per_beat = thing.clocks_per_beat
+                event.clocks_per_tick = thing.clocks_per_tick
                 self.MIDIEventList.append(event)
 
             else:
@@ -497,7 +497,7 @@ class MIDITrack(object):
                 self.MIDIdata = self.MIDIdata + struct.pack('>B', 0x04)
                 self.MIDIdata = self.MIDIdata + struct.pack('>B', event.numerator)
                 self.MIDIdata = self.MIDIdata + struct.pack('>B', event.denominator)
-                self.MIDIdata = self.MIDIdata + struct.pack('>B', event.clocks_per_beat)
+                self.MIDIdata = self.MIDIdata + struct.pack('>B', event.clocks_per_tick)
                 self.MIDIdata = self.MIDIdata + struct.pack('>B', 0x08) # 32nd notes per quarter note
             elif event.type == 'ProgramChange':
                 code = 0xC << 4 | event.channel
@@ -750,7 +750,7 @@ class MIDIFile(object):
         self.tracks[track].addTrackName(time,trackName, insertion_order = self.event_counter)
         self.event_counter = self.event_counter + 1
         
-    def addTimeSignature(self, track, time, numerator, denominator, clocks_per_beat):
+    def addTimeSignature(self, track, time, numerator, denominator, clocks_per_tick):
         '''
         Add a time signature event.
         
@@ -760,7 +760,7 @@ class MIDIFile(object):
         :param numerator: The numerator of the time signature. [Int]
         :param denominator: The denominator of the time signature, expressed as
             a power of two (see below). [Int]
-        :param clocks_per_beat: The number of MIDI clock ticks per beat (see below).
+        :param clocks_per_tick: The number of MIDI clock ticks metronome click (see below).
         
         The data format for this event is a little obscure. 
         
@@ -771,14 +771,14 @@ class MIDIFile(object):
         signature would be a ``numerator`` of 7 and a ``denominator``
         of 3.
 
-        The ``clocks_per_beat`` argument specifies the number of clock
+        The ``clocks_per_tick`` argument specifies the number of clock
         ticks per metronome click. By definition there are 24 ticks in
         a quarter note, so a metronome click per quarter note would be
-        24. A beat every third eighth note would be 3 * 12 = 36.  
+        24. A click every third eighth note would be 3 * 12 = 36.  
         '''
 
         self.tracks[track].addTimeSignature(time, numerator, denominator,
-            clocks_per_beat, insertion_order = self.event_counter)
+            clocks_per_tick, insertion_order = self.event_counter)
         self.event_counter = self.event_counter + 1
 
     def addTempo(self,track, time,tempo):

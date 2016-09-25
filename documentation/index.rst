@@ -50,36 +50,40 @@ See License.txt in the source distribution for details.
 Installation
 ------------
 
-The code is available on Github, and be cloned with one of the following
-URLS::
+The latest, stable version of MIDIUtil is hosted at the Python Package
+index and can be installed via the normal channels:
+
+.. code:: bash
+
+  pip install MIDIUtil
+
+Source code is available on `Github <https://github.com/MarkCWirt/MIDIUtil>`__ ,
+and be cloned with one of the following URLS:
+
+.. code:: bash
 
     git clone git@github.com:MarkCWirt/MIDIUtil.git
     # or
     git clone https://github.com/MarkCWirt/MIDIUtil.git
 
-depending on if you want to use SSH or HTTPS.
+depending on if you want to use SSH or HTTPS. (The source code
+for stable releases can also be downloaded from the
+`Releases <https://github.com/MarkCWirt/MIDIUtil/releases>`__
+page.)
 
-The code is also indexed on the Python Package Index and can be installed
-via ``pip``::
-
-    pip install MIDIUtil
-
-To use the library one can either install it on one's system or
-copy the midiutil directory of the source distribution to your
-project's directory (or to any directory pointed to  by the PYTHONPATH
-environment variable). The source distribution can be downloaded,
-un-zipped (or un-tarred), and installed in the standard way:
+To use the library one can either install it on one's system:
 
 .. code:: bash
 
     python setup.py install
 
+or point your ``$PYTHONPATH`` environment variable to the directory
+containing ``midiutil`` (i.e., ``src``).
+
 MIDIUtil is pure Python and should work on any platform to which
 Python has been ported.
 
-If you do not wish to install in on your system, just copy the
-src/midiutil directory to your project's directory or elsewhere on
-your PYTHONPATH. If you're using this software in your own projects
+If you're using this software in your own projects
 you may want to consider distributing the library bundled with yours;
 the library is small and self-contained, and such bundling makes things
 more convenient for your users. The best way of doing this is probably
@@ -87,7 +91,6 @@ to copy the midiutil directory directly to your package directory and
 then refer to it with a fully qualified name. This will prevent it from
 conflicting with any version of the software that may be installed on
 the target system.
-
 
 Quick Start
 -----------
