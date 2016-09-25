@@ -802,7 +802,6 @@ class MIDIFile(object):
         :param track: The track to which program change event is added.
         :param channel: the MIDI channel to assign to the event. [Integer, 0-15] 
         :param time: The time (in beats) at which the program change event is placed [Float].  
-        :param annotation: Arbitrary data to attach to the note.  
         :param program: the program number. [Integer, 0-127].
         """ 
         self.tracks[track].addProgramChange(channel, time, program,
@@ -901,8 +900,8 @@ class MIDIFile(object):
         Change the tuning bank for a selected track
 
         :param track: The track to which the data should be written
-        :param channel: The channel for the events 
-        :param time: The time of the events 
+        :param channel: The channel for the event
+        :param time: The time of the event
         :param bank: The tuning bank (0-127)
 
         Note that this is a convenience function, as the same
@@ -919,8 +918,9 @@ class MIDIFile(object):
         Change the tuning program for a selected track
 
         :param track: The track to which the data should be written
-        :param channel: The channel for the events 
-        :param time: The time of the events :param program: The tuning program number (0-127)
+        :param channel: The channel for the event
+        :param time: The time of the event
+        :param program: The tuning program number (0-127)
 
         Note that this is a convenience function, as the same
         functionality is available from directly sequencing controller

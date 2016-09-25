@@ -55,7 +55,7 @@ from a collection of Control Change events. Since all the CC events will
 have the same time and class (and therefore default ordinal), you can control
 the order of the events by the order to such you add them to the MIDIFile.
 
-Next, if you want the code to be able to de-duplicate events with may
+Next, if you want the code to be able to de-duplicate events which may
 lay over top of one another, the parent class, ``GenericEvent``, has a
 member function called ``__eq__()``. If two events do not coincide in
 time or type they are not equal, but it they do the ``__eq__`` function
@@ -72,8 +72,8 @@ turned off). From ``GenericEvent.__eq__()``:
         if self.tempo != other.tempo:
             return False
 
-If events are equivalent, the code should return False. If they are not
-equivalent no return should be called.
+If events are not equivalent, the code should return ``False``. If they are, the
+code can be allowed to fall through to its default return of ``True``.
 
 Create an Accessor Function
 ---------------------------
