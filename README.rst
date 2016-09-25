@@ -153,6 +153,6 @@ of suggestions waiting. Stay tuned for updates and bug fixes!
   :target: http://midiutil.readthedocs.io/en/latest/?badge=latest
   :alt: Documentation Status
 
-  .. |build| image:: https://travis-ci.org/MarkCWirt/MIDIUtil.svg?branch=master
-    :taget: https://travis-ci.org/MarkCWirt/MIDIUtil.svg?branch=master
-    :atl: Build Status
+.. |build| image:: https://travis-ci.org/MarkCWirt/MIDIUtil.svg?branch=master
+  :taget: https://travis-ci.org/MarkCWirt/MIDIUtil.svg?branch=master
+  :atl: Build Status
