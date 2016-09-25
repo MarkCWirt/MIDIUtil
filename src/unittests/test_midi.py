@@ -47,7 +47,7 @@ class TestMIDIUtils(unittest.TestCase):
     def testAddNote(self):
         MyMIDI = MIDIFile(1)
         MyMIDI.addNote(0, 0, 100,0,1,100)
-        self.assertEqual(MyMIDI.tracks[0].eventList[0].type, "note")
+        self.assertEqual(MyMIDI.tracks[0].eventList[0].type, "note2")
         self.assertEqual(MyMIDI.tracks[0].eventList[0].pitch, 100)
         self.assertEqual(MyMIDI.tracks[0].eventList[0].time, 0)
         self.assertEqual(MyMIDI.tracks[0].eventList[0].duration, 1)
@@ -57,7 +57,7 @@ class TestMIDIUtils(unittest.TestCase):
         time = 1
         MyMIDI = MIDIFile(1)
         MyMIDI.addNote(0, 0, 100,time,1,100)
-        self.assertEqual(MyMIDI.tracks[0].eventList[0].type, "note2")
+        self.assertEqual(MyMIDI.tracks[0].eventList[0].type, "note")
         self.assertEqual(MyMIDI.tracks[0].eventList[0].pitch, 100)
         self.assertEqual(MyMIDI.tracks[0].eventList[0].time, time)
         self.assertEqual(MyMIDI.tracks[0].eventList[0].duration, 1)
@@ -498,6 +498,8 @@ def suite():
 if __name__ == '__main__':
     print("Begining MIDIUtil Test Suite")
     MIDISuite = suite()
-    unittest.TextTestRunner(verbosity=2, stream=sys.stdout).run(MIDISuite)
+    runner = unittest.TextTestRunner(verbosity=2, stream=sys.stdout)
+    return_value =  not runner.run(MIDISuite).wasSuccessful()
+    sys.exit(return_value)
 
 
