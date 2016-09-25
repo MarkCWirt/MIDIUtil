@@ -42,8 +42,9 @@ See License.txt in the source distribution for details.
 Installation
 ------------
 
-The latest, stable version of MIDIUtil is hosted at the Python Package
-index and can be installed via the normal channels:
+The latest, stable version of MIDIUtil is hosted at the `Python Package
+Index <https://pypi.python.org/pypi/MIDIUtil/>`__ and can be installed
+via the normal channels:
 
 .. code:: bash
 
