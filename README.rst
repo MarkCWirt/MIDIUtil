@@ -1,6 +1,8 @@
 MIDIUtil
 ========
 
+|build|
+
 This is just a breif adumbration. Full documentation  can be
 found at `Read the Docs <http://midiutil.readthedocs.io/en/latest/>`_.
 
@@ -150,3 +152,7 @@ of suggestions waiting. Stay tuned for updates and bug fixes!
 .. |docs| image:: https://readthedocs.org/projects/midiutil/badge/?version=latest
   :target: http://midiutil.readthedocs.io/en/latest/?badge=latest
   :alt: Documentation Status
+
+  .. |build| image:: https://travis-ci.org/MarkCWirt/MIDIUtil.svg?branch=master
+    :taget: https://travis-ci.org/MarkCWirt/MIDIUtil.svg?branch=master
+    :atl: Build Status
