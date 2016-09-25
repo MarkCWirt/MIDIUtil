@@ -57,7 +57,7 @@ class TestMIDIUtils(unittest.TestCase):
         time = 1
         MyMIDI = MIDIFile(1)
         MyMIDI.addNote(0, 0, 100,time,1,100)
-        self.assertEqual(MyMIDI.tracks[0].eventList[0].type, "note")
+        self.assertEqual(MyMIDI.tracks[0].eventList[0].type, "note2")
         self.assertEqual(MyMIDI.tracks[0].eventList[0].pitch, 100)
         self.assertEqual(MyMIDI.tracks[0].eventList[0].time, time)
         self.assertEqual(MyMIDI.tracks[0].eventList[0].duration, 1)
