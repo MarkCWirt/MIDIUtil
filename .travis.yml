@@ -6,4 +6,4 @@ python:
   - "3.5-dev" 
 install:
     - python setup.py -q install
-script: python -m unittest discover src/unittests
+script: python  src/unittests/test_midi.py
