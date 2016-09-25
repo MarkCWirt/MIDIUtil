@@ -155,4 +155,4 @@ of suggestions waiting. Stay tuned for updates and bug fixes!
 
 .. |build| image:: https://travis-ci.org/MarkCWirt/MIDIUtil.svg?branch=master
   :taget: https://travis-ci.org/MarkCWirt/MIDIUtil.svg?branch=master
-  :atl: Build Status
+  :alt: Build Status
