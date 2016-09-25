@@ -3,7 +3,7 @@ MIDIUtil
 
 |build|
 
-This is just a breif adumbration. Full documentation  can be
+This is just a brief adumbration. Full documentation  can be
 found at `Read the Docs <http://midiutil.readthedocs.io/en/latest/>`_.
 
 |docs|
