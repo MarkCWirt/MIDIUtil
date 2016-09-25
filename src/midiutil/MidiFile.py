@@ -760,7 +760,8 @@ class MIDIFile(object):
         :param numerator: The numerator of the time signature. [Int]
         :param denominator: The denominator of the time signature, expressed as
             a power of two (see below). [Int]
-        :param clocks_per_tick: The number of MIDI clock ticks metronome click (see below).
+        :param clocks_per_tick: The number of MIDI clock ticks per metronome 
+            click (see below).
         
         The data format for this event is a little obscure. 
         
