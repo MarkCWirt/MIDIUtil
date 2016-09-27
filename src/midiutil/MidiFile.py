@@ -906,7 +906,7 @@ class MIDIFile(object):
 
         ''' 
         if time_order:
-            delta = 0.0001
+            delta = 1.0 / (TICKSPERBEAT - 10)
         else:
             delta = 0.0
         self.tracks[track].addControllerEvent(channel,time, 99, controller_msb,
