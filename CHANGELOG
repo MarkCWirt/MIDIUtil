@@ -1,3 +1,8 @@
+    * Increaded test coverage.
+    * Fixed bug in MIDIFile for `addjust_origin` = `False`
+    * Added ability to order RPC and NRPC sub-events in time, as
+      a work-around for sequencers that aren't good about preserviing
+      event ordering for events at the time time.
     * Updates to documentation.
     * Added Travis CI to the build process. Verifying operation
       on python 2.6 - 3 development version.
