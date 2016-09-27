@@ -626,7 +626,7 @@ class TestMIDIUtils(unittest.TestCase):
         MyMIDI.addNote(track, channel, pitch, time, duration, volume)
         MyMIDI.tracks[0].eventList[0].type = bad_type
         # this test doesn't work in 2.6 -- this is new functionality
-        if sys.version_info > (2,6):
+        if sys.version_info >= (2,7):
             with self.assertRaises(Exception) as context:
                 MyMIDI.close()
             self.assertTrue(('Error in MIDITrack: Unknown event type %s' % bad_type) in str(context.exception))
