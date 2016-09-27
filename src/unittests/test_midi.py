@@ -415,6 +415,40 @@ class TestMIDIUtils(unittest.TestCase):
         self.assertEqual(data.unpack_into_byte(14), 0x26)               # Bank LSB
         self.assertEqual(data.unpack_into_byte(15), data_lsb) # Bank value (bank number)
         
+    def testNRPNCallWithTimeOrder(self):
+        #import pdb; pdb.set_trace()
+        track = 0
+        time = 0
+        channel = 0
+        controller_msb = 1
+        controller_lsb =  2
+        data_msb = 3
+        data_lsb = 4
+        MyMIDI = MIDIFile(1)
+        MyMIDI.makeNRPNCall(track, channel, time, controller_msb, controller_lsb, data_msb, data_lsb, time_order=True)
+        MyMIDI.close()
+        
+        data = Decoder(MyMIDI.tracks[0].MIDIdata)
+        
+        self.assertEqual(MyMIDI.tracks[0].MIDIEventList[0].type, 'ControllerEvent')
+        
+        self.assertEqual(data.unpack_into_byte(0), 0x00)               # time
+        self.assertEqual(data.unpack_into_byte(1), 0xB << 4 | channel) # Code
+        self.assertEqual(data.unpack_into_byte(2), 99)                 # Controller Number
+        self.assertEqual(data.unpack_into_byte(3), controller_msb)     # Controller Value
+        self.assertEqual(data.unpack_into_byte(4), 0x01)               # time
+        self.assertEqual(data.unpack_into_byte(5), 0xB << 4 | channel) # Code
+        self.assertEqual(data.unpack_into_byte(6), 98)                 # Controller Number
+        self.assertEqual(data.unpack_into_byte(7), controller_lsb)     # Controller Value
+        self.assertEqual(data.unpack_into_byte(8), 0x01)               # time
+        self.assertEqual(data.unpack_into_byte(9), 0xB << 4 | channel) # Code
+        self.assertEqual(data.unpack_into_byte(10), 0x06)              # Bank MSB
+        self.assertEqual(data.unpack_into_byte(11), data_msb)          # Value
+        self.assertEqual(data.unpack_into_byte(12), 0x01)              # time
+        self.assertEqual(data.unpack_into_byte(13), 0xB << 4 | channel) # Code
+        self.assertEqual(data.unpack_into_byte(14), 0x26)               # Bank LSB
+        self.assertEqual(data.unpack_into_byte(15), data_lsb) # Bank value (bank number)
+        
     def testAddControllerEvent(self):
         #import pdb; pdb.set_trace()
         track = 0
@@ -554,6 +588,46 @@ class TestMIDIUtils(unittest.TestCase):
         
         self.assertEqual(data.unpack_into_byte(0), TICKSPERBEAT/10) # first time, should be an integer < 127
         self.assertEqual(data.unpack_into_byte(8), 0x00) # first time
+        
+    def testMultiClose(self):
+        track    = 0
+        channel  = 0
+        pitch    = 69
+        time     = 0
+        duration = 1.0
+        volume   = 64
+        MyMIDI = MIDIFile(1)
+        MyMIDI.addNote(track, channel, pitch, time, duration, volume)
+        MyMIDI.close()
+        data_length_1 = len(MyMIDI.tracks[0].MIDIdata)
+        MyMIDI.close()
+        data_length_2 = len(MyMIDI.tracks[0].MIDIdata)
+        
+        self.assertEqual(data_length_1, data_length_2)
+        MyMIDI.tracks[0].closeTrack()
+        data_length_3 = len(MyMIDI.tracks[0].MIDIdata)
+        self.assertEqual(data_length_1, data_length_3)
+        
+    def testEmptyEventList(self):
+        MyMIDI = MIDIFile(1)
+        MyMIDI.close()
+        data_length = len(MyMIDI.tracks[0].MIDIdata)
+        self.assertEqual(data_length, 4) # Header length  4
+        
+    def testUnknownEventType(self):
+        track    = 0
+        channel  = 0
+        pitch    = 69
+        time     = 0
+        duration = 1.0
+        volume   = 64
+        bad_type = "bad"
+        MyMIDI = MIDIFile(1)
+        MyMIDI.addNote(track, channel, pitch, time, duration, volume)
+        MyMIDI.tracks[0].eventList[0].type = bad_type
+        with self.assertRaises(Exception) as context:
+            MyMIDI.close()
+        self.assertTrue(('Error in MIDITrack: Unknown event type %s' % bad_type) in str(context.exception))
         
 def suite():
     MIDISuite = unittest.TestLoader().loadTestsFromTestCase(TestMIDIUtils)
