@@ -630,6 +630,100 @@ class TestMIDIUtils(unittest.TestCase):
             with self.assertRaises(Exception) as context:
                 MyMIDI.close()
             self.assertTrue(('Error in MIDITrack: Unknown event type %s' % bad_type) in str(context.exception))
+            
+    def testRemoveDuplicates(self):
+        # First notes
+        track    = 0
+        channel  = 0
+        pitch    = 69
+        time     = 0
+        duration = 1
+        volume   = 64
+        MyMIDI = MIDIFile(1)
+        MyMIDI.addNote(track, channel, pitch, time, duration, volume)
+        MyMIDI.addNote(track, channel, pitch, time, duration, volume)
+        MyMIDI.close()
+        self.assertEqual(1, len(MyMIDI.tracks[0].eventList)) # One event
+        MyMIDI = MIDIFile(1)
+        MyMIDI.addNote(track, channel, pitch, time, duration, volume)
+        pitch = 70
+        MyMIDI.addNote(track, channel, pitch, time, duration, volume)
+        MyMIDI.close()
+        self.assertEqual(2, len(MyMIDI.tracks[0].eventList)) # Two events
+        
+        # Next tempo
+        tempo = 60
+        track = 0
+        time = 0
+        MyMIDI = MIDIFile(1)
+        MyMIDI.addTempo(track, time, tempo)
+        MyMIDI.addTempo(track, time, tempo)
+        MyMIDI.close()
+        self.assertEqual(1, len(MyMIDI.tracks[0].eventList))
+        MyMIDI = MIDIFile(1)
+        MyMIDI.addTempo(track, time, tempo)
+        tempo = 80
+        MyMIDI.addTempo(track, time, tempo)
+        MyMIDI.close()
+        self.assertEqual(2, len(MyMIDI.tracks[0].eventList))
+        
+        # Program Number
+        time = 0
+        track = 0
+        program = 10
+        channel = 0
+        MyMIDI = MIDIFile(1)
+        MyMIDI.addProgramChange(track, channel, time, program)
+        MyMIDI.addProgramChange(track, channel, time, program)
+        MyMIDI.close()
+        self.assertEqual(1, len(MyMIDI.tracks[0].eventList))
+        MyMIDI = MIDIFile(1)
+        MyMIDI.addProgramChange(track, channel, time, program)
+        program = 11
+        MyMIDI.addProgramChange(track, channel, time, program)
+        MyMIDI.close()
+        self.assertEqual(2, len(MyMIDI.tracks[0].eventList))
+        
+        # Track Name
+        track = 0
+        time = 0
+        track_name = "track"
+        MyMIDI = MIDIFile(1)
+        MyMIDI.addTrackName(track, time, track_name)
+        MyMIDI.addTrackName(track, time, track_name)
+        MyMIDI.close()
+        self.assertEqual(1, len(MyMIDI.tracks[0].eventList))
+        MyMIDI = MIDIFile(1)
+        MyMIDI.addTrackName(track, time, track_name)
+        track_name = "track 2"
+        MyMIDI.addTrackName(track, time, track_name)
+        MyMIDI.close()
+        self.assertEqual(2, len(MyMIDI.tracks[0].eventList))
+        
+        # SysEx. These are never removed
+        track = 0
+        time = 0
+        manufacturer = 10
+        MyMIDI = MIDIFile(1)
+        MyMIDI.addSysEx(track,time, manufacturer, struct.pack('>B', 0x01))
+        MyMIDI.addSysEx(track,time, manufacturer, struct.pack('>B', 0x01))
+        MyMIDI.close()
+        self.assertEqual(2, len(MyMIDI.tracks[0].eventList))
+        
+        # UniversalSysEx. Same thing -- never remove
+        
+        track          = 0
+        time           = 0
+        code           = 1
+        subcode        = 2
+        payload_number = 47
+        
+        payload = struct.pack('>B', payload_number)
+        MyMIDI = MIDIFile(1)
+        MyMIDI.addUniversalSysEx(track, time, code, subcode, payload, realTime=True)
+        MyMIDI.addUniversalSysEx(track, time, code, subcode, payload, realTime=True)
+        MyMIDI.close()
+        self.assertEqual(2, len(MyMIDI.tracks[0].eventList))
         
 def suite():
     MIDISuite = unittest.TestLoader().loadTestsFromTestCase(TestMIDIUtils)
