@@ -601,19 +601,27 @@ class MIDITrack(object):
         
         self.MIDIEventList.sort(key=sort_events)
 
-    def adjustTime(self,origin):
+    def adjustTimeAndOrigin(self,origin, adjust):
         '''
-        Adjust Times to be relative, and zero-origined
+        Adjust Times to be relative, and zero-origined.
+        
+        If adjust is True, the track will be shifted. Regardelss times
+        are converted to relative values here.
         '''
         
         if len(self.MIDIEventList) == 0:
             return
         tempEventList = []
+        
+        if adjust:
+            internal_origin = origin
+        else:
+            internal_origin = 0.0
     
         runningTime = 0 
         
         for event in self.MIDIEventList:
-            adjustedTime = event.time - origin
+            adjustedTime = event.time - internal_origin
             event.time = adjustedTime - runningTime
             runningTime = adjustedTime
             tempEventList.append(event)
@@ -1117,8 +1125,7 @@ class MIDIFile(object):
         origin = self.findOrigin()
 
         for i in range(0,self.numTracks):
-            if self.adjust_origin:
-                self.tracks[i].adjustTime(origin)
+            self.tracks[i].adjustTimeAndOrigin(origin, self.adjust_origin)
             self.tracks[i].writeMIDIStream()
             
         self.closed = True
