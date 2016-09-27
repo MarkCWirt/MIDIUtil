@@ -318,6 +318,22 @@ class TestMIDIUtils(unittest.TestCase):
         self.assertEqual(data.unpack_into_byte(14), 0x26)               # Bank LSB
         self.assertEqual(data.unpack_into_byte(15), bank)               # Bank value (bank number)
         
+    def testTuningBankWithTimeOrder(self):
+        #import pdb; pdb.set_trace()
+        bank = 1
+        MyMIDI = MIDIFile(1)
+        MyMIDI.changeTuningBank(0, 0, 0, bank, time_order=True)
+        MyMIDI.close()
+        
+        data = Decoder(MyMIDI.tracks[0].MIDIdata)
+        
+        self.assertEqual(MyMIDI.tracks[0].MIDIEventList[0].type, 'ControllerEvent')
+        
+        self.assertEqual(data.unpack_into_byte(0),  0x00)               # time
+        self.assertEqual(data.unpack_into_byte(4),  0x01)               # time
+        self.assertEqual(data.unpack_into_byte(8),  0x01)               # time
+        self.assertEqual(data.unpack_into_byte(12), 0x01)               # time
+        
     def testTuningProgram(self):
         #import pdb; pdb.set_trace()
         program = 10
@@ -346,6 +362,24 @@ class TestMIDIUtils(unittest.TestCase):
         self.assertEqual(data.unpack_into_byte(13), 0xB << 4 | channel) # Code
         self.assertEqual(data.unpack_into_byte(14), 0x26)               # Bank LSB
         self.assertEqual(data.unpack_into_byte(15), program)            # Bank value (bank number)
+        
+    def testTuningProgramWithTimeOrder(self):
+        #import pdb; pdb.set_trace()
+        program = 10
+        MyMIDI = MIDIFile(1)
+        MyMIDI.changeTuningProgram(0, 0, 0, program, time_order=True)
+        MyMIDI.close()
+
+        data = Decoder(MyMIDI.tracks[0].MIDIdata)
+        
+        self.assertEqual(MyMIDI.tracks[0].MIDIEventList[0].type, 'ControllerEvent')
+        
+        self.assertEqual(data.unpack_into_byte(0),  0x00)              # time
+        self.assertEqual(data.unpack_into_byte(4),  0x01)              # time
+        self.assertEqual(data.unpack_into_byte(8),  0x01)              # time
+        self.assertEqual(data.unpack_into_byte(12), 0x01)              # time
+
+        
         
     def testNRPNCall(self):
         #import pdb; pdb.set_trace()

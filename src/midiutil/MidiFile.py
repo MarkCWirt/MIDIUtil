@@ -860,7 +860,7 @@ class MIDIFile(object):
         ''' 
         
         if time_order:
-            delta = 0.0001
+            delta = 1.0 / (TICKSPERBEAT - 10)
         else:
             delta = 0.0
         self.tracks[track].addControllerEvent(channel,time, 101, controller_msb,   
@@ -961,7 +961,7 @@ class MIDIFile(object):
 
         The specified tuning should already have been written to the
         stream with ``changeNoteTuning``.  ''' 
-        self.makeRPNCall(track, channel, time, 0, 3, 0, program, time_order=False)
+        self.makeRPNCall(track, channel, time, 0, 3, 0, program, time_order=time_order)
         
     def changeNoteTuning(self,  track,  tunings,   sysExChannel=0x7F,  \
                          realTime=True,  tuningProgam=0):
