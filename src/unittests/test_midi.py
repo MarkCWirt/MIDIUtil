@@ -524,6 +524,37 @@ class TestMIDIUtils(unittest.TestCase):
         with open("/tmp/test.mid", "wb") as output_file:
             MyMIDI.writeFile(output_file)
 
+    def testAdujustOrigin(self):
+        track    = 0
+        channel  = 0
+        pitch    = 69
+        time     = 1
+        duration = 0.1
+        volume   = 64
+        MyMIDI = MIDIFile(1)
+        MyMIDI.addNote(track, channel, pitch, time, duration, volume)
+        time = 1.1
+        MyMIDI.addNote(track, channel, pitch, time, duration, volume)
+        
+        MyMIDI.close()
+        
+        data = Decoder(MyMIDI.tracks[0].MIDIdata)
+        
+        self.assertEqual(data.unpack_into_byte(0), 0x00) # first time
+        self.assertEqual(data.unpack_into_byte(8), 0x00) # seconds time
+        
+        MyMIDI = MIDIFile(1, adjust_origin=False)
+        time = 0.1
+        MyMIDI.addNote(track, channel, pitch, time, duration, volume)
+        time = 0.2
+        MyMIDI.addNote(track, channel, pitch, time, duration, volume)
+        MyMIDI.close()
+        
+        data = Decoder(MyMIDI.tracks[0].MIDIdata)
+        
+        self.assertEqual(data.unpack_into_byte(0), TICKSPERBEAT/10) # first time, should be an integer < 127
+        self.assertEqual(data.unpack_into_byte(8), 0x00) # first time
+        
 def suite():
     MIDISuite = unittest.TestLoader().loadTestsFromTestCase(TestMIDIUtils)
 
