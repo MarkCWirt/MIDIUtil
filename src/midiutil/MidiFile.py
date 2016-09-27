@@ -825,7 +825,7 @@ class MIDIFile(object):
         self.event_counter = self.event_counter + 1
 
     def makeRPNCall(self, track, channel, time, controller_msb, controller_lsb, data_msb, 
-                    data_lsb):
+                    data_lsb, time_order=False):
         '''
 
         Perform a Registered Parameter Number Call
@@ -840,6 +840,7 @@ class MIDIFile(object):
         :param data_msb: The Most Significant Byte of the controller's parameter.  
         :param data_lsb: The Least Significant Byte of the controller's parameter. If non needed this
             should be set to ``None``
+        :param time_order: Order the control events in time (see below)
 
         As an example, if one were to change a channel's tuning program::
 
@@ -847,24 +848,37 @@ class MIDIFile(object):
 
         (Note, however, that there is a convenience function,
         ``changeTuningProgram``, that does this for you.)
-
+        
+        The ``time_order`` parameter is something of a work-around for sequencers that
+        do not preserve the order of events from the MIDI files they import. Within this code
+        care is taken to preserve the order of events as specified, but some sequencers
+        seem to transmit events occurring at the same time in an arbitrary order.
+        By setting this parameter to ``True`` something of a work-around is performed: each
+        successive event (of which there are three or four for this event type) is placed
+        in the time stream a small delta from the preceding one. Thus, for example, the
+        controllers are set before the data bytes in this call.
         ''' 
+        
+        if time_order:
+            delta = 0.0001
+        else:
+            delta = 0.0
         self.tracks[track].addControllerEvent(channel,time, 101, controller_msb,   
             insertion_order = self.event_counter)
         self.event_counter = self.event_counter + 1
-        self.tracks[track].addControllerEvent(channel,time, 100, controller_lsb,  
+        self.tracks[track].addControllerEvent(channel,time+delta, 100, controller_lsb,  
             insertion_order = self.event_counter)
         self.event_counter = self.event_counter + 1 
-        self.tracks[track].addControllerEvent(channel,time, 6,   data_msb,        
+        self.tracks[track].addControllerEvent(channel,time+(2.0*delta), 6,   data_msb,        
             insertion_order = self.event_counter)
         self.event_counter = self.event_counter + 1 
         if data_lsb is not None:
-            self.tracks[track].addControllerEvent(channel,time, 38, data_lsb, 
+            self.tracks[track].addControllerEvent(channel,time+(3.0*delta), 38, data_lsb, 
                 insertion_order = self.event_counter)
             self.event_counter = self.event_counter + 1
 
     def makeNRPNCall(self, track, channel, time, controller_msb,
-                     controller_lsb, data_msb, data_lsb):
+                     controller_lsb, data_msb, data_lsb, time_order=False):
         '''
 
         Perform a Non-Registered Parameter Number Call
@@ -879,23 +893,37 @@ class MIDIFile(object):
         :param data_msb: The most significant byte of the controller's parameter.  
         :param data_lsb: The least significant byte of the controller's parameter. If none is needed this
             should be set to ``None``
+        :param time_order: Order the control events in time (see below)
+
+        The ``time_order`` parameter is something of a work-around for sequencers that
+        do not preserve the order of events from the MIDI files they import. Within this code
+        care is taken to preserve the order of events as specified, but some sequencers
+        seem to transmit events occurring at the same time in an arbitrary order.
+        By setting this parameter to ``True`` something of a work-around is performed: each
+        successive event (of which there are three or four for this event type) is placed
+        in the time stream a small delta from the preceding one. Thus, for example, the
+        controllers are set before the data bytes in this call.
 
         ''' 
+        if time_order:
+            delta = 0.0001
+        else:
+            delta = 0.0
         self.tracks[track].addControllerEvent(channel,time, 99, controller_msb,
             insertion_order = self.event_counter)
         self.event_counter = self.event_counter + 1
-        self.tracks[track].addControllerEvent(channel,time, 98, controller_lsb,  
+        self.tracks[track].addControllerEvent(channel,time+delta, 98, controller_lsb,  
             insertion_order = self.event_counter)
         self.event_counter = self.event_counter + 1 
-        self.tracks[track].addControllerEvent(channel,time, 6,   data_msb, 
+        self.tracks[track].addControllerEvent(channel,time+(2*delta), 6,   data_msb, 
             insertion_order = self.event_counter)
         self.event_counter = self.event_counter + 1 
         if data_lsb is not None:
-            self.tracks[track].addControllerEvent(channel,time, 38,  data_lsb, 
+            self.tracks[track].addControllerEvent(channel,time+(3*delta), 38,  data_lsb, 
                 insertion_order = self.event_counter)
             self.event_counter = self.event_counter + 1
 
-    def changeTuningBank(self,track, channel, time, bank):
+    def changeTuningBank(self,track, channel, time, bank, time_order=False):
         '''
 
         Change the tuning bank for a selected track
@@ -904,6 +932,8 @@ class MIDIFile(object):
         :param channel: The channel for the event
         :param time: The time of the event
         :param bank: The tuning bank (0-127)
+        :param time_order: Preserve the ordering of the component events by ordering
+            in time. See ``makeRPNCall()`` for a discussion of when this may be necessary
 
         Note that this is a convenience function, as the same
         functionality is available from directly sequencing controller
@@ -911,9 +941,9 @@ class MIDIFile(object):
 
         The specified tuning should already have been written to the
         stream with ``changeNoteTuning``.  ''' 
-        self.makeRPNCall(track, channel, time, 0, 4, 0, bank)
+        self.makeRPNCall(track, channel, time, 0, 4, 0, bank, time_order=time_order)
 
-    def changeTuningProgram(self,track, channel, time, program):
+    def changeTuningProgram(self,track, channel, time, program, time_order=False):
         '''
 
         Change the tuning program for a selected track
@@ -922,6 +952,8 @@ class MIDIFile(object):
         :param channel: The channel for the event
         :param time: The time of the event
         :param program: The tuning program number (0-127)
+        :param time_order: Preserve the ordering of the component events by ordering
+            in time. See ``makeRPNCall()`` for a discussion of when this may be necessary
 
         Note that this is a convenience function, as the same
         functionality is available from directly sequencing controller
@@ -929,7 +961,7 @@ class MIDIFile(object):
 
         The specified tuning should already have been written to the
         stream with ``changeNoteTuning``.  ''' 
-        self.makeRPNCall(track, channel, time, 0, 3, 0, program)
+        self.makeRPNCall(track, channel, time, 0, 3, 0, program, time_order=False)
         
     def changeNoteTuning(self,  track,  tunings,   sysExChannel=0x7F,  \
                          realTime=True,  tuningProgam=0):
