@@ -632,9 +632,6 @@ class MIDITrack(object):
         '''
         Write track to disk.
         '''
-        
-        if not self.closed:
-            self.closeTrack()
             
         fileHandle.write(self.headerString)
         fileHandle.write(self.dataLength)
