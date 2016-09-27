@@ -625,9 +625,11 @@ class TestMIDIUtils(unittest.TestCase):
         MyMIDI = MIDIFile(1)
         MyMIDI.addNote(track, channel, pitch, time, duration, volume)
         MyMIDI.tracks[0].eventList[0].type = bad_type
-        with self.assertRaises(Exception) as context:
-            MyMIDI.close()
-        self.assertTrue(('Error in MIDITrack: Unknown event type %s' % bad_type) in str(context.exception))
+        # this test doesn't work in 2.6 -- this is new functionality
+        if sys.version_info > (2,6):
+            with self.assertRaises(Exception) as context:
+                MyMIDI.close()
+            self.assertTrue(('Error in MIDITrack: Unknown event type %s' % bad_type) in str(context.exception))
         
 def suite():
     MIDISuite = unittest.TestLoader().loadTestsFromTestCase(TestMIDIUtils)
