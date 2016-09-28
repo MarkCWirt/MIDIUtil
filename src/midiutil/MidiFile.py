@@ -885,8 +885,7 @@ class MIDIFile(object):
         Add a text event
 
         :param track: The track to which the notice is added.
-        :param time: The time (in beats) at which notice event is placed. In general
-            this sould be time t=0
+        :param time: The time (in beats) at which text event is placed.
         :param text: The text to adde [SASCII tring]
         """ 
         
