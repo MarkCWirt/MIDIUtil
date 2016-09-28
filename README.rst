@@ -144,7 +144,7 @@ Have fun!
 Thank You
 ---------
 
-I'd like to mention the following people who have given feedback, but
+I'd like to mention the following people who have given feedback, bug
 fixes,  and suggestions on the library:
 
 * Bram de Jong
