@@ -1,4 +1,9 @@
 Date:       28 September 2016
+Version:    1.1.1
+Date:       28 September 2016
+    * Just a couple of typo's corrected (what's a "but fix" anyway?),
+      and the display of README.rst on Pypi.
+
 Version:    1.1.0
     * Allow for the specification of either MIDI format 1 or 2 files.
       Note that in previous versions of the code the file being
