@@ -236,6 +236,33 @@ class TestMIDIUtils(unittest.TestCase):
         self.assertEqual(data.unpack_into_byte(3), 0x03)
         self.assertEqual(data[4:7], struct.pack('>L', int(60000000/tempo))[1:4])
         
+    def testCopyright(self):
+        #import pdb; pdb.set_trace()
+        notice ="2016(C) MCW"
+        MyMIDI = MIDIFile(1)
+        MyMIDI.addCopyright(0, 0, notice)
+        MyMIDI.close()
+        
+        payload_encoded = notice.encode("ISO-8859-1")
+        payloadLength = len(payload_encoded)
+        payloadLengthVar = writeVarLength(payloadLength)
+        
+        data = Decoder(MyMIDI.tracks[0].MIDIdata)
+        
+        self.assertEqual(MyMIDI.tracks[0].MIDIEventList[0].type, 'Copyright')
+        
+        self.assertEqual(data.unpack_into_byte(0), 0x00) # time
+        self.assertEqual(data.unpack_into_byte(1), 0xff) # Code
+        self.assertEqual(data.unpack_into_byte(2), 0x02) # Subcode
+        index = 3
+        for i in range(len(payloadLengthVar)):
+             self.assertEqual(data.unpack_into_byte(index), payloadLengthVar[i])
+             index = index + 1
+        for i in range(len(payload_encoded)):
+            self.assertEqual(data.unpack_into_byte(index), payload_encoded[i])
+            index = index + 1
+
+        
     def testTimeSignature(self):
         time = 0
         track = 0

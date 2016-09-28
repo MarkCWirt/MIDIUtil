@@ -7,7 +7,8 @@
     * Added Travis CI to the build process. Verifying operation
       on python 2.6 - 3 development version.
     * Functions added:
-        * `addTimeSignature()``.
+        * `addTimeSignature()`
+        * `addCopyright()`
 
 Date:       23 September 2016
 Version:    1.0.1
