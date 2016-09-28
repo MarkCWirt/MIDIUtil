@@ -1,3 +1,5 @@
+Date:       28 September 2016
+Version:    1.1.0
     * Allow for the specification of either MIDI format 1 or 2 files.
       Note that in previous versions of the code the file being
       written was format 2, but it was identified as format 1.
