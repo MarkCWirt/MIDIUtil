@@ -5,7 +5,7 @@ with open('README.rst') as file:
     long_description = file.read()
 
 setup(name='MIDIUtil',
-      version='HEAD',
+      version='1.1.1',
       description='A pure python library for creating multi-track MIDI files',
       author='Mark Conway Wirt',
       author_email='markcwirt) at (gmail . com',
