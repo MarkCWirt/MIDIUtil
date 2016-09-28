@@ -3,10 +3,14 @@ MIDIUtil
 
 |build|
 
-This is just a brief adumbration. Full documentation  can be
-found at `Read the Docs <http://midiutil.readthedocs.io/en/latest/>`_.
+This is just a brief adumbration. Full documentation for the development
+version can be found at `Read the Docs
+<http://midiutil.readthedocs.io/en/latest/>`_.
 
 |docs|
+
+The documentation for the latest stable release is `here
+<http://midiutil.readthedocs.io/en/stable/>`_.
 
 Introduction
 ------------
