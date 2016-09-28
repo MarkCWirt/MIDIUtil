@@ -11,9 +11,9 @@ as follows:
 .. code:: python
 
     def __init__(self, numTracks=1, removeDuplicates=True,
-      deinterleave=True, adjust_origin=None):
+      deinterleave=True, adjust_origin=None, file_format=1):
 
-where the paramters do the following:
+where the parameters do the following:
 
 numTracks
 ---------
@@ -93,3 +93,35 @@ If it is left at it's default value, ``None``, ``adjust_origin`` will be
 set to ``True`` and a ``FutureWarning`` will be displayed. This is because in
 the next release the default behavior will change and no adjustment will be
 performed by default.
+
+file_format
+-----------
+
+This specifies the format of the file to be written. Both format 1 (the default)
+and format 2 files are supported.
+
+In the format 1 file there is a separate "tempo" track to which tempo and
+time signature events are written. The calls to create these events --
+``addTemo()`` and ``addTimeSignature()`` accept a track parameter, but in
+a format 1 file these are ignored. In format 2 files they are interpreted
+literally (and zero-origined, so that a two track file has indices ``0`` and
+``1``).
+
+Track indexing is always zero-based, but with the format 1 file the tempo track
+is not indexed. Thus if you create a one track file:
+
+.. code:: python
+
+    MyMIDI = MIDIFile(1, file_format=1)
+
+you would only have ``0`` as a valid index; the tempo track is managed independently
+for you. Thus:
+
+.. code:: python
+    track = 0
+    big_track = 1000
+    MyMIDI.addTempo(big_track, 0, 120)
+    MyMIDI.addNote(track, 0, 69, 0, 1, 100)
+
+works, even though "track 0" is really the second track in the file, and there is
+no track 1000.

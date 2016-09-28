@@ -1,7 +1,12 @@
-    * Increaded test coverage.
-    * Fixed bug in MIDIFile for `addjust_origin` = `False`
+    * Allow for the specification of either MIDI format 1 or 2 files.
+      Note that in previous versions of the code the file being
+      written was format 2, but it was identified as format 1.
+      This error has been corrected. The default format for the file
+      is 1, which is the most widely supported format.
+    * Increased test coverage.
+    * Fixed bug in MIDIFile for `adjust_origin` = `False`
     * Added ability to order RPC and NRPC sub-events in time, as
-      a work-around for sequencers that aren't good about preserviing
+      a work-around for sequencers that aren't good about preserving
       event ordering for events at the time time.
     * Updates to documentation.
     * Added Travis CI to the build process. Verifying operation

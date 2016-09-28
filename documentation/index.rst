@@ -21,7 +21,8 @@ Introduction
 
 MIDIUtil is a pure Python library that allows one to write multi-track
 Musical Instrument Digital Interface (MIDI) files from within Python
-programs. It is object-oriented and allows one to create and write these
+programs (both format 1 and format 2 files are now supported). 
+It is object-oriented and allows one to create and write these
 files with a minimum of fuss.
 
 MIDIUtil isn't a full implementation of the MIDI specification. The actual
@@ -122,7 +123,8 @@ write it to disk.
     tempo    = 60  # In BPM
     volume   = 100 # 0-127, as per the MIDI standard
 
-    MyMIDI = MIDIFile(1) # One track
+    MyMIDI = MIDIFile(1) # One track, defaults to format 1 (tempo track 
+                         # automatically created)
     MyMIDI.addTempo(track,time, tempo)
 
     for pitch in degrees:

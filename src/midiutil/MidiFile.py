@@ -757,14 +757,19 @@ class MIDIHeader(object):
     complete and well formed MIDI pattern.
     
     '''
-    def __init__(self,numTracks):
+    def __init__(self,numTracks, file_format):
         ''' Initialize the data structures
         '''
         self.headerString = struct.pack('cccc',b'M',b'T',b'h',b'd')
         self.headerSize = struct.pack('>L',6)
         # Format 1 = multi-track file
-        self.format = struct.pack('>H',1)
-        self.numTracks = struct.pack('>H',numTracks)
+        self.format = struct.pack('>H',file_format)
+        self.numeric_format = file_format
+        if file_format == 1:
+            delta = 1
+        else:
+            delta = 0
+        self.numTracks = struct.pack('>H',numTracks + delta)
         self.ticksPerBeat = struct.pack('>H',TICKSPERBEAT)
     
 
@@ -784,7 +789,7 @@ class MIDIFile(object):
     and well-formed MIDI file.
     '''
     
-    def __init__(self, numTracks=1, removeDuplicates=True,  deinterleave=True, adjust_origin=None):
+    def __init__(self, numTracks=1, removeDuplicates=True,  deinterleave=True, adjust_origin=None, file_format=1):
         '''
         
             Initialize the MIDIFile class
@@ -795,6 +800,8 @@ class MIDIFile(object):
             :param deinterleave: If set to ``True`` deinterleave the notes in the stream
             :param adjust_origin: If set to ``True`` (of left at the default of ``None``) shift all the
                 events in the tracks so that the first event takes place at time t=0
+            :param file_format: The format of the multi-track file. This should either be ``1`` (the default,
+                and the most widely supported format) or ``2``.
                 
             Note that the default for ``adjust_origin`` will change in a future release, so one should probably
             explicitly set it.
@@ -807,11 +814,31 @@ class MIDIFile(object):
             
                 from midiutil.MidiFile import MIDIFile
                 midi_file = MIDIFile(2)
+                
+            A Note on File Formats
+            ----------------------
+            
+            In previous versions of this code the file written was format 2 (which can be thought of as
+            a collection of independent tracks) but was identified as format 1. In this version
+            one can specify either format 1 or 2.
+            
+            In format 1 files there is a separate tempo track which contains tempo and time signature data,
+            but contains no note data. If one creates a single track format 1 file the actual file has
+            two tracks -- one for tempo data and one for note data. In the track indexing the tempo track
+            can be ignored. In other words track 0 is the note track (the second track in the file). However,
+            tempo and time signature data will be written to the first, tempo track. This is done to
+            try and preserve as much interoperability with previous versions as possible.
+            
+            In a format 2 file all tracks are indexed and the track parameter is interpreted literally.
         '''
-        self.header = MIDIHeader(numTracks)
+        self.header = MIDIHeader(numTracks, file_format)
         
         self.tracks = list()
-        self.numTracks = numTracks
+        if file_format == 1:
+            delta = 1
+        else:
+            delta = 0
+        self.numTracks = numTracks + delta
         self.closed = False
         if adjust_origin is None:
             self.adjust_origin = True
@@ -820,7 +847,7 @@ class MIDIFile(object):
         else:
             self.adjust_origin = adjust_origin
         
-        for i in range(0,numTracks):
+        for i in range(0,self.numTracks):
             self.tracks.append(MIDITrack(removeDuplicates,  deinterleave))
             
         self.event_counter = 0 # to keep track of the order of insertion for new sorting
@@ -848,6 +875,8 @@ class MIDIFile(object):
         `csound <http://csound.github.io/>`_ orchestra files directly from the
         class ``EventList``.
         """
+        if self.header.numeric_format == 1:
+            track = track + 1
         self.tracks[track].addNoteByNumber(channel, pitch, time, duration, volume, 
             annotation = annotation, insertion_order = self.event_counter)
         self.event_counter = self.event_counter + 1
@@ -861,6 +890,8 @@ class MIDIFile(object):
             In general this should probably be time 0 (the beginning of the track).
         :param trackName: The name to assign to the track [String]
         """
+        if self.header.numeric_format == 1:
+            track = track + 1
         self.tracks[track].addTrackName(time,trackName, insertion_order = self.event_counter)
         self.event_counter = self.event_counter + 1
         
@@ -868,7 +899,9 @@ class MIDIFile(object):
         '''
         Add a time signature event.
         
-        :param track: The track to which the signature is assigned.
+        :param track: The track to which the signature is assigned. Note that in
+            a format 1 file this parameter is ignored and the event is written to the tempo
+            track
         :param time: The time (in beats) at which the event is placed.
             In general this should probably be time 0 (the beginning of the track).
         :param numerator: The numerator of the time signature. [Int]
@@ -891,6 +924,8 @@ class MIDIFile(object):
         a quarter note, so a metronome click per quarter note would be
         24. A click every third eighth note would be 3 * 12 = 36.  
         '''
+        if self.header.numeric_format == 1:
+            track = 0
 
         self.tracks[track].addTimeSignature(time, numerator, denominator,
             clocks_per_tick, insertion_order = self.event_counter)
@@ -901,11 +936,13 @@ class MIDIFile(object):
 
         Add notes to the MIDIFile object
 
-        :param track: The track to which the tempo event  is added.
+        :param track: The track to which the tempo event  is added. Note that in a format
+            1 file this parameter is ignored and the temp is written to the tempo track
         :param time: The time (in beats) at which tempo event is placed 
         :param tempo: The tempo, in Beats per Minute. [Integer]
         """ 
-        
+        if self.header.numeric_format == 1:
+            track = 0        
         self.tracks[track].addTempo(time,tempo, insertion_order = self.event_counter)
         self.event_counter = self.event_counter + 1
         
@@ -919,7 +956,8 @@ class MIDIFile(object):
             this sould be time t=0
         :param notice: The copyright notice [String]
         """ 
-        
+        if self.header.numeric_format == 1:
+            track = track + 1        
         self.tracks[track].addCopyright(time,notice, insertion_order = self.event_counter)
         self.event_counter = self.event_counter + 1
         
@@ -954,6 +992,8 @@ class MIDIFile(object):
         
             MyMIDI.addKeySignature(0, 0, 3, SHARPS, MINOR)
         '''
+        if self.header.numeric_format == 1:
+            track = track + 1
         self.tracks[track].addKeySignature(time, accidentals, accidental_type, mode, 
             insertion_order = self.event_counter)
         self.event_counter = self.event_counter + 1
@@ -967,7 +1007,8 @@ class MIDIFile(object):
         :param time: The time (in beats) at which text event is placed.
         :param text: The text to adde [SASCII tring]
         """ 
-        
+        if self.header.numeric_format == 1:
+            track = track + 1
         self.tracks[track].addText(time, text, insertion_order = self.event_counter)
         self.event_counter = self.event_counter + 1
 
@@ -996,6 +1037,8 @@ class MIDIFile(object):
         :param controller_number: The controller ID of the event.  
         :param parameter: The event's parameter, the meaning of which varies by event type.
         """
+        if self.header.numeric_format == 1:
+            track = track + 1
         self.tracks[track].addControllerEvent(channel,time,controller_number, parameter,
             insertion_order = self.event_counter)
         self.event_counter = self.event_counter + 1
@@ -1034,6 +1077,8 @@ class MIDIFile(object):
         in the time stream a small delta from the preceding one. Thus, for example, the
         controllers are set before the data bytes in this call.
         ''' 
+        if self.header.numeric_format == 1:
+            track = track + 1
         
         if time_order:
             delta = 1.0 / (TICKSPERBEAT - 10)
@@ -1081,6 +1126,8 @@ class MIDIFile(object):
         controllers are set before the data bytes in this call.
 
         ''' 
+        if self.header.numeric_format == 1:
+            track = track + 1
         if time_order:
             delta = 1.0 / (TICKSPERBEAT - 10)
         else:
@@ -1172,6 +1219,8 @@ class MIDIFile(object):
             tuning = [(69, 500)]
             MyMIDI.changeNoteTuning(0, tuning, tuningProgam=0)
         """
+        if self.header.numeric_format == 1:
+            track = track + 1
         self.tracks[track].changeNoteTuning(tunings,   sysExChannel,  realTime,\
             tuningProgam, insertion_order = self.event_counter)
         self.event_counter = self.event_counter + 1
@@ -1195,6 +1244,8 @@ class MIDIFile(object):
         a developer finds him or herself using the function heavily.
 
         '''
+        if self.header.numeric_format == 1:
+            track = track + 1
         self.tracks[track].addSysEx(time,manID, payload, insertion_order = self.event_counter)
         self.event_counter = self.event_counter + 1
     
@@ -1223,6 +1274,8 @@ class MIDIFile(object):
         which uses the event to create a real-time note tuning update.
 
         '''
+        if self.header.numeric_format == 1:
+            track = track + 1
         self.tracks[track].addUniversalSysEx(time, code, subcode, payload,  sysExChannel,\
                                                realTime, insertion_order = self.event_counter)
         self.event_counter = self.event_counter + 1
