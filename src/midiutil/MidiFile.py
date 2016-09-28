@@ -942,7 +942,7 @@ class MIDIFile(object):
             
         one gets the following constants defined:
         
-        * ``SHAPRS``
+        * ``SHARPS``
         * ``FLATS``
         * ``MAJOR``
         * ``MINOR``
