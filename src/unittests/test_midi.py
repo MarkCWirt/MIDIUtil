@@ -259,7 +259,11 @@ class TestMIDIUtils(unittest.TestCase):
              self.assertEqual(data.unpack_into_byte(index), payloadLengthVar[i])
              index = index + 1
         for i in range(len(payload_encoded)):
-            self.assertEqual(data.unpack_into_byte(index), payload_encoded[i])
+            if sys.version_info < (3,):
+                test_char = ord(payload_encoded[i])
+            else:
+                test_char = payload_encoded[i]
+            self.assertEqual(data.unpack_into_byte(index), test_char)
             index = index + 1
 
         
