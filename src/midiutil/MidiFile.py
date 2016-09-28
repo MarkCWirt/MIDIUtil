@@ -944,7 +944,7 @@ class MIDIFile(object):
         Add notes to the MIDIFile object
 
         :param track: The track to which the tempo event  is added. Note that in a format
-            1 file this parameter is ignored and the temp is written to the tempo track
+            1 file this parameter is ignored and the tempo is written to the tempo track
         :param time: The time (in beats) at which tempo event is placed 
         :param tempo: The tempo, in Beats per Minute. [Integer]
         """ 
@@ -1012,7 +1012,7 @@ class MIDIFile(object):
 
         :param track: The track to which the notice is added.
         :param time: The time (in beats) at which text event is placed.
-        :param text: The text to adde [SASCII tring]
+        :param text: The text to adde [ASCII String]
         """ 
         if self.header.numeric_format == 1:
             track = track + 1
