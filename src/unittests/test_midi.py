@@ -16,8 +16,12 @@ from __future__ import division, print_function
 import sys,  struct
 
 import unittest
-from midiutil.MidiFile import MIDIFile, writeVarLength,  \
-    frequencyTransform,  returnFrequency, TICKSPERBEAT
+
+from midiutil.MidiFile import *
+
+from midiutil.MidiFile import writeVarLength,  \
+    frequencyTransform,  returnFrequency, TICKSPERBEAT, MAJOR, MINOR, SHARPS, FLATS, MIDIFile
+    
 
 class Decoder(object):
     '''
@@ -318,6 +322,28 @@ class TestMIDIUtils(unittest.TestCase):
         self.assertEqual(data.unpack_into_byte(5), denominator)
         self.assertEqual(data.unpack_into_byte(6), clocks_per_tick) # Data length
         self.assertEqual(data.unpack_into_byte(7), 0x08) # 32nd notes per quarter note
+        
+    def testKeySignature(self):
+        time            = 0
+        track           = 0
+        accidentals     = 3
+        accidental_type = MINOR
+        mode            = MAJOR
+        
+        MyMIDI = MIDIFile(1)
+        MyMIDI.addKeySignature(track, time, accidentals, accidental_type, mode)
+        MyMIDI.close()
+        
+        data = Decoder(MyMIDI.tracks[0].MIDIdata)
+        
+        self.assertEqual(MyMIDI.tracks[0].MIDIEventList[0].type, 'KeySignature')
+        
+        self.assertEqual(data.unpack_into_byte(0), 0x00) # time
+        self.assertEqual(data.unpack_into_byte(1), 0xFF) # Code
+        self.assertEqual(data.unpack_into_byte(2), 0x59) # subcode
+        self.assertEqual(data.unpack_into_byte(3), 0x02) # Event subtype
+        self.assertEqual(data.unpack_into_byte(4), accidentals * accidental_type)
+        self.assertEqual(data.unpack_into_byte(5), mode)
         
     def testProgramChange(self):
         #import pdb; pdb.set_trace()

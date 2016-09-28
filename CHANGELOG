@@ -10,6 +10,7 @@
         * `addTimeSignature()`
         * `addCopyright()`
         * `addText()`
+        * `addKeySignature()`
 
 Date:       23 September 2016
 Version:    1.0.1

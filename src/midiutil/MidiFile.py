@@ -22,7 +22,16 @@ TICKSPERBEAT = 960
 controllerEventTypes = {
     'pan' : 0x0a
 }
-                        
+
+# Define some constants
+
+MAJOR  = 0
+MINOR  = 1
+SHARPS = 1
+FLATS  = -1
+
+__all__ = ['MIDIFile', 'MAJOR', 'MINOR', 'SHARPS', 'FLATS']
+
 class MIDIEvent(object):
     '''
     The class to contain the MIDI Event (placed on MIDIEventList).
@@ -144,6 +153,15 @@ class Text(GenericEvent):
         self.text = text.encode("ISO-8859-1")
         super(Text, self).__init__('Text', time, ordinal, insertion_order)
         
+class KeySignature(GenericEvent):
+    '''
+    A class that encapsulates a text event
+    '''
+    def __init__(self, time, accidentals, accidental_type, mode, ordinal=1, insertion_order=0):
+        self.accidentals = accidentals
+        self.accidental_type = accidental_type
+        self.mode = mode
+        super(KeySignature, self).__init__('KeySignature', time, ordinal, insertion_order)
         
 class ProgramChange(GenericEvent):
     '''
@@ -290,6 +308,13 @@ class MIDITrack(object):
         '''
         self.eventList.append(Copyright(time, notice, insertion_order = insertion_order))
         
+    def addKeySignature(self, time, accidentals, accidental_type, mode, insertion_order = 0):
+        '''
+        Add a copyright notice
+        '''
+        self.eventList.append(KeySignature(time, accidentals, accidental_type, mode, 
+                                        insertion_order = insertion_order))
+        
     def addText(self, time, text, insertion_order = 0):
         '''
         Add a text event
@@ -351,7 +376,14 @@ class MIDITrack(object):
                 event = MIDIEvent("Text", thing.time * TICKSPERBEAT, thing.ord, thing.insertion_order)
                 event.text = thing.text
                 self.MIDIEventList.append(event)
-
+                
+            elif thing.type == 'KeySignature':
+                event = MIDIEvent("KeySignature", thing.time * TICKSPERBEAT, thing.ord, thing.insertion_order)
+                event.accidentals     = thing.accidentals
+                event.accidental_type = thing.accidental_type
+                event.mode            = thing.mode
+                self.MIDIEventList.append(event)
+                
             elif thing.type == 'programChange':
                 event               = MIDIEvent("ProgramChange", thing.time * TICKSPERBEAT, thing.ord, 
                                                 thing.insertion_order)
@@ -564,6 +596,18 @@ class MIDITrack(object):
                 self.MIDIdata = self.MIDIdata + struct.pack('>B', event.denominator)
                 self.MIDIdata = self.MIDIdata + struct.pack('>B', event.clocks_per_tick)
                 self.MIDIdata = self.MIDIdata + struct.pack('>B', 0x08) # 32nd notes per quarter note
+            elif event.type == "KeySignature":
+                code = 0xFF
+                subcode = 0x59
+                event_subtype = 0x02
+                varTime = writeVarLength(event.time)
+                for timeByte in varTime:
+                    self.MIDIdata = self.MIDIdata + struct.pack('>B',timeByte)
+                self.MIDIdata = self.MIDIdata + struct.pack('>B',code)
+                self.MIDIdata = self.MIDIdata + struct.pack('>B',subcode)
+                self.MIDIdata = self.MIDIdata + struct.pack('>B',event_subtype)
+                self.MIDIdata = self.MIDIdata + struct.pack('>b',event.accidentals * event.accidental_type)
+                self.MIDIdata = self.MIDIdata + struct.pack('>B',event.mode)
             elif event.type == 'ProgramChange':
                 code = 0xC << 4 | event.channel
                 varTime = writeVarLength(event.time)
@@ -877,6 +921,41 @@ class MIDIFile(object):
         """ 
         
         self.tracks[track].addCopyright(time,notice, insertion_order = self.event_counter)
+        self.event_counter = self.event_counter + 1
+        
+    def addKeySignature(self, track, time, accidentals, accidental_type, mode, insertion_order = 0):
+        '''
+        Add a Key Signature to a track
+        
+        :param track: The track to which this should be added
+        :param time: The time at which the signature should be placed
+        :param accidentals: The number of accidentals in the key signature
+        :param accidental_type: The type of accidental
+        :param mode: The mode of the scale
+        
+        The easiest way to use this function is to make sure that the symbolic
+        constants for accidental_type and mode are imported. By doing this:
+        
+        .. code::
+        
+            from midiutil.MidiFile import *
+            
+        one gets the following constants defined:
+        
+        * ``SHAPRS``
+        * ``FLATS``
+        * ``MAJOR``
+        * ``MINOR``
+        
+        So, for example, if one wanted to create a key signature for a minor
+        scale with three sharps:
+        
+        .. code::
+        
+            MyMIDI.addKeySignature(0, 0, 3, SHARPS, MINOR)
+        '''
+        self.tracks[track].addKeySignature(time, accidentals, accidental_type, mode, 
+            insertion_order = self.event_counter)
         self.event_counter = self.event_counter + 1
         
     def addText(self,track, time, text):
