@@ -130,11 +130,19 @@ class Tempo(GenericEvent):
         
 class Copyright(GenericEvent):
     '''
-    A class that encapsulates a tempo meta-event
+    A class that encapsulates a copyright event
     '''
     def __init__(self,time,notice, ordinal=1, insertion_order=0):
         self.notice = notice.encode("ISO-8859-1")
         super(Copyright, self).__init__('Copyright', time, ordinal, insertion_order)
+        
+class Text(GenericEvent):
+    '''
+    A class that encapsulates a text event
+    '''
+    def __init__(self, time, text, ordinal=1, insertion_order=0):
+        self.text = text.encode("ISO-8859-1")
+        super(Text, self).__init__('Text', time, ordinal, insertion_order)
         
         
 class ProgramChange(GenericEvent):
@@ -282,6 +290,12 @@ class MIDITrack(object):
         '''
         self.eventList.append(Copyright(time, notice, insertion_order = insertion_order))
         
+    def addText(self, time, text, insertion_order = 0):
+        '''
+        Add a text event
+        '''
+        self.eventList.append(Text(time, text, insertion_order = insertion_order))
+        
     def changeNoteTuning(self,  tunings,   sysExChannel=0x7F,  realTime=True,  \
         tuningProgam=0, insertion_order=0):
         '''
@@ -331,6 +345,11 @@ class MIDITrack(object):
             elif thing.type == 'Copyright':
                 event = MIDIEvent("Copyright", thing.time * TICKSPERBEAT, thing.ord, thing.insertion_order)
                 event.notice = thing.notice
+                self.MIDIEventList.append(event)
+                
+            elif thing.type == 'Text':
+                event = MIDIEvent("Text", thing.time * TICKSPERBEAT, thing.ord, thing.insertion_order)
+                event.text = thing.text
                 self.MIDIEventList.append(event)
 
             elif thing.type == 'programChange':
@@ -506,6 +525,19 @@ class MIDITrack(object):
                 self.MIDIdata = self.MIDIdata + struct.pack('>B',subcode)
                 self.MIDIdata = self.MIDIdata + struct.pack('>B', 0x03)
                 self.MIDIdata = self.MIDIdata + threebite
+            elif event.type == "Text":
+                code = 0xFF
+                subcode = 0x01
+                varTime = writeVarLength(event.time)
+                for timeByte in varTime:
+                    self.MIDIdata = self.MIDIdata + struct.pack('>B',timeByte)                
+                self.MIDIdata = self.MIDIdata + struct.pack('>B',code)
+                self.MIDIdata = self.MIDIdata + struct.pack('>B',subcode)
+                payloadLength = len(event.text)
+                payloadLengthVar = writeVarLength(payloadLength)
+                for i in range(len(payloadLengthVar)):
+                    self.MIDIdata = self.MIDIdata + struct.pack("b",payloadLengthVar[i])
+                self.MIDIdata = self.MIDIdata + event.text
             elif event.type == "Copyright":
                 code = 0xFF
                 subcode = 0x02
@@ -845,6 +877,20 @@ class MIDIFile(object):
         """ 
         
         self.tracks[track].addCopyright(time,notice, insertion_order = self.event_counter)
+        self.event_counter = self.event_counter + 1
+        
+    def addText(self,track, time, text):
+        """
+
+        Add a text event
+
+        :param track: The track to which the notice is added.
+        :param time: The time (in beats) at which notice event is placed. In general
+            this sould be time t=0
+        :param text: The text to adde [SASCII tring]
+        """ 
+        
+        self.tracks[track].addText(time, text, insertion_order = self.event_counter)
         self.event_counter = self.event_counter + 1
 
     def addProgramChange(self,track, channel, time, program):

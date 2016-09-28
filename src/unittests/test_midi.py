@@ -265,8 +265,37 @@ class TestMIDIUtils(unittest.TestCase):
                 test_char = payload_encoded[i]
             self.assertEqual(data.unpack_into_byte(index), test_char)
             index = index + 1
-
+            
+    def testText(self):
+        #import pdb; pdb.set_trace()
+        text ="2016(C) MCW"
+        MyMIDI = MIDIFile(1)
+        MyMIDI.addText(0, 0, text)
+        MyMIDI.close()
         
+        payload_encoded = text.encode("ISO-8859-1")
+        payloadLength = len(payload_encoded)
+        payloadLengthVar = writeVarLength(payloadLength)
+        
+        data = Decoder(MyMIDI.tracks[0].MIDIdata)
+        
+        self.assertEqual(MyMIDI.tracks[0].MIDIEventList[0].type, 'Text')
+        
+        self.assertEqual(data.unpack_into_byte(0), 0x00) # time
+        self.assertEqual(data.unpack_into_byte(1), 0xff) # Code
+        self.assertEqual(data.unpack_into_byte(2), 0x01) # Subcode
+        index = 3
+        for i in range(len(payloadLengthVar)):
+             self.assertEqual(data.unpack_into_byte(index), payloadLengthVar[i])
+             index = index + 1
+        for i in range(len(payload_encoded)):
+            if sys.version_info < (3,):
+                test_char = ord(payload_encoded[i])
+            else:
+                test_char = payload_encoded[i]
+            self.assertEqual(data.unpack_into_byte(index), test_char)
+            index = index + 1
+
     def testTimeSignature(self):
         time = 0
         track = 0

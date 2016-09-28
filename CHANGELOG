@@ -9,6 +9,7 @@
     * Functions added:
         * `addTimeSignature()`
         * `addCopyright()`
+        * `addText()`
 
 Date:       23 September 2016
 Version:    1.0.1
