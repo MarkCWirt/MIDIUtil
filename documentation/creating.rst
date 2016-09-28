@@ -118,6 +118,7 @@ you would only have ``0`` as a valid index; the tempo track is managed independe
 for you. Thus:
 
 .. code:: python
+
     track = 0
     big_track = 1000
     MyMIDI.addTempo(big_track, 0, 120)
