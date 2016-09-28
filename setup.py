@@ -1,5 +1,9 @@
 from setuptools import setup, find_packages
 
+
+with open('README.rst') as file:
+    long_description = file.read()
+
 setup(name='MIDIUtil',
       version='HEAD',
       description='A pure python library for creating multi-track MIDI files',
@@ -28,6 +32,5 @@ setup(name='MIDIUtil',
             'License :: OSI Approved :: MIT License',
           ],
       keywords = 'Music MIDI',
-      long_description='''
-This package provides a simple interface to allow Python programs to write multi-track MIDI files.'''
+      long_description=long_description
      )
