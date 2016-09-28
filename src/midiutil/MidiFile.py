@@ -223,10 +223,11 @@ class TimeSignature(GenericEvent):
     A class that encapsulates a time signature.
     '''
     
-    def __init__(self,  time,  numerator, denominator, clocks_per_tick, ordinal=0, insertion_order=0):
+    def __init__(self,  time,  numerator, denominator, clocks_per_tick, notes_per_quarter, ordinal=0, insertion_order=0):
         self.numerator = numerator
         self.denominator = denominator
         self.clocks_per_tick = clocks_per_tick
+        self.notes_per_quarter = notes_per_quarter
         super(TimeSignature, self).__init__('TimeSignature', time, ordinal, insertion_order)
         
 class MIDITrack(object):
@@ -295,12 +296,12 @@ class MIDITrack(object):
         '''
         self.eventList.append(TrackName(time,trackName, insertion_order = insertion_order))
         
-    def addTimeSignature(self, time, numerator, denominator, clocks_per_tick, insertion_order = 0):
+    def addTimeSignature(self, time, numerator, denominator, clocks_per_tick, notes_per_quarter, insertion_order = 0):
         '''
         Add a time signature.
         '''
         self.eventList.append(TimeSignature(time, numerator, denominator, 
-                                            clocks_per_tick, insertion_order = insertion_order))
+                                            clocks_per_tick, notes_per_quarter, insertion_order = insertion_order))
                                             
     def addCopyright(self, time, notice, insertion_order = 0):
         '''
@@ -423,6 +424,7 @@ class MIDITrack(object):
                 event.numerator = thing.numerator
                 event.denominator = thing.denominator
                 event.clocks_per_tick = thing.clocks_per_tick
+                event.notes_per_quarter = thing.notes_per_quarter
                 self.MIDIEventList.append(event)
 
             else:
@@ -595,7 +597,7 @@ class MIDITrack(object):
                 self.MIDIdata = self.MIDIdata + struct.pack('>B', event.numerator)
                 self.MIDIdata = self.MIDIdata + struct.pack('>B', event.denominator)
                 self.MIDIdata = self.MIDIdata + struct.pack('>B', event.clocks_per_tick)
-                self.MIDIdata = self.MIDIdata + struct.pack('>B', 0x08) # 32nd notes per quarter note
+                self.MIDIdata = self.MIDIdata + struct.pack('>B', event.notes_per_quarter) # 32nd notes per quarter note
             elif event.type == "KeySignature":
                 code = 0xFF
                 subcode = 0x59
@@ -895,7 +897,7 @@ class MIDIFile(object):
         self.tracks[track].addTrackName(time,trackName, insertion_order = self.event_counter)
         self.event_counter = self.event_counter + 1
         
-    def addTimeSignature(self, track, time, numerator, denominator, clocks_per_tick):
+    def addTimeSignature(self, track, time, numerator, denominator, clocks_per_tick, notes_per_quarter = 8):
         '''
         Add a time signature event.
         
@@ -909,6 +911,11 @@ class MIDIFile(object):
             a power of two (see below). [Int]
         :param clocks_per_tick: The number of MIDI clock ticks per metronome 
             click (see below).
+        :param notes_per_quarter: The number of annotated 32nd notes in a MIDI
+            quarter note. This is almost always 8 (the default), but some
+            sequencers allow this value to be changed. Unless you know that your
+            sequencing software supports it, this should be left at its default
+            value.
         
         The data format for this event is a little obscure. 
         
@@ -928,7 +935,7 @@ class MIDIFile(object):
             track = 0
 
         self.tracks[track].addTimeSignature(time, numerator, denominator,
-            clocks_per_tick, insertion_order = self.event_counter)
+            clocks_per_tick, notes_per_quarter, insertion_order = self.event_counter)
         self.event_counter = self.event_counter + 1
 
     def addTempo(self,track, time,tempo):
