@@ -84,10 +84,10 @@ event of this type. Continuing the example of the tempo event:
 .. code:: python
 
   def addTempo(self,time,tempo, insertion_order=0):
-    '''
-    Add a tempo change (or set) event.
-    '''
-    self.eventList.append(Tempo(time,tempo, insertion_order = insertion_order))
+      '''
+      Add a tempo change (or set) event.
+      '''
+      self.eventList.append(Tempo(time,tempo, insertion_order = insertion_order))
 
 (Most/many MIDI events require a channel specification, but the tempo event
 does not.)
@@ -98,13 +98,22 @@ the track number to which the event is written. So in ``MIDIFile``:
 .. code:: python
 
   def addTempo(self,track, time,tempo):
-    self.tracks[track].addTempo(time,tempo, insertion_order = self.event_counter)
-    self.event_counter = self.event_counter + 1
+      if self.header.numeric_format == 1:
+          track = 0
+      self.tracks[track].addTempo(time,tempo, insertion_order = self.event_counter)
+      self.event_counter = self.event_counter + 1
 
 Note that a track has been added (which is zero-origined and needs to be
 constrained by the number of tracks that the ``MIDIFile`` was created with),
 and ``insertion_order`` is taken from the class ``event_counter``
-data member. This should be followed in each function you add.
+data member. This should be followed in each function you add. Also note that
+the tempo event is handled differently in format 1 files and format 2 files.
+This function ensures that the tempo event is written to the first track
+(track 0) for a format 1 file, otherwise it writes it to the track specified.
+In most of the public functions a check it done on format, and the track is
+incremented by one for format 1 files so that the event is not written to the
+tempo track (but preserving the zero-origined convention for all tracks in
+both formats.)
 
 This is the function you will use in your code to create an event of
 the desired type.
@@ -172,7 +181,7 @@ In the MIDI standard's variable length data only seven bits of a word are
 used to store data; the eighth bit signifies if more bytes encoding the
 value follow. The total length may be 1 to 3 bytes, depending upon the size of
 the value encoded. The ``writeVarLength()`` function takes care of this
-conversion for you.
+converssion for you.
 
 Now the data is written to the binary object ``self.MIDIdata``, which is
 the actual MIDI-encoded data stream. As per the MIDI standard, first we
