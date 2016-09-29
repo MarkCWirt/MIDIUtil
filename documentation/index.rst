@@ -113,7 +113,7 @@ write it to disk.
 
     #!/usr/bin/env python
 
-    from midiutil.MidiFile import MIDIFile
+    from midiutil import MIDIFile
 
     degrees  = [60, 62, 64, 65, 67, 69, 71, 72] # MIDI note number
     track    = 0
