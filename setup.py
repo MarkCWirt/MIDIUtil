@@ -30,6 +30,8 @@ setup(name='MIDIUtil',
             'Programming Language :: Python :: 3.4',
             'Programming Language :: Python :: 3.5',
             'License :: OSI Approved :: MIT License',
+            'Operating System :: OS Independent',
+            'Topic :: Multimedia :: Sound/Audio :: MIDI',
           ],
       keywords = 'Music MIDI',
       long_description=long_description
