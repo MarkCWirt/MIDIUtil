@@ -1,5 +1,5 @@
-Tuning and Micro-tonalities
-===========================
+Tuning and Microtonalities
+==========================
 
 .. currentmodule:: midiutil.MidiFile
 
