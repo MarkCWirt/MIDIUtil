@@ -53,7 +53,7 @@ Lastly events are sorted on the ``self.insertion_order`` member. This
 makes it possible to, say, create a Registered Parameter Number call
 from a collection of Control Change events. Since all the CC events will
 have the same time and class (and therefore default ordinal), you can control
-the order of the events by the order to such you add them to the MIDIFile.
+the order of the events by the order in which you add them to the MIDIFile.
 
 Next, if you want the code to be able to de-duplicate events which may
 lay over top of one another, the parent class, ``GenericEvent``, has a
