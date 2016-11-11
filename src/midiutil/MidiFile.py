@@ -800,7 +800,7 @@ class MIDIFile(object):
             :param removeDuplicates: If set to ``True`` remove duplicate events before writing
                 to disk
             :param deinterleave: If set to ``True`` deinterleave the notes in the stream
-            :param adjust_origin: If set to ``True`` (of left at the default of ``None``) shift all the
+            :param adjust_origin: If set to ``True`` (or left at the default of ``None``) shift all the
                 events in the tracks so that the first event takes place at time t=0
             :param file_format: The format of the multi-track file. This should either be ``1`` (the default,
                 and the most widely supported format) or ``2``.
