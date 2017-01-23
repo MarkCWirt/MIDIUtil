@@ -13,6 +13,8 @@
 from __future__ import division, print_function
 import struct,  math, warnings
 
+__version__ = '1.1.1'
+
 # TICKSPERBEAT is the number of "ticks" (time measurement in the MIDI file) that
 # corresponds to one beat. This number is somewhat arbitrary, but should be chosen
 # to provide adequate temporal resolution.
