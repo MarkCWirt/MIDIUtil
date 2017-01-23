@@ -108,7 +108,7 @@ write it to disk.
 
 .. code:: python
 
-#!/usr/bin/env python
+    #!/usr/bin/env python
 
     from midiutil import MIDIFile
 
