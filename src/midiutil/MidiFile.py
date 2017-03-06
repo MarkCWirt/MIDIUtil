@@ -735,14 +735,15 @@ class MIDITrack(object):
         stack = {}
 
         for event in self.MIDIEventList:
-            key = str(event.pitch)+str(event.channel)
             if event.type == 'NoteOn':
+                key = str(event.pitch)+str(event.channel)
                 if key in stack:
                     stack[key].append(event.time)
                 else:
                     stack[key] = [event.time]
                 tempEventList.append(event)
             elif event.type == 'NoteOff':
+                key = str(event.pitch)+str(event.channel)
                 if len(stack[key]) > 1:
                     event.time = stack[key].pop()
                     tempEventList.append(event)
