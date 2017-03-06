@@ -151,6 +151,7 @@ fixes,  and suggestions on the library:
 * Egg Syntax
 * Nils Gey
 * Francis G.
+* cclauss (Code formating cleanup and PEP-8 stuff, which I'm not good at following).
 
 I've actually been off email for a few years, so I'm sure there are lots
 of suggestions waiting. Stay tuned for updates and bug fixes!
