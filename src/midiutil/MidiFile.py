@@ -733,31 +733,31 @@ class MIDITrack(object):
 
         tempEventList = []
         stack = {}
-
+        
         for event in self.MIDIEventList:
-            key = str(event.pitch)+str(event.channel)
+            
             if event.type == 'NoteOn':
-                if key in stack:
-                    stack[key].append(event.time)
+                if str(event.pitch)+str(event.channel) in stack:
+                    stack[str(event.pitch)+str(event.channel)].append(event.time)
                 else:
-                    stack[key] = [event.time]
+                    stack[str(event.pitch)+str(event.channel)] = [event.time]
                 tempEventList.append(event)
             elif event.type == 'NoteOff':
-                if len(stack[key]) > 1:
-                    event.time = stack[key].pop()
+                if len(stack[str(event.pitch)+str(event.channel)]) > 1:
+                    event.time = stack[str(event.pitch)+str(event.channel)].pop()
                     tempEventList.append(event)
                 else:
-                    stack[key].pop()
+                    stack[str(event.pitch)+str(event.channel)].pop()
                     tempEventList.append(event)
             else:
                 tempEventList.append(event)
-
+                    
         self.MIDIEventList = tempEventList
-
-        # Note that ``processEventList`` makes the ordinality of a note off
-        # event a bit lower than the note on event, so this sort will make
-        # concomitant note off events processed first.
-
+        
+        # Note that ``processEventList`` makes the ordinality of a note off event
+        # a bit lower than the note on event, so this sort will make concomitant
+        # note off events processed first.
+        
         self.MIDIEventList.sort(key=sort_events)
 
     def adjustTimeAndOrigin(self, origin, adjust):

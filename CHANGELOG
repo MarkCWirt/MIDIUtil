@@ -1,3 +1,13 @@
+    * Documentation changes, typo corrections, etc.
+    * Simplify the importation of the library. It's now possible to just:
+
+        from midiutil import MIDIFile
+
+      which seems somewhat easier.
+    * Some formatting and cleanup work (PEP-ish stuff).
+    * Added Python 3.6 testing/support.
+
+
 Date:       28 September 2016
 Version:    1.1.1
 Date:       28 September 2016
