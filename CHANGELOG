@@ -6,7 +6,8 @@
       which seems somewhat easier.
     * Some formatting and cleanup work (PEP-ish stuff).
     * Added Python 3.6 testing/support.
-
+    * Removed support for Python 2.6. All good things eventually come to an
+      end
 
 Date:       28 September 2016
 Version:    1.1.1
