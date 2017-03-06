@@ -15,7 +15,7 @@ import math
 import struct
 import warnings
 
-__version__ = '1.1.3'
+__version__ = 'HEAD'
 
 # TICKSPERBEAT is the number of "ticks" (time measurement in the MIDI file)
 # that corresponds to one beat. This number is somewhat arbitrary, but should
