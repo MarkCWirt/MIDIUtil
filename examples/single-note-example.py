@@ -3,7 +3,7 @@
 # and write to disk.
 ############################################################################
 
-#Import the library
+# Import the library
 from midiutil import MIDIFile
 
 # Create the MIDIFile Object
@@ -13,8 +13,8 @@ MyMIDI = MIDIFile(1)
 # addTempo is the time to write the event.
 track = 0
 time = 0
-MyMIDI.addTrackName(track,time,"Sample Track")
-MyMIDI.addTempo(track,time, 120)
+MyMIDI.addTrackName(track, time, "Sample Track")
+MyMIDI.addTempo(track, time, 120)
 
 # Add a note. addNote expects the following information:
 channel = 0
@@ -23,10 +23,8 @@ duration = 1
 volume = 100
 
 # Now add the note.
-MyMIDI.addNote(track,channel,pitch,time,duration,volume)
+MyMIDI.addNote(track, channel, pitch, time, duration, volume)
 
 # And write it to disk.
-binfile = open("output.mid", 'wb')
-MyMIDI.writeFile(binfile)
-binfile.close()
-
+with open("output.mid", 'wb') as binfile:
+    MyMIDI.writeFile(binfile)
