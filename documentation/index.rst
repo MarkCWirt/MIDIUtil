@@ -37,12 +37,13 @@ anyone with a good working knowledge of the MIDI file format and a good,
 working knowledge of Python. Documentation for extending the library
 is provided.
 
-This software was originally developed with Python 2.5.2 and made use
-of some features that were introduced in 2.5. More recently Python 2 and
-3 support has been unified, so the code should work in both environments.
-However, support for versions of Python previous to 2.6 has been dropped.
-I have verified correct functioning with Python 2.6.8, but it is possible
-that it will work with earlier versions of 2.6.
+This software was originally developed with Python 2.5.2 and made use of
+some features that were introduced in 2.5. More recently Python 2 and 3
+support has been unified, so the code should work in both environments.
+However, support for versions of Python previous to 2.7 has been dropped.
+Any mission-critical music generation systems should probably be updated
+to a version of Python supported and maintained by the Python foundation,
+lest society devolve into lawlessness.
 
 This software is distributed under an Open Source license and you are
 free to use it as you see fit, provided that attribution is maintained.
