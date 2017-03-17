@@ -93,7 +93,7 @@ class GenericEvent(object):
         if self.type == 'trackName':
             if self.trackName != other.trackName:
                 return False
-        if self.type in ('controllerEvent', 'SysEx', 'UniversalSysEx'):
+        if self.type in ('controllerEvent', 'pitchWheelEvent', 'SysEx', 'UniversalSysEx'):
             return False
 
         return True
@@ -228,6 +228,17 @@ class ControllerEvent(GenericEvent):
                                               insertion_order)
 
 
+class PitchWheelEvent(GenericEvent):
+    '''
+    A class that encapsulates a pitch wheel change event.
+    '''
+
+    def __init__(self, channel, time, pitch_wheel_value, ordinal=1, insertion_order=0):
+        self.channel = channel
+        self.pitch_wheel_value = pitch_wheel_value
+        super(PitchWheelEvent, self).__init__('pitchWheelEvent', time, ordinal, insertion_order)
+
+
 class TrackName(GenericEvent):
     '''
     A class that encapsulates a program change event.
@@ -290,6 +301,12 @@ class MIDITrack(object):
         self.eventList.append(ControllerEvent(channel, time, controller_number,
                                               parameter,
                                               insertion_order=insertion_order))
+
+    def addPitchWheelEvent(self, channel, time, pitch_wheel_value, insertion_order=0):
+        '''
+        Add a pitch wheel event.
+        '''
+        self.eventList.append(PitchWheelEvent(channel, time, pitch_wheel_value, insertion_order=insertion_order))
 
     def addTempo(self, time, tempo, insertion_order=0):
         '''
@@ -449,6 +466,12 @@ class MIDITrack(object):
                 event.controller_number = thing.controller_number
                 event.channel = thing.channel
                 event.parameter = thing.parameter
+                self.MIDIEventList.append(event)
+
+            elif thing.type == 'pitchWheelEvent':
+                event = MIDIEvent('PitchWheelEvent', thing.time * TICKSPERBEAT, thing.ord, thing.insertion_order)
+                event.pitch_wheel_value = thing.pitch_wheel_value
+                event.channel = thing.channel
                 self.MIDIEventList.append(event)
 
             elif thing.type == 'SysEx':
@@ -684,6 +707,16 @@ class MIDITrack(object):
                 self.MIDIdata += struct.pack('>B', code)
                 self.MIDIdata += struct.pack('>B', event.controller_number)
                 self.MIDIdata += struct.pack('>B', event.parameter)
+            elif event.type == 'PitchWheelEvent':
+                code = 0xE << 4 | event.channel
+                varTime = writeVarLength(event.time)
+                for timeByte in varTime:
+                    self.MIDIdata = self.MIDIdata + struct.pack('>B',timeByte)
+                MSB = (event.pitch_wheel_value + 8192) >> 7
+                LSB = (event.pitch_wheel_value + 8192) & 0x7F
+                self.MIDIdata = self.MIDIdata + struct.pack('>B',code)
+                self.MIDIdata = self.MIDIdata + struct.pack('>B',LSB)
+                self.MIDIdata = self.MIDIdata + struct.pack('>B',MSB)
             elif event.type == "SysEx":
                 code = 0xF0
                 varTime = writeVarLength(event.time)
@@ -1117,6 +1150,21 @@ class MIDIFile(object):
         self.tracks[track].addControllerEvent(channel, time, controller_number,
             parameter, insertion_order=self.event_counter)  # noqa: E128
         self.event_counter += 1
+
+    def addPitchWheelEvent(self, track, channel, time, pitchWheelValue):
+        """
+
+        Add a channel pitch wheel event
+
+        :param track: The track to which the event is added.
+        :param channel: the MIDI channel to assign to the event. [Integer, 0-15]
+        :param time: The time (in beats) at which the event is placed [Float].
+        :param pitchWheelValue: 0 for no pitch change. [Integer, -8192-8192]
+        """
+        if self.header.numeric_format == 1:
+            track = track + 1
+        self.tracks[track].addPitchWheelEvent(channel, time, pitchWheelValue, insertion_order = self.event_counter)
+        self.event_counter = self.event_counter + 1
 
     def makeRPNCall(self, track, channel, time, controller_msb, controller_lsb,
                     data_msb, data_lsb, time_order=False):
