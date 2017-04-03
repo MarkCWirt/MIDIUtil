@@ -156,7 +156,7 @@ fixes,  and suggestions on the library:
 I've actually been off email for a few years, so I'm sure there are lots
 of suggestions waiting. Stay tuned for updates and bug fixes!
 
-.. |docs| image:: https://readthedocs.org/projects/midiutil/badge/?version=release-1.1.3
+.. |docs| image:: https://readthedocs.org/projects/midiutil/badge/?version=1.1.3
    :target: http://midiutil.readthedocs.io/
    :alt: Documentation Status
 
