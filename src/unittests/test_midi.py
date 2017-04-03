@@ -223,6 +223,36 @@ class TestMIDIUtils(unittest.TestCase):
         self.assertEqual(data.unpack_into_byte(4), 0x01)
         self.assertEqual(data.unpack_into_byte(5), 0xf7)
         
+    def testPitchWheel(self):
+        
+        val = 1000
+        MyMIDI = MIDIFile(1)
+        MyMIDI.addPitchWheelEvent(0,0, 0, val)
+        MyMIDI.close()
+        
+        MSB = (val + 8192) >> 7
+        LSB = (val + 8192) & 0x7F
+        
+        data = Decoder(MyMIDI.tracks[1].MIDIdata)
+        self.assertEqual(data.unpack_into_byte(0), 0x00) # time
+        self.assertEqual(data.unpack_into_byte(1), 224) # Code
+        self.assertEqual(data.unpack_into_byte(2), LSB)
+        self.assertEqual(data.unpack_into_byte(3), MSB)
+        
+        val = -1000
+        MyMIDI = MIDIFile(1)
+        MyMIDI.addPitchWheelEvent(0,0, 0, val)
+        MyMIDI.close()
+        
+        MSB = (val + 8192) >> 7
+        LSB = (val + 8192) & 0x7F
+        
+        data = Decoder(MyMIDI.tracks[1].MIDIdata)
+        self.assertEqual(data.unpack_into_byte(0), 0x00) # time
+        self.assertEqual(data.unpack_into_byte(1), 224) # Code
+        self.assertEqual(data.unpack_into_byte(2), LSB)
+        self.assertEqual(data.unpack_into_byte(3), MSB)
+        
     def testTempo(self):
         #import pdb; pdb.set_trace()
         tempo = 60

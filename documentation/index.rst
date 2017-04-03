@@ -156,6 +156,8 @@ fixes,  and suggestions on the library:
 * Egg Syntax
 * Nils Gey
 * Francis G.
+* cclauss (Code formating cleanup and PEP-8 stuff, which I'm not good at following).
+* Philippe-Adrien Nousse (Adphi) for the pitch bend implementation.
 
 Indices and tables
 ------------------
