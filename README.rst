@@ -5,7 +5,7 @@ MIDIUtil
 
 This is just a brief adumbration. Full documentation for the release
 version can be found at `Read the Docs
-<http://midiutil.readthedocs.io/en/stable/>`_. The documentation for the
+<http://midiutil.readthedocs.io/>`_. The documentation for the
 development version is `here <http://midiutil.readthedocs.io/en/latest/>`_.
 
 |docs|
