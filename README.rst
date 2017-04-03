@@ -3,21 +3,19 @@ MIDIUtil
 
 |build|
 
-This is just a brief adumbration. Full documentation for the development
+This is just a brief adumbration. Full documentation for the release
 version can be found at `Read the Docs
-<http://midiutil.readthedocs.io/en/latest/>`_.
+<http://midiutil.readthedocs.io/en/stable/>`_. The documentation for the
+development version is `here <http://midiutil.readthedocs.io/en/latest/>`_.
 
 |docs|
-
-The documentation for the latest stable release is `here
-<http://midiutil.readthedocs.io/en/stable/>`_.
 
 Introduction
 ------------
 
 MIDIUtil is a pure Python library that allows one to write multi-track
 Musical Instrument Digital Interface (MIDI) files from within Python
-programs (both format 1 and format 2 files are now supported). 
+programs (both format 1 and format 2 files are now supported).
 It is object-oriented and allows one to create and write these
 files with a minimum of fuss.
 
@@ -158,8 +156,8 @@ fixes,  and suggestions on the library:
 I've actually been off email for a few years, so I'm sure there are lots
 of suggestions waiting. Stay tuned for updates and bug fixes!
 
-.. |docs| image:: https://readthedocs.org/projects/midiutil/badge/?version=latest
-   :target: http://midiutil.readthedocs.io/en/latest/?badge=latest
+.. |docs| image:: https://readthedocs.org/projects/midiutil/badge/?version=stable
+   :target: http://midiutil.readthedocs.io/en/latest/badge/?version=1.1.3
    :alt: Documentation Status
 
 .. |build| image:: https://travis-ci.org/MarkCWirt/MIDIUtil.svg?branch=master
