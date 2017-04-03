@@ -1162,9 +1162,9 @@ class MIDIFile(object):
         :param pitchWheelValue: 0 for no pitch change. [Integer, -8192-8192]
         """
         if self.header.numeric_format == 1:
-            track = track + 1
+            track += 1
         self.tracks[track].addPitchWheelEvent(channel, time, pitchWheelValue, insertion_order = self.event_counter)
-        self.event_counter = self.event_counter + 1
+        self.event_counter += 1
 
     def makeRPNCall(self, track, channel, time, controller_msb, controller_lsb,
                     data_msb, data_lsb, time_order=False):

@@ -16,6 +16,10 @@ Note, however, that implementation of the MIDI tuning standard is somewhat spott
 so you may want to verify that your hardware and/or software supports it before
 you spend too much time.
 
+Recently the pitch bend message had been implemented. The advantage of the pitch
+bend is that almost all software and hardware understand it. The disadvantage is that
+different software and hardware can interpret the values differently.
+
 The main function to support a tuning change is ``changeNoteTuning``.
 
 .. automethod:: MIDIFile.changeNoteTuning
@@ -58,6 +62,16 @@ transmitted:
   MyMIDI.changeTuningBank(track, channel, time, bank) # may or may not be needed
   MyMIDI.changeTuningProgram(track, channel, time, program) # ditto
 
+
+
+Using Pitch Bend
+----------------
+
+Pitch bend is a *channel level event*, meaning that if you pass a pitch wheel event, all
+notes on that channel will be affected.
+
+
+.. automethod:: MIDIFile.addPitchWheelEvent
 To Do
 -----
 
