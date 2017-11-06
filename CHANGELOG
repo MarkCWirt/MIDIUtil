@@ -1,5 +1,5 @@
-
-    * Added pitch bend support with `addPitchWheelEvent`
+    * Clarifications on documentation.
+    * Added pitch bend support with `addPitchWheelEvent`.
 
 Date:       6 March 2017
 Version:    1.1.3

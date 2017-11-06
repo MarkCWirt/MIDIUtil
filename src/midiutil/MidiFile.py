@@ -1019,6 +1019,21 @@ class MIDIFile(object):
         ticks per metronome click. By definition there are 24 ticks in
         a quarter note, so a metronome click per quarter note would be
         24. A click every third eighth note would be 3 * 12 = 36.
+
+        The ``notes_per_quarter`` value is also a little confusing. It
+        specifies the number of 32nd notes in a MIDI quarter note. Usually
+        there are 8 32nd notes in a quarter note (8/32 = 1/4), so
+        the default value is 8. However, one can change this value if
+        needed. Setting it to 16, for example, would cause the music to
+        play at double speed, as there would be 16/32 (or what could be
+        considered *two* quarter notes for every one MIDI quarter note.
+
+        Note that both the ``clocks_per_tick`` and the
+        ``notes_per_quarter`` are specified in terms of quarter notes,
+        even is the score is not a quarter-note based score (i.e.,
+        even if the denominator is not ``4``). So if you're working with a 
+        time signature of, say, 6/8, one still needs to specify the clocks
+        per quarter note.
         '''
         if self.header.numeric_format == 1:
             track = 0
