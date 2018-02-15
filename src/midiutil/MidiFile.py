@@ -39,8 +39,8 @@ class MIDIEvent(object):
     '''
     The class to contain the MIDI Event (placed on MIDIEventList).
     '''
-    def __init__(self, type="unknown", time=0, ordinal=0, insertion_order=0):
-        self.type = type
+    def __init__(self, evtname="unknown", time=0, ordinal=0, insertion_order=0):
+        self.evtname = evtname
         self.time = time
         self.ord = ordinal
         self.insertion_order = insertion_order
@@ -50,12 +50,12 @@ class GenericEvent(object):
     '''
     The event class from which specific events are derived
     '''
-    def __init__(self, event_type, time, ordinal, insertion_order):
-        self.type = event_type
+    evtname = None
+
+    def __init__(self, time, ordinal, insertion_order):
         self.time = time
         self.ord = ordinal
         self.insertion_order = insertion_order
-        # self.type = 'Unknown'
 
     def __eq__(self, other):
         '''
@@ -74,26 +74,26 @@ class GenericEvent(object):
         I suppose I should go back and restructure the code, perhaps removing
         the derived classes altogether. At some point perhaps I will.
         '''
-        if self.time != other.time or self.type != other.type:
+        if self.time != other.time or self.evtname != other.evtname:
             return False
 
         # What follows is code that encodes the concept of equality for each
         # derived class. Believe it f you dare.
 
-        if self.type == 'note':
+        if self.evtname == 'Note':
             if self.pitch != other.pitch or self.channel != other.channel:
                 return False
-        if self.type == 'tempo':
+        if self.evtname == 'Tempo':
             if self.tempo != other.tempo:
                 return False
-        if self.type == 'programChange':
+        if self.evtname == 'ProgramChange':
             if (self.programNumber != other.programNumber or
                     self.channel != other.channel):
                 return False
-        if self.type == 'trackName':
+        if self.evtname == 'TrackName':
             if self.trackName != other.trackName:
                 return False
-        if self.type in ('controllerEvent', 'pitchWheelEvent', 'SysEx', 'UniversalSysEx'):
+        if self.evtname in ('ControllerEvent', 'PitchWheelEvent', 'SysEx', 'UniversalSysEx'):
             return False
 
         return True
@@ -122,6 +122,8 @@ class Note(GenericEvent):
     '''
     A class that encapsulates a note
     '''
+    evtname = 'Note'
+
     def __init__(self, channel, pitch, time, duration, volume, ordinal=3,
                  annotation=None, insertion_order=0):
         self.pitch = pitch
@@ -129,25 +131,29 @@ class Note(GenericEvent):
         self.volume = volume
         self.channel = channel
         self.annotation = annotation
-        super(Note, self).__init__('note', time, ordinal, insertion_order)
+        super(Note, self).__init__(time, ordinal, insertion_order)
 
 
 class Tempo(GenericEvent):
     '''
     A class that encapsulates a tempo meta-event
     '''
+    evtname = 'Tempo'
+
     def __init__(self, time, tempo, ordinal=3, insertion_order=0):
         self.tempo = int(60000000 / tempo)
-        super(Tempo, self).__init__('tempo', time, ordinal, insertion_order)
+        super(Tempo, self).__init__(time, ordinal, insertion_order)
 
 
 class Copyright(GenericEvent):
     '''
     A class that encapsulates a copyright event
     '''
+    evtname = 'Copyright'
+
     def __init__(self, time, notice, ordinal=1, insertion_order=0):
         self.notice = notice.encode("ISO-8859-1")
-        super(Copyright, self).__init__('Copyright', time, ordinal,
+        super(Copyright, self).__init__(time, ordinal,
                                         insertion_order)
 
 
@@ -155,21 +161,25 @@ class Text(GenericEvent):
     '''
     A class that encapsulates a text event
     '''
+    evtname = 'Text'
+
     def __init__(self, time, text, ordinal=1, insertion_order=0):
         self.text = text.encode("ISO-8859-1")
-        super(Text, self).__init__('Text', time, ordinal, insertion_order)
+        super(Text, self).__init__(time, ordinal, insertion_order)
 
 
 class KeySignature(GenericEvent):
     '''
     A class that encapsulates a text event
     '''
+    evtname = 'KeySignature'
+
     def __init__(self, time, accidentals, accidental_type, mode, ordinal=1,
                  insertion_order=0):
         self.accidentals = accidentals
         self.accidental_type = accidental_type
         self.mode = mode
-        super(KeySignature, self).__init__('KeySignature', time, ordinal,
+        super(KeySignature, self).__init__(time, ordinal,
                                            insertion_order)
 
 
@@ -177,12 +187,13 @@ class ProgramChange(GenericEvent):
     '''
     A class that encapsulates a program change event.
     '''
+    evtname = 'ProgramChange'
 
     def __init__(self,  channel,  time,  programNumber, ordinal=1,
                  insertion_order=0):
         self.programNumber = programNumber
         self.channel = channel
-        super(ProgramChange, self).__init__('programChange', time, ordinal,
+        super(ProgramChange, self).__init__(time, ordinal,
                                             insertion_order)
 
 
@@ -190,11 +201,12 @@ class SysExEvent(GenericEvent):
     '''
     A class that encapsulates a System Exclusive  event.
     '''
+    evtname = 'SysEx' # doesn't match class name like most others
 
     def __init__(self,  time,  manID,  payload, ordinal=1, insertion_order=0):
         self.manID = manID
         self.payload = payload
-        super(SysExEvent, self).__init__('SysEx', time, ordinal,
+        super(SysExEvent, self).__init__(time, ordinal,
                                          insertion_order)
 
 
@@ -202,6 +214,7 @@ class UniversalSysExEvent(GenericEvent):
     '''
     A class that encapsulates a Universal System Exclusive  event.
     '''
+    evtname = 'UniversalSysEx' # doesn't match class name like most others
 
     def __init__(self,  time,  realTime,  sysExChannel,  code,  subcode,
                  payload, ordinal=1, insertion_order=0):
@@ -210,7 +223,7 @@ class UniversalSysExEvent(GenericEvent):
         self.code = code
         self.subcode = subcode
         self.payload = payload
-        super(UniversalSysExEvent, self).__init__('UniversalSysEx', time,
+        super(UniversalSysExEvent, self).__init__(time,
                                                   ordinal, insertion_order)
 
 
@@ -218,13 +231,14 @@ class ControllerEvent(GenericEvent):
     '''
     A class that encapsulates a program change event.
     '''
+    evtname = 'ControllerEvent'
 
     def __init__(self,  channel,  time,  controller_number, parameter,
                  ordinal=1, insertion_order=0):
         self.parameter = parameter
         self.channel = channel
         self.controller_number = controller_number
-        super(ControllerEvent, self).__init__('controllerEvent', time, ordinal,
+        super(ControllerEvent, self).__init__(time, ordinal,
                                               insertion_order)
 
 
@@ -232,22 +246,24 @@ class PitchWheelEvent(GenericEvent):
     '''
     A class that encapsulates a pitch wheel change event.
     '''
+    evtname = 'PitchWheelEvent'
 
     def __init__(self, channel, time, pitch_wheel_value, ordinal=1, insertion_order=0):
         self.channel = channel
         self.pitch_wheel_value = pitch_wheel_value
-        super(PitchWheelEvent, self).__init__('pitchWheelEvent', time, ordinal, insertion_order)
+        super(PitchWheelEvent, self).__init__(time, ordinal, insertion_order)
 
 
 class TrackName(GenericEvent):
     '''
     A class that encapsulates a program change event.
     '''
+    evtname = 'TrackName'
 
     def __init__(self,  time,  trackName, ordinal=0, insertion_order=0):
         # GenericEvent.__init__(self, time,)
         self.trackName = trackName.encode("ISO-8859-1")
-        super(TrackName, self).__init__('trackName', time, ordinal,
+        super(TrackName, self).__init__(time, ordinal,
                                         insertion_order)
 
 
@@ -255,6 +271,7 @@ class TimeSignature(GenericEvent):
     '''
     A class that encapsulates a time signature.
     '''
+    evtname = 'TimeSignature'
 
     def __init__(self,  time,  numerator, denominator, clocks_per_tick,
                  notes_per_quarter, ordinal=0, insertion_order=0):
@@ -262,7 +279,7 @@ class TimeSignature(GenericEvent):
         self.denominator = denominator
         self.clocks_per_tick = clocks_per_tick
         self.notes_per_quarter = notes_per_quarter
-        super(TimeSignature, self).__init__('TimeSignature', time, ordinal,
+        super(TimeSignature, self).__init__(time, ordinal,
                                             insertion_order)
 
 
@@ -405,7 +422,7 @@ class MIDITrack(object):
         # Loop over all items in the eventList
 
         for thing in self.eventList:
-            if thing.type == 'note':
+            if thing.evtname == 'Note':
                 event = MIDIEvent("NoteOn", thing.time * TICKSPERBEAT,
                                   thing.ord, thing.insertion_order)
                 event.pitch = thing.pitch
@@ -421,25 +438,25 @@ class MIDITrack(object):
                 event.channel = thing.channel
                 self.MIDIEventList.append(event)
 
-            elif thing.type == 'tempo':
+            elif thing.evtname == 'Tempo':
                 event = MIDIEvent("Tempo", thing.time * TICKSPERBEAT,
                                   thing.ord, thing.insertion_order)
                 event.tempo = thing.tempo
                 self.MIDIEventList.append(event)
 
-            elif thing.type == 'Copyright':
+            elif thing.evtname == 'Copyright':
                 event = MIDIEvent("Copyright", thing.time * TICKSPERBEAT,
                                   thing.ord, thing.insertion_order)
                 event.notice = thing.notice
                 self.MIDIEventList.append(event)
 
-            elif thing.type == 'Text':
+            elif thing.evtname == 'Text':
                 event = MIDIEvent("Text", thing.time * TICKSPERBEAT, thing.ord,
                                   thing.insertion_order)
                 event.text = thing.text
                 self.MIDIEventList.append(event)
 
-            elif thing.type == 'KeySignature':
+            elif thing.evtname == 'KeySignature':
                 event = MIDIEvent("KeySignature", thing.time * TICKSPERBEAT,
                                   thing.ord, thing.insertion_order)
                 event.accidentals = thing.accidentals
@@ -447,20 +464,20 @@ class MIDITrack(object):
                 event.mode = thing.mode
                 self.MIDIEventList.append(event)
 
-            elif thing.type == 'programChange':
+            elif thing.evtname == 'ProgramChange':
                 event = MIDIEvent("ProgramChange", thing.time * TICKSPERBEAT,
                                   thing.ord, thing.insertion_order)
                 event.programNumber = thing.programNumber
                 event.channel = thing.channel
                 self.MIDIEventList.append(event)
 
-            elif thing.type == 'trackName':
+            elif thing.evtname == 'TrackName':
                 event = MIDIEvent("TrackName", thing.time * TICKSPERBEAT,
                                   thing.ord, thing.insertion_order)
                 event.trackName = thing.trackName
                 self.MIDIEventList.append(event)
 
-            elif thing.type == 'controllerEvent':
+            elif thing.evtname == 'ControllerEvent':
                 event = MIDIEvent("ControllerEvent", thing.time * TICKSPERBEAT,
                                   thing.ord, thing.insertion_order)
                 event.controller_number = thing.controller_number
@@ -468,20 +485,20 @@ class MIDITrack(object):
                 event.parameter = thing.parameter
                 self.MIDIEventList.append(event)
 
-            elif thing.type == 'pitchWheelEvent':
+            elif thing.evtname == 'PitchWheelEvent':
                 event = MIDIEvent('PitchWheelEvent', thing.time * TICKSPERBEAT, thing.ord, thing.insertion_order)
                 event.pitch_wheel_value = thing.pitch_wheel_value
                 event.channel = thing.channel
                 self.MIDIEventList.append(event)
 
-            elif thing.type == 'SysEx':
+            elif thing.evtname == 'SysEx':
                 event = MIDIEvent("SysEx", thing.time * TICKSPERBEAT,
                                   thing.ord, thing.insertion_order)
                 event.manID = thing.manID
                 event.payload = thing.payload
                 self.MIDIEventList.append(event)
 
-            elif thing.type == 'UniversalSysEx':
+            elif thing.evtname == 'UniversalSysEx':
                 event = MIDIEvent("UniversalSysEx", thing.time * TICKSPERBEAT,
                                   thing.ord, thing.insertion_order)
                 event.realTime = thing.realTime
@@ -491,7 +508,7 @@ class MIDITrack(object):
                 event.payload = thing.payload
                 self.MIDIEventList.append(event)
 
-            elif thing.type == 'TimeSignature':
+            elif thing.evtname == 'TimeSignature':
                 event = MIDIEvent("TimeSignature", thing.time * TICKSPERBEAT,
                                   thing.ord, thing.insertion_order)
                 event.numerator = thing.numerator
@@ -502,7 +519,7 @@ class MIDITrack(object):
 
             else:
                 raise ValueError("Error in MIDITrack: Unknown event type %s" %
-                                 thing.type)
+                                 thing.evtname)
 
         # Assumptions in the code expect the list to be time-sorted.
         self.MIDIEventList.sort(key=sort_events)
@@ -600,7 +617,7 @@ class MIDITrack(object):
             actualTime = actualTime + roundedVal
 
         for event in self.MIDIEventList:
-            if event.type == "NoteOn":
+            if event.evtname == "NoteOn":
                 code = 0x9 << 4 | event.channel
                 varTime = writeVarLength(event.time)
                 for timeByte in varTime:
@@ -608,7 +625,7 @@ class MIDITrack(object):
                 self.MIDIdata += struct.pack('>B', code)
                 self.MIDIdata += struct.pack('>B', event.pitch)
                 self.MIDIdata += struct.pack('>B', event.volume)
-            elif event.type == "NoteOff":
+            elif event.evtname == "NoteOff":
                 code = 0x8 << 4 | event.channel
                 varTime = writeVarLength(event.time)
                 for timeByte in varTime:
@@ -616,7 +633,7 @@ class MIDITrack(object):
                 self.MIDIdata += struct.pack('>B', code)
                 self.MIDIdata += struct.pack('>B', event.pitch)
                 self.MIDIdata += struct.pack('>B', event.volume)
-            elif event.type == "Tempo":
+            elif event.evtname == "Tempo":
                 code = 0xFF
                 subcode = 0x51
                 fourbite = struct.pack('>L', event.tempo)
@@ -628,7 +645,7 @@ class MIDITrack(object):
                 self.MIDIdata += struct.pack('>B', subcode)
                 self.MIDIdata += struct.pack('>B', 0x03)
                 self.MIDIdata += threebite
-            elif event.type == "Text":
+            elif event.evtname == "Text":
                 code = 0xFF
                 subcode = 0x01
                 varTime = writeVarLength(event.time)
@@ -641,7 +658,7 @@ class MIDITrack(object):
                 for i in range(len(payloadLengthVar)):
                     self.MIDIdata += struct.pack("b", payloadLengthVar[i])
                 self.MIDIdata += event.text
-            elif event.type == "Copyright":
+            elif event.evtname == "Copyright":
                 code = 0xFF
                 subcode = 0x02
                 varTime = writeVarLength(event.time)
@@ -654,7 +671,7 @@ class MIDITrack(object):
                 for i in range(len(payloadLengthVar)):
                     self.MIDIdata += struct.pack("b", payloadLengthVar[i])
                 self.MIDIdata += event.notice
-            elif event.type == "TimeSignature":
+            elif event.evtname == "TimeSignature":
                 code = 0xFF
                 subcode = 0x58
                 varTime = writeVarLength(event.time)
@@ -668,7 +685,7 @@ class MIDITrack(object):
                 self.MIDIdata += struct.pack('>B', event.clocks_per_tick)
                 # 32nd notes per quarter note
                 self.MIDIdata += struct.pack('>B', event.notes_per_quarter)
-            elif event.type == "KeySignature":
+            elif event.evtname == "KeySignature":
                 code = 0xFF
                 subcode = 0x59
                 event_subtype = 0x02
@@ -681,14 +698,14 @@ class MIDITrack(object):
                 self.MIDIdata += struct.pack('>b', event.accidentals *
                                              event.accidental_type)
                 self.MIDIdata += struct.pack('>B', event.mode)
-            elif event.type == 'ProgramChange':
+            elif event.evtname == 'ProgramChange':
                 code = 0xC << 4 | event.channel
                 varTime = writeVarLength(event.time)
                 for timeByte in varTime:
                     self.MIDIdata += struct.pack('>B', timeByte)
                 self.MIDIdata += struct.pack('>B', code)
                 self.MIDIdata += struct.pack('>B', event.programNumber)
-            elif event.type == 'TrackName':
+            elif event.evtname == 'TrackName':
                 varTime = writeVarLength(event.time)
                 for timeByte in varTime:
                     self.MIDIdata += struct.pack('>B', timeByte)
@@ -699,7 +716,7 @@ class MIDITrack(object):
                 for i in range(0, len(dataLenghtVar)):
                     self.MIDIdata += struct.pack("b", dataLenghtVar[i])
                 self.MIDIdata += event.trackName
-            elif event.type == "ControllerEvent":
+            elif event.evtname == "ControllerEvent":
                 code = 0xB << 4 | event.channel
                 varTime = writeVarLength(event.time)
                 for timeByte in varTime:
@@ -707,7 +724,7 @@ class MIDITrack(object):
                 self.MIDIdata += struct.pack('>B', code)
                 self.MIDIdata += struct.pack('>B', event.controller_number)
                 self.MIDIdata += struct.pack('>B', event.parameter)
-            elif event.type == 'PitchWheelEvent':
+            elif event.evtname == 'PitchWheelEvent':
                 code = 0xE << 4 | event.channel
                 varTime = writeVarLength(event.time)
                 for timeByte in varTime:
@@ -717,7 +734,7 @@ class MIDITrack(object):
                 self.MIDIdata = self.MIDIdata + struct.pack('>B',code)
                 self.MIDIdata = self.MIDIdata + struct.pack('>B',LSB)
                 self.MIDIdata = self.MIDIdata + struct.pack('>B',MSB)
-            elif event.type == "SysEx":
+            elif event.evtname == "SysEx":
                 code = 0xF0
                 varTime = writeVarLength(event.time)
                 for timeByte in varTime:
@@ -731,7 +748,7 @@ class MIDITrack(object):
                 self.MIDIdata += struct.pack('>B', event.manID)
                 self.MIDIdata += event.payload
                 self.MIDIdata += struct.pack('>B', 0xF7)
-            elif event.type == "UniversalSysEx":
+            elif event.evtname == "UniversalSysEx":
                 code = 0xF0
                 varTime = writeVarLength(event.time)
                 for timeByte in varTime:
@@ -769,13 +786,13 @@ class MIDITrack(object):
         
         for event in self.MIDIEventList:
             
-            if event.type == 'NoteOn':
+            if event.evtname == 'NoteOn':
                 if str(event.pitch)+str(event.channel) in stack:
                     stack[str(event.pitch)+str(event.channel)].append(event.time)
                 else:
                     stack[str(event.pitch)+str(event.channel)] = [event.time]
                 tempEventList.append(event)
-            elif event.type == 'NoteOff':
+            elif event.evtname == 'NoteOff':
                 if len(stack[str(event.pitch)+str(event.channel)]) > 1:
                     event.time = stack[str(event.pitch)+str(event.channel)].pop()
                     tempEventList.append(event)

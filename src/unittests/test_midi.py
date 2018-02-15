@@ -51,7 +51,7 @@ class TestMIDIUtils(unittest.TestCase):
     def testAddNote(self):
         MyMIDI = MIDIFile(1) # a format 1 file, so we increment the track number below
         MyMIDI.addNote(0, 0, 100,0,1,100)
-        self.assertEqual(MyMIDI.tracks[1].eventList[0].type, "note")
+        self.assertEqual(MyMIDI.tracks[1].eventList[0].evtname, "Note")
         self.assertEqual(MyMIDI.tracks[1].eventList[0].pitch, 100)
         self.assertEqual(MyMIDI.tracks[1].eventList[0].time, 0)
         self.assertEqual(MyMIDI.tracks[1].eventList[0].duration, 1)
@@ -61,7 +61,7 @@ class TestMIDIUtils(unittest.TestCase):
         time = 1
         MyMIDI = MIDIFile(1)
         MyMIDI.addNote(0, 0, 100,time,1,100)
-        self.assertEqual(MyMIDI.tracks[1].eventList[0].type, "note")
+        self.assertEqual(MyMIDI.tracks[1].eventList[0].evtname, "Note")
         self.assertEqual(MyMIDI.tracks[1].eventList[0].pitch, 100)
         self.assertEqual(MyMIDI.tracks[1].eventList[0].time, time)
         self.assertEqual(MyMIDI.tracks[1].eventList[0].duration, 1)
@@ -74,13 +74,13 @@ class TestMIDIUtils(unittest.TestCase):
         MyMIDI.addNote(0, 0, 100, 0, 2, 100)
         MyMIDI.addNote(0, 0, 100, 1, 2, 100)
         MyMIDI.close()
-        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[0].type, 'NoteOn')
+        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[0].evtname, 'NoteOn')
         self.assertEqual(MyMIDI.tracks[1].MIDIEventList[0].time,  0)
-        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[1].type, 'NoteOff')
+        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[1].evtname, 'NoteOff')
         self.assertEqual(MyMIDI.tracks[1].MIDIEventList[1].time,  TICKSPERBEAT)
-        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[2].type, 'NoteOn')
+        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[2].evtname, 'NoteOn')
         self.assertEqual(MyMIDI.tracks[1].MIDIEventList[2].time,  0)
-        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[3].type, 'NoteOff')
+        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[3].evtname, 'NoteOff')
         self.assertEqual(MyMIDI.tracks[1].MIDIEventList[3].time,  TICKSPERBEAT * 2)
         
     def testTimeShift(self):
@@ -89,9 +89,9 @@ class TestMIDIUtils(unittest.TestCase):
         MyMIDI = MIDIFile(1)
         MyMIDI.addNote(0, 0, 100, 5, 1, 100)
         MyMIDI.close()
-        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[0].type, 'NoteOn')
+        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[0].evtname, 'NoteOn')
         self.assertEqual(MyMIDI.tracks[1].MIDIEventList[0].time,  0)
-        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[1].type, 'NoteOff')
+        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[1].evtname, 'NoteOff')
         self.assertEqual(MyMIDI.tracks[1].MIDIEventList[1].time,  TICKSPERBEAT)
         
         # With two tracks
@@ -99,22 +99,22 @@ class TestMIDIUtils(unittest.TestCase):
         MyMIDI.addNote(0, 0, 100, 5, 1, 100)
         MyMIDI.addNote(1, 0, 100, 6, 1, 100)
         MyMIDI.close()
-        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[0].type, 'NoteOn')
+        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[0].evtname, 'NoteOn')
         self.assertEqual(MyMIDI.tracks[1].MIDIEventList[0].time,  0)
-        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[1].type, 'NoteOff')
+        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[1].evtname, 'NoteOff')
         self.assertEqual(MyMIDI.tracks[1].MIDIEventList[1].time,  TICKSPERBEAT)
-        self.assertEqual(MyMIDI.tracks[2].MIDIEventList[0].type, 'NoteOn')
+        self.assertEqual(MyMIDI.tracks[2].MIDIEventList[0].evtname, 'NoteOn')
         self.assertEqual(MyMIDI.tracks[2].MIDIEventList[0].time,  TICKSPERBEAT)
-        self.assertEqual(MyMIDI.tracks[2].MIDIEventList[1].type, 'NoteOff')
+        self.assertEqual(MyMIDI.tracks[2].MIDIEventList[1].evtname, 'NoteOff')
         self.assertEqual(MyMIDI.tracks[2].MIDIEventList[1].time,  TICKSPERBEAT)
         
         # Negative Time
         MyMIDI = MIDIFile(1)
         MyMIDI.addNote(0, 0, 100, -5, 1, 100)
         MyMIDI.close()
-        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[0].type, 'NoteOn')
+        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[0].evtname, 'NoteOn')
         self.assertEqual(MyMIDI.tracks[1].MIDIEventList[0].time,  0)
-        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[1].type, 'NoteOff')
+        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[1].evtname, 'NoteOff')
         self.assertEqual(MyMIDI.tracks[1].MIDIEventList[1].time,  TICKSPERBEAT)
         
         # Negative time, two tracks
@@ -123,13 +123,13 @@ class TestMIDIUtils(unittest.TestCase):
         MyMIDI.addNote(0, 0, 100, -1, 1, 100)
         MyMIDI.addNote(1, 0, 100, 0, 1, 100)
         MyMIDI.close()
-        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[0].type, 'NoteOn')
+        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[0].evtname, 'NoteOn')
         self.assertEqual(MyMIDI.tracks[1].MIDIEventList[0].time,  0)
-        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[1].type, 'NoteOff')
+        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[1].evtname, 'NoteOff')
         self.assertEqual(MyMIDI.tracks[1].MIDIEventList[1].time,  TICKSPERBEAT)
-        self.assertEqual(MyMIDI.tracks[2].MIDIEventList[0].type, 'NoteOn')
+        self.assertEqual(MyMIDI.tracks[2].MIDIEventList[0].evtname, 'NoteOn')
         self.assertEqual(MyMIDI.tracks[2].MIDIEventList[0].time,  TICKSPERBEAT)
-        self.assertEqual(MyMIDI.tracks[2].MIDIEventList[1].type, 'NoteOff')
+        self.assertEqual(MyMIDI.tracks[2].MIDIEventList[1].evtname, 'NoteOff')
         self.assertEqual(MyMIDI.tracks[2].MIDIEventList[1].time,  TICKSPERBEAT)
  
     def testFrequency(self):
@@ -214,7 +214,7 @@ class TestMIDIUtils(unittest.TestCase):
         
         data = Decoder(MyMIDI.tracks[1].MIDIdata)
         
-        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[0].type, 'SysEx')
+        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[0].evtname, 'SysEx')
         
         self.assertEqual(data.unpack_into_byte(0), 0x00)
         self.assertEqual(data.unpack_into_byte(1), 0xf0)
@@ -262,7 +262,7 @@ class TestMIDIUtils(unittest.TestCase):
         
         data = Decoder(MyMIDI.tracks[0].MIDIdata)
         
-        self.assertEqual(MyMIDI.tracks[0].MIDIEventList[0].type, 'Tempo')
+        self.assertEqual(MyMIDI.tracks[0].MIDIEventList[0].evtname, 'Tempo')
         
         self.assertEqual(data.unpack_into_byte(0), 0x00) # time
         self.assertEqual(data.unpack_into_byte(1), 0xff) # Code
@@ -279,7 +279,7 @@ class TestMIDIUtils(unittest.TestCase):
         
         data = Decoder(MyMIDI.tracks[0].MIDIdata)
         
-        self.assertEqual(MyMIDI.tracks[0].MIDIEventList[0].type, 'Tempo')
+        self.assertEqual(MyMIDI.tracks[0].MIDIEventList[0].evtname, 'Tempo')
         
         self.assertEqual(data.unpack_into_byte(0), 0x00) # time
         self.assertEqual(data.unpack_into_byte(1), 0xff) # Code
@@ -300,7 +300,7 @@ class TestMIDIUtils(unittest.TestCase):
         
         data = Decoder(MyMIDI.tracks[1].MIDIdata)
         
-        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[0].type, 'Copyright')
+        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[0].evtname, 'Copyright')
         
         self.assertEqual(data.unpack_into_byte(0), 0x00) # time
         self.assertEqual(data.unpack_into_byte(1), 0xff) # Code
@@ -330,7 +330,7 @@ class TestMIDIUtils(unittest.TestCase):
         
         data = Decoder(MyMIDI.tracks[1].MIDIdata)
         
-        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[0].type, 'Text')
+        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[0].evtname, 'Text')
         
         self.assertEqual(data.unpack_into_byte(0), 0x00) # time
         self.assertEqual(data.unpack_into_byte(1), 0xff) # Code
@@ -359,7 +359,7 @@ class TestMIDIUtils(unittest.TestCase):
         
         data = Decoder(MyMIDI.tracks[0].MIDIdata)
         
-        self.assertEqual(MyMIDI.tracks[0].MIDIEventList[0].type, 'TimeSignature')
+        self.assertEqual(MyMIDI.tracks[0].MIDIEventList[0].evtname, 'TimeSignature')
         
         self.assertEqual(data.unpack_into_byte(0), 0x00) # time
         self.assertEqual(data.unpack_into_byte(1), 0xFF) # Code
@@ -384,7 +384,7 @@ class TestMIDIUtils(unittest.TestCase):
         
         data = Decoder(MyMIDI.tracks[0].MIDIdata)
         
-        self.assertEqual(MyMIDI.tracks[0].MIDIEventList[0].type, 'TimeSignature')
+        self.assertEqual(MyMIDI.tracks[0].MIDIEventList[0].evtname, 'TimeSignature')
         
         self.assertEqual(data.unpack_into_byte(0), 0x00) # time
         self.assertEqual(data.unpack_into_byte(1), 0xFF) # Code
@@ -408,7 +408,7 @@ class TestMIDIUtils(unittest.TestCase):
         
         data = Decoder(MyMIDI.tracks[1].MIDIdata)
         
-        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[0].type, 'KeySignature')
+        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[0].evtname, 'KeySignature')
         
         self.assertEqual(data.unpack_into_byte(0), 0x00) # time
         self.assertEqual(data.unpack_into_byte(1), 0xFF) # Code
@@ -427,7 +427,7 @@ class TestMIDIUtils(unittest.TestCase):
         
         data = Decoder(MyMIDI.tracks[0].MIDIdata)
         
-        self.assertEqual(MyMIDI.tracks[0].MIDIEventList[0].type, 'ProgramChange')
+        self.assertEqual(MyMIDI.tracks[0].MIDIEventList[0].evtname, 'ProgramChange')
         self.assertEqual(data.unpack_into_byte(0), 0x00) # time
         self.assertEqual(data.unpack_into_byte(1), 0xC << 4 | channel) # Code
         self.assertEqual(data.unpack_into_byte(2), program)
@@ -441,7 +441,7 @@ class TestMIDIUtils(unittest.TestCase):
 
         data = Decoder(MyMIDI.tracks[1].MIDIdata)
 
-        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[0].type, 'TrackName')
+        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[0].evtname, 'TrackName')
         
         self.assertEqual(data.unpack_into_byte(0), 0x00) # time
         self.assertEqual(data.unpack_into_byte(1), 0xFF) # Code
@@ -457,7 +457,7 @@ class TestMIDIUtils(unittest.TestCase):
         
         data = Decoder(MyMIDI.tracks[1].MIDIdata)
         
-        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[0].type, 'ControllerEvent')
+        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[0].evtname, 'ControllerEvent')
         
         self.assertEqual(data.unpack_into_byte(0),  0x00)               # time
         self.assertEqual(data.unpack_into_byte(1),  0xB << 4 | channel) # Code
@@ -485,7 +485,7 @@ class TestMIDIUtils(unittest.TestCase):
         
         data = Decoder(MyMIDI.tracks[1].MIDIdata)
         
-        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[0].type, 'ControllerEvent')
+        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[0].evtname, 'ControllerEvent')
         
         self.assertEqual(data.unpack_into_byte(0),  0x00)               # time
         self.assertEqual(data.unpack_into_byte(4),  0x01)               # time
@@ -502,7 +502,7 @@ class TestMIDIUtils(unittest.TestCase):
 
         data = Decoder(MyMIDI.tracks[1].MIDIdata)
         
-        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[0].type, 'ControllerEvent')
+        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[0].evtname, 'ControllerEvent')
         
         self.assertEqual(data.unpack_into_byte(0), 0x00)               # time
         self.assertEqual(data.unpack_into_byte(1), 0xB << 4 | channel) # Code
@@ -530,7 +530,7 @@ class TestMIDIUtils(unittest.TestCase):
 
         data = Decoder(MyMIDI.tracks[1].MIDIdata)
         
-        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[0].type, 'ControllerEvent')
+        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[0].evtname, 'ControllerEvent')
         
         self.assertEqual(data.unpack_into_byte(0),  0x00)              # time
         self.assertEqual(data.unpack_into_byte(4),  0x01)              # time
@@ -554,7 +554,7 @@ class TestMIDIUtils(unittest.TestCase):
         
         data = Decoder(MyMIDI.tracks[1].MIDIdata)
         
-        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[0].type, 'ControllerEvent')
+        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[0].evtname, 'ControllerEvent')
         
         self.assertEqual(data.unpack_into_byte(0), 0x00)               # time
         self.assertEqual(data.unpack_into_byte(1), 0xB << 4 | channel) # Code
@@ -588,7 +588,7 @@ class TestMIDIUtils(unittest.TestCase):
         
         data = Decoder(MyMIDI.tracks[1].MIDIdata)
         
-        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[0].type, 'ControllerEvent')
+        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[0].evtname, 'ControllerEvent')
         
         self.assertEqual(data.unpack_into_byte(0), 0x00)               # time
         self.assertEqual(data.unpack_into_byte(1), 0xB << 4 | channel) # Code
@@ -620,7 +620,7 @@ class TestMIDIUtils(unittest.TestCase):
         
         data = Decoder(MyMIDI.tracks[1].MIDIdata)
         
-        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[0].type, 'ControllerEvent')
+        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[0].evtname, 'ControllerEvent')
 
         self.assertEqual(data.unpack_into_byte(0), 0x00) # time
         self.assertEqual(data.unpack_into_byte(1), 0xB << 4 | channel) # Code
@@ -644,7 +644,7 @@ class TestMIDIUtils(unittest.TestCase):
         
         data = Decoder(MyMIDI.tracks[1].MIDIdata)
         
-        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[0].type, 'UniversalSysEx')
+        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[0].evtname, 'UniversalSysEx')
         
         self.assertEqual(data.unpack_into_byte(0), time_bytes[0]) # Time
         self.assertEqual(data.unpack_into_byte(1), time_bytes[1]) # Time
@@ -669,7 +669,7 @@ class TestMIDIUtils(unittest.TestCase):
         
         data = Decoder(MyMIDI.tracks[1].MIDIdata)
         
-        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[0].type, 'UniversalSysEx')
+        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[0].evtname, 'UniversalSysEx')
         
         self.assertEqual(data.unpack_into_byte(0), 0x00)
         self.assertEqual(data.unpack_into_byte(1), 0xf0)
@@ -688,7 +688,7 @@ class TestMIDIUtils(unittest.TestCase):
         
         data = Decoder(MyMIDI.tracks[1].MIDIdata)
         
-        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[0].type, 'UniversalSysEx')
+        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[0].evtname, 'UniversalSysEx')
         
         self.assertEqual(data.unpack_into_byte(0), 0x00)
         self.assertEqual(data.unpack_into_byte(1), 0xf0)
@@ -782,7 +782,7 @@ class TestMIDIUtils(unittest.TestCase):
         bad_type = "bad"
         MyMIDI = MIDIFile(1)
         MyMIDI.addNote(track, channel, pitch, time, duration, volume)
-        MyMIDI.tracks[1].eventList[0].type = bad_type
+        MyMIDI.tracks[1].eventList[0].evtname = bad_type
         with self.assertRaises(Exception) as context:
             MyMIDI.close()
         self.assertTrue(('Error in MIDITrack: Unknown event type %s' % bad_type) in str(context.exception))
