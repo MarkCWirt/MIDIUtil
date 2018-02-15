@@ -39,10 +39,10 @@ class MIDIEvent(object):
     '''
     The class to contain the MIDI Event (placed on MIDIEventList).
     '''
-    def __init__(self, evtname="unknown", time=0, ordinal=0, insertion_order=0):
+    def __init__(self, evtname="unknown", time=0, sec_sort_order=0, insertion_order=0):
         self.evtname = evtname
         self.time = time
-        self.ord = ordinal
+        self.sec_sort_order = sec_sort_order
         self.insertion_order = insertion_order
 
 
@@ -51,10 +51,10 @@ class GenericEvent(object):
     The event class from which specific events are derived
     '''
     evtname = None
+    sec_sort_order = 0
 
-    def __init__(self, time, ordinal, insertion_order):
+    def __init__(self, time, insertion_order):
         self.time = time
-        self.ord = ordinal
         self.insertion_order = insertion_order
 
     def __eq__(self, other):
@@ -123,15 +123,16 @@ class Note(GenericEvent):
     A class that encapsulates a note
     '''
     evtname = 'Note'
+    sec_sort_order = 3
 
-    def __init__(self, channel, pitch, time, duration, volume, ordinal=3,
+    def __init__(self, channel, pitch, time, duration, volume,
                  annotation=None, insertion_order=0):
         self.pitch = pitch
         self.duration = duration
         self.volume = volume
         self.channel = channel
         self.annotation = annotation
-        super(Note, self).__init__(time, ordinal, insertion_order)
+        super(Note, self).__init__(time, insertion_order)
 
 
 class Tempo(GenericEvent):
@@ -139,10 +140,11 @@ class Tempo(GenericEvent):
     A class that encapsulates a tempo meta-event
     '''
     evtname = 'Tempo'
+    sec_sort_order = 3
 
-    def __init__(self, time, tempo, ordinal=3, insertion_order=0):
+    def __init__(self, time, tempo, insertion_order=0):
         self.tempo = int(60000000 / tempo)
-        super(Tempo, self).__init__(time, ordinal, insertion_order)
+        super(Tempo, self).__init__(time, insertion_order)
 
 
 class Copyright(GenericEvent):
@@ -150,11 +152,11 @@ class Copyright(GenericEvent):
     A class that encapsulates a copyright event
     '''
     evtname = 'Copyright'
+    sec_sort_order = 1
 
-    def __init__(self, time, notice, ordinal=1, insertion_order=0):
+    def __init__(self, time, notice, insertion_order=0):
         self.notice = notice.encode("ISO-8859-1")
-        super(Copyright, self).__init__(time, ordinal,
-                                        insertion_order)
+        super(Copyright, self).__init__(time, insertion_order)
 
 
 class Text(GenericEvent):
@@ -162,10 +164,11 @@ class Text(GenericEvent):
     A class that encapsulates a text event
     '''
     evtname = 'Text'
+    sec_sort_order = 1
 
-    def __init__(self, time, text, ordinal=1, insertion_order=0):
+    def __init__(self, time, text, insertion_order=0):
         self.text = text.encode("ISO-8859-1")
-        super(Text, self).__init__(time, ordinal, insertion_order)
+        super(Text, self).__init__(time, insertion_order)
 
 
 class KeySignature(GenericEvent):
@@ -173,14 +176,14 @@ class KeySignature(GenericEvent):
     A class that encapsulates a text event
     '''
     evtname = 'KeySignature'
+    sec_sort_order = 1
 
-    def __init__(self, time, accidentals, accidental_type, mode, ordinal=1,
+    def __init__(self, time, accidentals, accidental_type, mode,
                  insertion_order=0):
         self.accidentals = accidentals
         self.accidental_type = accidental_type
         self.mode = mode
-        super(KeySignature, self).__init__(time, ordinal,
-                                           insertion_order)
+        super(KeySignature, self).__init__(time, insertion_order)
 
 
 class ProgramChange(GenericEvent):
@@ -188,13 +191,13 @@ class ProgramChange(GenericEvent):
     A class that encapsulates a program change event.
     '''
     evtname = 'ProgramChange'
+    sec_sort_order = 1
 
-    def __init__(self,  channel,  time,  programNumber, ordinal=1,
+    def __init__(self,  channel,  time,  programNumber,
                  insertion_order=0):
         self.programNumber = programNumber
         self.channel = channel
-        super(ProgramChange, self).__init__(time, ordinal,
-                                            insertion_order)
+        super(ProgramChange, self).__init__(time, insertion_order)
 
 
 class SysExEvent(GenericEvent):
@@ -202,12 +205,12 @@ class SysExEvent(GenericEvent):
     A class that encapsulates a System Exclusive  event.
     '''
     evtname = 'SysEx' # doesn't match class name like most others
+    sec_sort_order = 1
 
-    def __init__(self,  time,  manID,  payload, ordinal=1, insertion_order=0):
+    def __init__(self,  time,  manID,  payload, insertion_order=0):
         self.manID = manID
         self.payload = payload
-        super(SysExEvent, self).__init__(time, ordinal,
-                                         insertion_order)
+        super(SysExEvent, self).__init__(time, insertion_order)
 
 
 class UniversalSysExEvent(GenericEvent):
@@ -215,16 +218,16 @@ class UniversalSysExEvent(GenericEvent):
     A class that encapsulates a Universal System Exclusive  event.
     '''
     evtname = 'UniversalSysEx' # doesn't match class name like most others
+    sec_sort_order = 1
 
     def __init__(self,  time,  realTime,  sysExChannel,  code,  subcode,
-                 payload, ordinal=1, insertion_order=0):
+                 payload, insertion_order=0):
         self.realTime = realTime
         self.sysExChannel = sysExChannel
         self.code = code
         self.subcode = subcode
         self.payload = payload
-        super(UniversalSysExEvent, self).__init__(time,
-                                                  ordinal, insertion_order)
+        super(UniversalSysExEvent, self).__init__(time, insertion_order)
 
 
 class ControllerEvent(GenericEvent):
@@ -232,14 +235,14 @@ class ControllerEvent(GenericEvent):
     A class that encapsulates a program change event.
     '''
     evtname = 'ControllerEvent'
+    sec_sort_order = 1
 
     def __init__(self,  channel,  time,  controller_number, parameter,
-                 ordinal=1, insertion_order=0):
+                 insertion_order=0):
         self.parameter = parameter
         self.channel = channel
         self.controller_number = controller_number
-        super(ControllerEvent, self).__init__(time, ordinal,
-                                              insertion_order)
+        super(ControllerEvent, self).__init__(time, insertion_order)
 
 
 class PitchWheelEvent(GenericEvent):
@@ -247,11 +250,12 @@ class PitchWheelEvent(GenericEvent):
     A class that encapsulates a pitch wheel change event.
     '''
     evtname = 'PitchWheelEvent'
+    sec_sort_order = 1
 
-    def __init__(self, channel, time, pitch_wheel_value, ordinal=1, insertion_order=0):
+    def __init__(self, channel, time, pitch_wheel_value, insertion_order=0):
         self.channel = channel
         self.pitch_wheel_value = pitch_wheel_value
-        super(PitchWheelEvent, self).__init__(time, ordinal, insertion_order)
+        super(PitchWheelEvent, self).__init__(time, insertion_order)
 
 
 class TrackName(GenericEvent):
@@ -259,12 +263,12 @@ class TrackName(GenericEvent):
     A class that encapsulates a program change event.
     '''
     evtname = 'TrackName'
+    sec_sort_order = 0
 
-    def __init__(self,  time,  trackName, ordinal=0, insertion_order=0):
+    def __init__(self,  time,  trackName, insertion_order=0):
         # GenericEvent.__init__(self, time,)
         self.trackName = trackName.encode("ISO-8859-1")
-        super(TrackName, self).__init__(time, ordinal,
-                                        insertion_order)
+        super(TrackName, self).__init__(time, insertion_order)
 
 
 class TimeSignature(GenericEvent):
@@ -272,15 +276,15 @@ class TimeSignature(GenericEvent):
     A class that encapsulates a time signature.
     '''
     evtname = 'TimeSignature'
+    sec_sort_order = 0
 
     def __init__(self,  time,  numerator, denominator, clocks_per_tick,
-                 notes_per_quarter, ordinal=0, insertion_order=0):
+                 notes_per_quarter, insertion_order=0):
         self.numerator = numerator
         self.denominator = denominator
         self.clocks_per_tick = clocks_per_tick
         self.notes_per_quarter = notes_per_quarter
-        super(TimeSignature, self).__init__(time, ordinal,
-                                            insertion_order)
+        super(TimeSignature, self).__init__(time, insertion_order)
 
 
 class MIDITrack(object):
@@ -424,7 +428,7 @@ class MIDITrack(object):
         for thing in self.eventList:
             if thing.evtname == 'Note':
                 event = MIDIEvent("NoteOn", thing.time * TICKSPERBEAT,
-                                  thing.ord, thing.insertion_order)
+                                  thing.sec_sort_order, thing.insertion_order)
                 event.pitch = thing.pitch
                 event.volume = thing.volume
                 event.channel = thing.channel
@@ -432,7 +436,7 @@ class MIDITrack(object):
 
                 event = MIDIEvent("NoteOff",
                                   (thing.time + thing.duration) * TICKSPERBEAT,
-                                  thing.ord - 0.1, thing.insertion_order)
+                                  thing.sec_sort_order - 1, thing.insertion_order)
                 event.pitch = thing.pitch
                 event.volume = thing.volume
                 event.channel = thing.channel
@@ -440,25 +444,25 @@ class MIDITrack(object):
 
             elif thing.evtname == 'Tempo':
                 event = MIDIEvent("Tempo", thing.time * TICKSPERBEAT,
-                                  thing.ord, thing.insertion_order)
+                                  thing.sec_sort_order, thing.insertion_order)
                 event.tempo = thing.tempo
                 self.MIDIEventList.append(event)
 
             elif thing.evtname == 'Copyright':
                 event = MIDIEvent("Copyright", thing.time * TICKSPERBEAT,
-                                  thing.ord, thing.insertion_order)
+                                  thing.sec_sort_order, thing.insertion_order)
                 event.notice = thing.notice
                 self.MIDIEventList.append(event)
 
             elif thing.evtname == 'Text':
-                event = MIDIEvent("Text", thing.time * TICKSPERBEAT, thing.ord,
+                event = MIDIEvent("Text", thing.time * TICKSPERBEAT, thing.sec_sort_order,
                                   thing.insertion_order)
                 event.text = thing.text
                 self.MIDIEventList.append(event)
 
             elif thing.evtname == 'KeySignature':
                 event = MIDIEvent("KeySignature", thing.time * TICKSPERBEAT,
-                                  thing.ord, thing.insertion_order)
+                                  thing.sec_sort_order, thing.insertion_order)
                 event.accidentals = thing.accidentals
                 event.accidental_type = thing.accidental_type
                 event.mode = thing.mode
@@ -466,41 +470,41 @@ class MIDITrack(object):
 
             elif thing.evtname == 'ProgramChange':
                 event = MIDIEvent("ProgramChange", thing.time * TICKSPERBEAT,
-                                  thing.ord, thing.insertion_order)
+                                  thing.sec_sort_order, thing.insertion_order)
                 event.programNumber = thing.programNumber
                 event.channel = thing.channel
                 self.MIDIEventList.append(event)
 
             elif thing.evtname == 'TrackName':
                 event = MIDIEvent("TrackName", thing.time * TICKSPERBEAT,
-                                  thing.ord, thing.insertion_order)
+                                  thing.sec_sort_order, thing.insertion_order)
                 event.trackName = thing.trackName
                 self.MIDIEventList.append(event)
 
             elif thing.evtname == 'ControllerEvent':
                 event = MIDIEvent("ControllerEvent", thing.time * TICKSPERBEAT,
-                                  thing.ord, thing.insertion_order)
+                                  thing.sec_sort_order, thing.insertion_order)
                 event.controller_number = thing.controller_number
                 event.channel = thing.channel
                 event.parameter = thing.parameter
                 self.MIDIEventList.append(event)
 
             elif thing.evtname == 'PitchWheelEvent':
-                event = MIDIEvent('PitchWheelEvent', thing.time * TICKSPERBEAT, thing.ord, thing.insertion_order)
+                event = MIDIEvent('PitchWheelEvent', thing.time * TICKSPERBEAT, thing.sec_sort_order, thing.insertion_order)
                 event.pitch_wheel_value = thing.pitch_wheel_value
                 event.channel = thing.channel
                 self.MIDIEventList.append(event)
 
             elif thing.evtname == 'SysEx':
                 event = MIDIEvent("SysEx", thing.time * TICKSPERBEAT,
-                                  thing.ord, thing.insertion_order)
+                                  thing.sec_sort_order, thing.insertion_order)
                 event.manID = thing.manID
                 event.payload = thing.payload
                 self.MIDIEventList.append(event)
 
             elif thing.evtname == 'UniversalSysEx':
                 event = MIDIEvent("UniversalSysEx", thing.time * TICKSPERBEAT,
-                                  thing.ord, thing.insertion_order)
+                                  thing.sec_sort_order, thing.insertion_order)
                 event.realTime = thing.realTime
                 event.sysExChannel = thing.sysExChannel
                 event.code = thing.code
@@ -510,7 +514,7 @@ class MIDITrack(object):
 
             elif thing.evtname == 'TimeSignature':
                 event = MIDIEvent("TimeSignature", thing.time * TICKSPERBEAT,
-                                  thing.ord, thing.insertion_order)
+                                  thing.sec_sort_order, thing.insertion_order)
                 event.numerator = thing.numerator
                 event.denominator = thing.denominator
                 event.clocks_per_tick = thing.clocks_per_tick
@@ -783,9 +787,9 @@ class MIDITrack(object):
 
         tempEventList = []
         stack = {}
-        
+
         for event in self.MIDIEventList:
-            
+
             if event.evtname == 'NoteOn':
                 if str(event.pitch)+str(event.channel) in stack:
                     stack[str(event.pitch)+str(event.channel)].append(event.time)
@@ -801,13 +805,13 @@ class MIDITrack(object):
                     tempEventList.append(event)
             else:
                 tempEventList.append(event)
-                    
+
         self.MIDIEventList = tempEventList
-        
+
         # Note that ``processEventList`` makes the ordinality of a note off event
         # a bit lower than the note on event, so this sort will make concomitant
         # note off events processed first.
-        
+
         self.MIDIEventList.sort(key=sort_events)
 
     def adjustTimeAndOrigin(self, origin, adjust):
@@ -1048,7 +1052,7 @@ class MIDIFile(object):
         Note that both the ``clocks_per_tick`` and the
         ``notes_per_quarter`` are specified in terms of quarter notes,
         even is the score is not a quarter-note based score (i.e.,
-        even if the denominator is not ``4``). So if you're working with a 
+        even if the denominator is not ``4``). So if you're working with a
         time signature of, say, 6/8, one still needs to specify the clocks
         per quarter note.
         '''
@@ -1640,7 +1644,7 @@ def sort_events(event):
         * Events are ordered in time. An event that takes place earlier will
           appear earlier
         * If two events happen at the same time, the secondary sort key is
-          ``ord``. Thus a class of events can be processed earlier than
+          ``sec_sort_order``. Thus a class of events can be processed earlier than
           another. One place this is used in the code is to make sure that note
           off events are processed before note on events.
         * If time and ordinality are the same, they are sorted in the order in
@@ -1650,4 +1654,4 @@ def sort_events(event):
           file that way.
     '''
 
-    return (event.time, event.ord, event.insertion_order)
+    return (event.time, event.sec_sort_order, event.insertion_order)
