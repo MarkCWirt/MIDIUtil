@@ -84,3 +84,15 @@ In this changeset, ``sec_sort_order`` is still an instance attribute of
 class ``MIDIEvent``. This is because ``MIDIEvent`` itself is somewhat of
 a poor design, which we won't try to correct in this changeset. We will
 correct this problem down the road by doing away with class ``MIDIEvent``.
+
+GenericEvent __eq__() method
+============================
+Now I will address one of the most glaring design flaws: the
+``GenericEvent`` method ``__eq__()`` which knows specifics about derived
+classes.
+
+The solution for this flaw is straightforward, and should be fairly obvious
+to anyone with more than novice-level experience in Python and Object
+Oriented programming: just put the knowledge where it belongs, in the
+derived classes.
+

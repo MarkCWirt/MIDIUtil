@@ -59,44 +59,18 @@ class GenericEvent(object):
 
     def __eq__(self, other):
         '''
-        Equality operator for Generic Events and derived classes.
+        Equality operator.
 
         In the processing of the event list, we have need to remove duplicates.
         To do this we rely on the fact that the classes are hashable, and must
         therefore have an equality operator (__hash__() and __eq__() must both
         be defined).
 
-        This is the most embarrassing portion of the code, and anyone who knows
-        about OO programming would find this almost unbelievable. Here we have
-        a base class that knows specifics about derived classes, thus breaking
-        the very spirit of OO programming.
-
-        I suppose I should go back and restructure the code, perhaps removing
-        the derived classes altogether. At some point perhaps I will.
+        Some derived classes will need to override and consider their specific
+        attributes in the comparison.
         '''
-        if self.time != other.time or self.evtname != other.evtname:
-            return False
+        return (self.evtname == other.evtname and self.time == other.time)
 
-        # What follows is code that encodes the concept of equality for each
-        # derived class. Believe it f you dare.
-
-        if self.evtname == 'Note':
-            if self.pitch != other.pitch or self.channel != other.channel:
-                return False
-        if self.evtname == 'Tempo':
-            if self.tempo != other.tempo:
-                return False
-        if self.evtname == 'ProgramChange':
-            if (self.programNumber != other.programNumber or
-                    self.channel != other.channel):
-                return False
-        if self.evtname == 'TrackName':
-            if self.trackName != other.trackName:
-                return False
-        if self.evtname in ('ControllerEvent', 'PitchWheelEvent', 'SysEx', 'UniversalSysEx'):
-            return False
-
-        return True
 
     def __hash__(self):
         '''
@@ -134,6 +108,10 @@ class Note(GenericEvent):
         self.annotation = annotation
         super(Note, self).__init__(time, insertion_order)
 
+    def __eq__(self, other):
+        return (self.evtname == other.evtname and self.time == other.time and
+                self.pitch == other.pitch and self.channel == other.channel)
+
 
 class Tempo(GenericEvent):
     '''
@@ -145,6 +123,11 @@ class Tempo(GenericEvent):
     def __init__(self, time, tempo, insertion_order=0):
         self.tempo = int(60000000 / tempo)
         super(Tempo, self).__init__(time, insertion_order)
+
+    def __eq__(self, other):
+        return (self.evtname == other.evtname and
+                self.time == other.time and
+                self.tempo == other.tempo)
 
 
 class Copyright(GenericEvent):
@@ -199,6 +182,12 @@ class ProgramChange(GenericEvent):
         self.channel = channel
         super(ProgramChange, self).__init__(time, insertion_order)
 
+    def __eq__(self, other):
+        return (self.evtname == other.evtname and
+                self.time == other.time and
+                self.programNumber == other.programNumber and
+                self.channel == other.channel)
+
 
 class SysExEvent(GenericEvent):
     '''
@@ -211,6 +200,9 @@ class SysExEvent(GenericEvent):
         self.manID = manID
         self.payload = payload
         super(SysExEvent, self).__init__(time, insertion_order)
+
+    def __eq__(self, other):
+        return False
 
 
 class UniversalSysExEvent(GenericEvent):
@@ -229,6 +221,9 @@ class UniversalSysExEvent(GenericEvent):
         self.payload = payload
         super(UniversalSysExEvent, self).__init__(time, insertion_order)
 
+    def __eq__(self, other):
+        return False
+
 
 class ControllerEvent(GenericEvent):
     '''
@@ -244,6 +239,9 @@ class ControllerEvent(GenericEvent):
         self.controller_number = controller_number
         super(ControllerEvent, self).__init__(time, insertion_order)
 
+    def __eq__(self, other):
+        return False
+
 
 class PitchWheelEvent(GenericEvent):
     '''
@@ -257,6 +255,9 @@ class PitchWheelEvent(GenericEvent):
         self.pitch_wheel_value = pitch_wheel_value
         super(PitchWheelEvent, self).__init__(time, insertion_order)
 
+    def __eq__(self, other):
+        return False
+
 
 class TrackName(GenericEvent):
     '''
@@ -269,6 +270,11 @@ class TrackName(GenericEvent):
         # GenericEvent.__init__(self, time,)
         self.trackName = trackName.encode("ISO-8859-1")
         super(TrackName, self).__init__(time, insertion_order)
+
+    def __eq__(self, other):
+        return (self.evtname == other.evtname and
+                self.time == other.time and
+                self.trackName == other.trackName)
 
 
 class TimeSignature(GenericEvent):
