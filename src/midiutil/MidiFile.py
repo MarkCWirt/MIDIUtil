@@ -601,7 +601,7 @@ class TrackName(GenericEvent):
         dataLength = len(self.trackName)
         dataLengthVar = writeVarLength(dataLength)
         for i in dataLengthVar:
-            midibytes += struct.pack("b", i)
+            midibytes += struct.pack("B", i)
         midibytes += self.trackName
         return midibytes
 
