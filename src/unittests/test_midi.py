@@ -421,13 +421,18 @@ class TestMIDIUtils(unittest.TestCase):
         #import pdb; pdb.set_trace()
         program = 10
         channel = 0
+        tracknum = 0
+        realtracknum = tracknum
+        time = 0.0
         MyMIDI = MIDIFile(1)
-        MyMIDI.addProgramChange(0, channel, 0, program)
+        if MyMIDI.header.numeric_format == 1:
+            realtracknum = tracknum + 1
+        MyMIDI.addProgramChange(tracknum, channel, time, program)
         MyMIDI.close()
 
-        data = Decoder(MyMIDI.tracks[0].MIDIdata)
+        data = Decoder(MyMIDI.tracks[realtracknum].MIDIdata)
 
-        self.assertEqual(MyMIDI.tracks[0].MIDIEventList[0].evtname, 'ProgramChange')
+        self.assertEqual(MyMIDI.tracks[realtracknum].MIDIEventList[0].evtname, 'ProgramChange')
         self.assertEqual(data.unpack_into_byte(0), 0x00) # time
         self.assertEqual(data.unpack_into_byte(1), 0xC << 4 | channel) # Code
         self.assertEqual(data.unpack_into_byte(2), program)
@@ -438,6 +443,7 @@ class TestMIDIUtils(unittest.TestCase):
         channel = 0
         time = 0.0
         tracknum = 0
+        realtracknum = tracknum
         MyMIDI = MIDIFile(1)
         if MyMIDI.header.numeric_format == 1:
             realtracknum = tracknum + 1
@@ -851,13 +857,13 @@ class TestMIDIUtils(unittest.TestCase):
         MyMIDI.addProgramChange(track, channel, time, program)
         MyMIDI.addProgramChange(track, channel, time, program)
         MyMIDI.close()
-        self.assertEqual(1, len(MyMIDI.tracks[0].eventList))
+        self.assertEqual(1, len(MyMIDI.tracks[track+1].eventList))
         MyMIDI = MIDIFile(1)
         MyMIDI.addProgramChange(track, channel, time, program)
         program = 11
         MyMIDI.addProgramChange(track, channel, time, program)
         MyMIDI.close()
-        self.assertEqual(2, len(MyMIDI.tracks[0].eventList))
+        self.assertEqual(2, len(MyMIDI.tracks[track+1].eventList))
 
         # Track Name
         track = 0
