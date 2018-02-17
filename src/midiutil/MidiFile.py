@@ -270,8 +270,8 @@ class Copyright(GenericEvent):
         midibytes += struct.pack('>B', subcode)
         payloadLength = len(self.notice)
         payloadLengthVar = writeVarLength(payloadLength)
-        for i in range(len(payloadLengthVar)):
-            midibytes += struct.pack("b", payloadLengthVar[i])
+        for i in payloadLengthVar:
+            midibytes += struct.pack("b", i)
         midibytes += self.notice
         return midibytes
 
@@ -301,8 +301,8 @@ class Text(GenericEvent):
         midibytes += struct.pack('>B', subcode)
         payloadLength = len(self.text)
         payloadLengthVar = writeVarLength(payloadLength)
-        for i in range(len(payloadLengthVar)):
-            midibytes += struct.pack("B", payloadLengthVar[i])
+        for i in payloadLengthVar:
+            midibytes += struct.pack("B", i)
         midibytes += self.text
         return midibytes
 
@@ -565,8 +565,8 @@ class TrackName(GenericEvent):
         midibytes += struct.pack('B', 0X03)
         dataLength = len(self.trackName)
         dataLengthVar = writeVarLength(dataLength)
-        for i in range(0, len(dataLengthVar)):
-            midibytes += struct.pack("b", dataLengthVar[i])
+        for i in dataLengthVar:
+            midibytes += struct.pack("b", i)
         midibytes += self.trackName
         return midibytes
 
