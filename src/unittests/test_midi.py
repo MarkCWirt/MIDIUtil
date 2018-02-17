@@ -432,6 +432,25 @@ class TestMIDIUtils(unittest.TestCase):
         self.assertEqual(data.unpack_into_byte(1), 0xC << 4 | channel) # Code
         self.assertEqual(data.unpack_into_byte(2), program)
 
+    def testChannelPressure(self):
+        #import pdb; pdb.set_trace()
+        pressure = 10
+        channel = 0
+        time = 0.0
+        tracknum = 0
+        MyMIDI = MIDIFile(1)
+        if MyMIDI.header.numeric_format == 1:
+            realtracknum = tracknum + 1
+        MyMIDI.addChannelPressure(tracknum, channel, time, pressure)
+        MyMIDI.close()
+
+        data = Decoder(MyMIDI.tracks[realtracknum].MIDIdata)
+
+        self.assertEqual(MyMIDI.tracks[realtracknum].MIDIEventList[0].evtname, 'ChannelPressure')
+        self.assertEqual(data.unpack_into_byte(0), 0x00) # time
+        self.assertEqual(data.unpack_into_byte(1), 0xD0 | channel) # Code
+        self.assertEqual(data.unpack_into_byte(2), pressure)
+
     def testTrackName(self):
         #import pdb; pdb.set_trace()
         track_name = "track"

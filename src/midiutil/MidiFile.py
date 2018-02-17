@@ -499,6 +499,41 @@ class ControllerEvent(GenericEvent):
         return midibytes
 
 
+class ChannelPressureEvent(GenericEvent):
+    '''
+    A class that encapsulates a Channel Pressure (Aftertouch) event.
+    '''
+    evtname = 'ChannelPressure'
+    midi_status = 0xD0 # 0xDx is Channel Pressure (Aftertouch)
+    sec_sort_order = 1
+
+    def __init__(self, channel, time, pressure_value, insertion_order=0):
+        self.channel = channel
+        self.pressure_value = pressure_value
+        super(ChannelPressureEvent, self).__init__(time, insertion_order)
+
+    def __eq__(self, other):
+        return (self.__class__.__name__ == other.__class__.__name__ and
+                self.time == other.time and
+                self.pressure_value == other.pressure_value and
+                self.channel == other.channel)
+
+    __hash__ = GenericEvent.__hash__
+
+    def serialize(self, previous_event_tick):
+        """Return a bytestring representation of the event, in the format required for
+        writing into a standard midi file.
+        """
+        midibytes = b""
+        code = self.midi_status | self.channel
+        vartick = writeVarLength(self.tick - previous_event_tick)
+        for x in vartick:
+            midibytes += struct.pack('>B', x)
+        midibytes += struct.pack('>B', code)
+        midibytes += struct.pack('>B', self.pressure_value)
+        return midibytes
+
+
 class PitchWheelEvent(GenericEvent):
     '''
     A class that encapsulates a pitch wheel change event.
@@ -686,6 +721,13 @@ class MIDITrack(object):
         '''
         self.eventList.append(ProgramChange(channel, time, program,
                                             insertion_order=insertion_order))
+
+    def addChannelPressure(self, channel, time, pressure_value, insertion_order=0):
+        '''
+        Add a channel pressure event.
+        '''
+        self.eventList.append(ChannelPressureEvent(channel, time, pressure_value,
+                                                   insertion_order=insertion_order))
 
     def addTrackName(self, time, trackName, insertion_order=0):
         '''
@@ -1214,6 +1256,25 @@ class MIDIFile(object):
         self.tracks[track].addProgramChange(channel, time, program,
                                             insertion_order=self.event_counter)
         self.event_counter += 1
+
+    def addChannelPressure(self, tracknum, channel, time, pressure_value):
+        """
+        Add a Channel Pressure event.
+
+        :param tracknum: The zero-based track number to which program change event is added.
+        :param channel: the MIDI channel to assign to the event.
+            [Integer, 0-15]
+        :param time: The time (in beats) at which the program change event is
+            placed [Float].
+        :param pressure_value: the pressure value. [Integer, 0-127].
+        """
+        if self.header.numeric_format == 1:
+            tracknum += 1
+        track = self.tracks[tracknum]
+        track.addChannelPressure(channel, time, pressure_value,
+                                 insertion_order=self.event_counter)
+        self.event_counter += 1
+
 
     def addControllerEvent(self, track, channel, time, controller_number,
                            parameter):
