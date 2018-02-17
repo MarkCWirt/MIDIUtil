@@ -791,41 +791,13 @@ class MIDITrack(object):
         Write the events in MIDIEvents to the MIDI stream.
         MIDIEventList is presumed to be already sorted in chronological order.
         '''
-#        preciseTime = 0.0  # Actual time of event, ignoring round-off
-#        actualTime = 0.0   # Time as written to midi stream, include round-off
-#        for event in self.MIDIEventList:
-#
-#            preciseTime = preciseTime + event.time
-#
-#            # Convert the time to variable length and back, to see how much
-#            # error is introduced
-#
-#            testBuffer = b""
-#            varTime = writeVarLength(event.time)
-#            for timeByte in varTime:
-#                testBuffer = testBuffer + struct.pack('>B', timeByte)
-#            (roundedVal, discard) = readVarLength(0, testBuffer)
-#            roundedTime = actualTime + roundedVal
-#
-#            # Calculate the delta between the two and apply it to event time.
-#
-#            delta = preciseTime - roundedTime
-#            event.time = event.time + delta
-#
-#            # Now update the actualTime value, using the updated event time.
-#
-#            testBuffer = b""
-#            varTime = writeVarLength(event.time)
-#            for timeByte in varTime:
-#                testBuffer = testBuffer + struct.pack('>B', timeByte)
-#
-#            (roundedVal, discard) = readVarLength(0, testBuffer)
-#            actualTime = actualTime + roundedVal
-
         previous_event_tick = 0
         for event in self.MIDIEventList:
             self.MIDIdata += event.serialize(previous_event_tick)
             #previous_event_tick = event.tick
+            # I do not like that adjustTimeAndOrigin() changes GenericEvent.tick
+            # from absolute to relative. I intend to change that, and just
+            # calculate the relative tick here, without changing GenericEvent.tick
 
     def deInterleaveNotes(self):
         '''
