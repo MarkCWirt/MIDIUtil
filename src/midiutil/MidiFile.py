@@ -1589,33 +1589,35 @@ class MIDIFile(object):
 
 def writeVarLength(i):
     '''
-    Accept an input, and write a MIDI-compatible variable length stream
+    Accept an integer, and serialize it as a MIDI file variable length quantity
 
-    The MIDI format is a little strange, and makes use of so-called variable
-    length quantities. These quantities are a stream of bytes. If the most
-    significant bit is 1, then more bytes follow. If it is zero, then the
-    byte in question is the last in the stream
+    Some numbers in MTrk chunks are represented in a form called a variable-
+    length quantity.  These numbers are represented in a sequence of bytes,
+    each byte holding seven bits of the number, and ordered most significant
+    bits first. All bytes in the sequence except the last have bit 7 set,
+    and the last byte has bit 7 clear.  This form allows smaller numbers to
+    be stored in fewer bytes.  For example, if the number is between 0 and
+    127, it is thus represented exactly as one byte.  A number between 128
+    and 16383 uses two bytes, and so on.
+
+    Examples:
+    Number  VLQ
+    128     81 00
+    8192    C0 00
+    16383   FF 7F
+    16384   81 80 00
     '''
-    input = int(i+0.5)
-    output = [0, 0, 0, 0]
-    reversed = [0, 0, 0, 0]
-    count = 0
-    result = input & 0x7F
-    output[count] = result
-    count = count + 1
-    input = input >> 7
-    while input > 0:
-        result = input & 0x7F
-        result = result | 0x80
-        output[count] = result
-        count = count + 1
-        input = input >> 7
+    if i == 0:
+        return [0]
 
-    reversed[0] = output[3]
-    reversed[1] = output[2]
-    reversed[2] = output[1]
-    reversed[3] = output[0]
-    return reversed[4-count:4]
+    vlqbytes = []
+    hibit = 0x00 # low-order byte has high bit cleared.
+    while i > 0:
+        vlqbytes.append(((i & 0x7f) | hibit) & 0xff)
+        i >>= 7
+        hibit = 0x80
+    vlqbytes.reverse() # put most-significant byte first, least significant last
+    return vlqbytes
 
 
 # readVarLength is taken from the MidiFile class.
