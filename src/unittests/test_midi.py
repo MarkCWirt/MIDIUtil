@@ -466,6 +466,21 @@ class TestMIDIUtils(unittest.TestCase):
         self.assertEqual(data.unpack_into_byte(1), 0xFF) # Code
         self.assertEqual(data.unpack_into_byte(2), 0x03) # subcodes
 
+    def testLongTrackName(self):
+        #import pdb; pdb.set_trace()
+        track_name = 'long track name ' * 8
+        MyMIDI = MIDIFile(1)
+        MyMIDI.addTrackName(0, 0, track_name)
+        MyMIDI.close()
+
+        data = Decoder(MyMIDI.tracks[1].MIDIdata)
+
+        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[0].evtname, 'TrackName')
+
+        self.assertEqual(data.unpack_into_byte(0), 0x00) # time
+        self.assertEqual(data.unpack_into_byte(1), 0xFF) # Code
+        self.assertEqual(data.unpack_into_byte(2), 0x03) # subcodes
+
     def testTuningBank(self):
         #import pdb; pdb.set_trace()
         bank = 1
