@@ -1241,30 +1241,32 @@ class MIDIFile(object):
                                    insertion_order=self.event_counter)
         self.event_counter += 1
 
-    def addProgramChange(self, track, channel, time, program):
+    def addProgramChange(self, tracknum, channel, time, program):
         """
 
         Add a MIDI program change event.
 
-        :param track: The track to which program change event is added.
+        :param tracknum: The zero-based track number to which program change event is added.
         :param channel: the MIDI channel to assign to the event.
             [Integer, 0-15]
         :param time: The time (in beats) at which the program change event is
             placed [Float].
         :param program: the program number. [Integer, 0-127].
         """
-        self.tracks[track].addProgramChange(channel, time, program,
-                                            insertion_order=self.event_counter)
+        if self.header.numeric_format == 1:
+            tracknum += 1
+        self.tracks[tracknum].addProgramChange(channel, time, program,
+                                               insertion_order=self.event_counter)
         self.event_counter += 1
 
     def addChannelPressure(self, tracknum, channel, time, pressure_value):
         """
         Add a Channel Pressure event.
 
-        :param tracknum: The zero-based track number to which program change event is added.
+        :param tracknum: The zero-based track number to which channel pressure event is added.
         :param channel: the MIDI channel to assign to the event.
             [Integer, 0-15]
-        :param time: The time (in beats) at which the program change event is
+        :param time: The time (in beats) at which the channel pressure event is
             placed [Float].
         :param pressure_value: the pressure value. [Integer, 0-127].
         """
