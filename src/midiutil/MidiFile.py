@@ -109,6 +109,10 @@ class NoteOn(GenericEvent):
         return (self.evtname == other.evtname and self.time == other.time and
                 self.pitch == other.pitch and self.channel == other.channel)
 
+    # In Python 3, a class which overrides __eq__ also needs to provide __hash__,
+    # because in Python 3 parent __hash__ is not inherited.
+    __hash__ = GenericEvent.__hash__
+
     def __str__(self):
         return 'NoteOn %d at time %f tick %d duration %f ch %d vel %d' % (
                 self.pitch, self.time, self.tick, self.duration, self.channel, self.volume)
@@ -152,6 +156,8 @@ class NoteOff (GenericEvent):
         return (self.evtname == other.evtname and self.time == other.time and
                 self.pitch == other.pitch and self.channel == other.channel)
 
+    __hash__ = GenericEvent.__hash__
+
     def __str__(self):
         return 'NoteOff %d at time %f tick %d ch %d vel %d' % (
                 self.pitch, self.time, self.tick, self.channel, self.volume)
@@ -186,6 +192,8 @@ class Tempo(GenericEvent):
         return (self.evtname == other.evtname and
                 self.time == other.time and
                 self.tempo == other.tempo)
+
+    __hash__ = GenericEvent.__hash__
 
     def serialize(self, previous_event_tick):
         """Return a bytestring representation of the event, in the format required for
@@ -349,6 +357,8 @@ class ProgramChange(GenericEvent):
                 self.programNumber == other.programNumber and
                 self.channel == other.channel)
 
+    __hash__ = GenericEvent.__hash__
+
     def serialize(self, previous_event_tick):
         """Return a bytestring representation of the event, in the format required for
         writing into a standard midi file.
@@ -377,6 +387,8 @@ class SysExEvent(GenericEvent):
 
     def __eq__(self, other):
         return False
+
+    __hash__ = GenericEvent.__hash__
 
     def serialize(self, previous_event_tick):
         """Return a bytestring representation of the event, in the format required for
@@ -417,6 +429,8 @@ class UniversalSysExEvent(GenericEvent):
 
     def __eq__(self, other):
         return False
+
+    __hash__ = GenericEvent.__hash__
 
     def serialize(self, previous_event_tick):
         """Return a bytestring representation of the event, in the format required for
@@ -465,6 +479,8 @@ class ControllerEvent(GenericEvent):
     def __eq__(self, other):
         return False
 
+    __hash__ = GenericEvent.__hash__
+
     def serialize(self, previous_event_tick):
         """Return a bytestring representation of the event, in the format required for
         writing into a standard midi file.
@@ -495,6 +511,8 @@ class PitchWheelEvent(GenericEvent):
 
     def __eq__(self, other):
         return False
+
+    __hash__ = GenericEvent.__hash__
 
     def serialize(self, previous_event_tick):
         """Return a bytestring representation of the event, in the format required for
@@ -529,6 +547,8 @@ class TrackName(GenericEvent):
         return (self.evtname == other.evtname and
                 self.time == other.time and
                 self.trackName == other.trackName)
+
+    __hash__ = GenericEvent.__hash__
 
     def serialize(self, previous_event_tick):
         """Return a bytestring representation of the event, in the format required for
