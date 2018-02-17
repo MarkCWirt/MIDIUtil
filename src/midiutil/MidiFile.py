@@ -72,10 +72,13 @@ class GenericEvent(object):
         '''
         Return a hash code for the object.
 
-        This is needed for the removal of duplicate objects from the event
-        list.  The only real requirement for the algorithm is that the hash of
-        equal objects must be equal.  There is probably great opportunity for
-        improvements in the hashing function.
+        This is needed in order to allow GenericObject classes to be used
+        as the key in a dict or set. duplicate objects are removed from
+        the event list by storing all the objects in a set, and then
+        reconstructing the list from the set.  The only real requirement
+        for the algorithm is that the hash of equal objects must be equal.
+        There is probably great opportunity for improvements in the hashing
+        function.
         '''
         # Robert Jenkin's 32 bit hash.
         a = int(self.time)
@@ -765,8 +768,8 @@ class MIDITrack(object):
         # hashable (that is, they must have a __hash__() and __eq__() function
         # defined).
 
-        tempDict = {item: 1 for item in self.eventList}
-        self.eventList = list(tempDict.keys())
+        s = set(self.eventList)
+        self.eventList = list(s)
         self.eventList.sort(key=sort_events)
 
     def closeTrack(self):
