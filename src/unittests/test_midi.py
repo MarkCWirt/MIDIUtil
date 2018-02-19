@@ -20,7 +20,7 @@ import unittest
 from midiutil.MidiFile import *
 
 from midiutil.MidiFile import writeVarLength,  \
-    frequencyTransform,  returnFrequency, TICKSPERBEAT, MAJOR, MINOR, SHARPS, FLATS, MIDIFile
+    frequencyTransform, returnFrequency, MAJOR, MINOR, SHARPS, FLATS, MIDIFile
 
 
 class Decoder(object):
@@ -50,87 +50,130 @@ class TestMIDIUtils(unittest.TestCase):
 
     def testAddNote(self):
         MyMIDI = MIDIFile(1) # a format 1 file, so we increment the track number below
-        MyMIDI.addNote(0, 0, 100,0,1,100)
+        track = 0
+        channel = 0
+        pitch = 100
+        time = 0
+        duration = 1
+        volume = 100
+        MyMIDI.addNote(track, channel, pitch, time, duration, volume)
         self.assertEqual(MyMIDI.tracks[1].eventList[0].evtname, "NoteOn")
-        self.assertEqual(MyMIDI.tracks[1].eventList[0].pitch, 100)
-        self.assertEqual(MyMIDI.tracks[1].eventList[0].time, 0)
-        self.assertEqual(MyMIDI.tracks[1].eventList[0].duration, 1)
-        self.assertEqual(MyMIDI.tracks[1].eventList[0].volume, 100)
+        self.assertEqual(MyMIDI.tracks[1].eventList[0].pitch, pitch)
+        self.assertEqual(MyMIDI.tracks[1].eventList[0].tick, MyMIDI.time_to_ticks(time))
+        self.assertEqual(MyMIDI.tracks[1].eventList[0].duration, MyMIDI.time_to_ticks(duration))
+        self.assertEqual(MyMIDI.tracks[1].eventList[0].volume, volume)
 
     def testShiftTrack(self):
+        track = 0
+        channel = 0
+        pitch = 100
         time = 1
+        duration = 1
+        volume = 100
         MyMIDI = MIDIFile(1)
-        MyMIDI.addNote(0, 0, 100,time,1,100)
+        MyMIDI.addNote(track, channel, pitch, time, duration, volume)
         self.assertEqual(MyMIDI.tracks[1].eventList[0].evtname, "NoteOn")
-        self.assertEqual(MyMIDI.tracks[1].eventList[0].pitch, 100)
-        self.assertEqual(MyMIDI.tracks[1].eventList[0].time, time)
-        self.assertEqual(MyMIDI.tracks[1].eventList[0].duration, 1)
-        self.assertEqual(MyMIDI.tracks[1].eventList[0].volume, 100)
+        self.assertEqual(MyMIDI.tracks[1].eventList[0].pitch, pitch)
+        self.assertEqual(MyMIDI.tracks[1].eventList[0].tick, MyMIDI.time_to_ticks(time))
+        self.assertEqual(MyMIDI.tracks[1].eventList[0].duration, MyMIDI.time_to_ticks(duration))
+        self.assertEqual(MyMIDI.tracks[1].eventList[0].volume, volume)
         MyMIDI.shiftTracks()
-        self.assertEqual(MyMIDI.tracks[1].eventList[0].time, 0)
+        self.assertEqual(MyMIDI.tracks[1].eventList[0].tick, 0)
 
     def testDeinterleaveNotes(self):
-        MyMIDI = MIDIFile(1)
-        MyMIDI.addNote(0, 0, 100, 0, 2, 100)
-        MyMIDI.addNote(0, 0, 100, 1, 2, 100)
+        MyMIDI = MIDIFile(1, adjust_origin=False)
+        track = 0
+        channel = 0
+        pitch = 100
+        time1 = 0
+        time2 = 1
+        duration = 2
+        volume = 100
+        MyMIDI.addNote(track, channel, pitch, time1, duration, volume) # on at 0 off at 2
+        MyMIDI.addNote(track, channel, pitch, time2, duration, volume+1) # on at 1 off at 3
         MyMIDI.close()
+
+        # ticks have already been converted to delta ticks
         self.assertEqual(MyMIDI.tracks[1].MIDIEventList[0].evtname, 'NoteOn')
-        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[0].tick,  0)
+        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[0].tick, MyMIDI.time_to_ticks(time1))
         self.assertEqual(MyMIDI.tracks[1].MIDIEventList[1].evtname, 'NoteOff')
-        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[1].tick,  TICKSPERBEAT)
+        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[1].tick, MyMIDI.time_to_ticks(time2))
         self.assertEqual(MyMIDI.tracks[1].MIDIEventList[2].evtname, 'NoteOn')
-        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[2].tick,  0)
+        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[2].tick, MyMIDI.time_to_ticks(time2 - time2))
         self.assertEqual(MyMIDI.tracks[1].MIDIEventList[3].evtname, 'NoteOff')
-        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[3].tick,  TICKSPERBEAT * 2)
+        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[3].tick, MyMIDI.time_to_ticks(time2 - time2 + duration))
 
     def testTimeShift(self):
 
         # With one track
         MyMIDI = MIDIFile(1)
-        MyMIDI.addNote(0, 0, 100, 5, 1, 100)
+        track = 0
+        channel = 0
+        pitch = 100
+        time1 = 5
+        duration = 1
+        volume = 100
+        MyMIDI.addNote(track, channel, pitch, time1, duration, volume)
         MyMIDI.close()
         self.assertEqual(MyMIDI.tracks[1].MIDIEventList[0].evtname, 'NoteOn')
-        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[0].tick,  0)
+        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[0].tick, MyMIDI.time_to_ticks(0))
         self.assertEqual(MyMIDI.tracks[1].MIDIEventList[1].evtname, 'NoteOff')
-        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[1].tick,  TICKSPERBEAT)
+        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[1].tick, MyMIDI.time_to_ticks(duration))
 
         # With two tracks
+        track2 = 1
         MyMIDI = MIDIFile(2)
-        MyMIDI.addNote(0, 0, 100, 5, 1, 100)
-        MyMIDI.addNote(1, 0, 100, 6, 1, 100)
+        MyMIDI.addNote(track, channel, pitch, time1, duration, volume)
+        time2 = 6
+        MyMIDI.addNote(track2, channel, pitch, time2, duration, volume)
         MyMIDI.close()
+        # ticks have already been converted to delta ticks
         self.assertEqual(MyMIDI.tracks[1].MIDIEventList[0].evtname, 'NoteOn')
-        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[0].tick,  0)
+        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[0].tick, MyMIDI.time_to_ticks(0))
         self.assertEqual(MyMIDI.tracks[1].MIDIEventList[1].evtname, 'NoteOff')
-        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[1].tick,  TICKSPERBEAT)
+        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[1].tick, MyMIDI.time_to_ticks(duration))
         self.assertEqual(MyMIDI.tracks[2].MIDIEventList[0].evtname, 'NoteOn')
-        self.assertEqual(MyMIDI.tracks[2].MIDIEventList[0].tick,  TICKSPERBEAT)
+        self.assertEqual(MyMIDI.tracks[2].MIDIEventList[0].tick, MyMIDI.time_to_ticks(0 + duration))
         self.assertEqual(MyMIDI.tracks[2].MIDIEventList[1].evtname, 'NoteOff')
-        self.assertEqual(MyMIDI.tracks[2].MIDIEventList[1].tick,  TICKSPERBEAT)
+        self.assertEqual(MyMIDI.tracks[2].MIDIEventList[1].tick, MyMIDI.time_to_ticks(0 + duration))
 
         # Negative Time
         MyMIDI = MIDIFile(1)
-        MyMIDI.addNote(0, 0, 100, -5, 1, 100)
+        track = 0
+        channel = 0
+        pitch = 100
+        time = -5
+        duration = 1
+        volume = 100
+        MyMIDI.addNote(track, channel, pitch, time, duration, volume)
         MyMIDI.close()
         self.assertEqual(MyMIDI.tracks[1].MIDIEventList[0].evtname, 'NoteOn')
-        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[0].tick,  0)
+        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[0].tick, MyMIDI.time_to_ticks(0))
         self.assertEqual(MyMIDI.tracks[1].MIDIEventList[1].evtname, 'NoteOff')
-        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[1].tick,  TICKSPERBEAT)
+        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[1].tick, MyMIDI.time_to_ticks(0 + duration))
 
         # Negative time, two tracks
 
         MyMIDI = MIDIFile(2)
-        MyMIDI.addNote(0, 0, 100, -1, 1, 100)
-        MyMIDI.addNote(1, 0, 100, 0, 1, 100)
+        track = 0
+        channel = 0
+        pitch = 100
+        time = -1
+        duration = 1
+        volume = 100
+        MyMIDI.addNote(track, channel, pitch, time, duration, volume)
+        track2 = 1
+        time2 = 0
+        MyMIDI.addNote(track2, channel, pitch, time2, duration, volume)
         MyMIDI.close()
         self.assertEqual(MyMIDI.tracks[1].MIDIEventList[0].evtname, 'NoteOn')
-        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[0].tick,  0)
+        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[0].tick, MyMIDI.time_to_ticks(0))
         self.assertEqual(MyMIDI.tracks[1].MIDIEventList[1].evtname, 'NoteOff')
-        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[1].tick,  TICKSPERBEAT)
+        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[1].tick, MyMIDI.time_to_ticks(1))
         self.assertEqual(MyMIDI.tracks[2].MIDIEventList[0].evtname, 'NoteOn')
-        self.assertEqual(MyMIDI.tracks[2].MIDIEventList[0].tick,  TICKSPERBEAT)
+        self.assertEqual(MyMIDI.tracks[2].MIDIEventList[0].tick, MyMIDI.time_to_ticks(1))
         self.assertEqual(MyMIDI.tracks[2].MIDIEventList[1].evtname, 'NoteOff')
-        self.assertEqual(MyMIDI.tracks[2].MIDIEventList[1].tick,  TICKSPERBEAT)
+        self.assertEqual(MyMIDI.tracks[2].MIDIEventList[1].tick, MyMIDI.time_to_ticks(1))
 
     def testFrequency(self):
         freq = frequencyTransform(8.1758)
@@ -678,7 +721,7 @@ class TestMIDIUtils(unittest.TestCase):
 
         # Just for fun we'll use a multi-byte time
         time = 1
-        time_bytes = writeVarLength(time*TICKSPERBEAT)
+        time_bytes = writeVarLength(time * MyMIDI.ticks_per_quarternote)
         MyMIDI.addUniversalSysEx(0, time, code, subcode, payload, realTime=False)
         MyMIDI.close()
 
@@ -756,7 +799,7 @@ class TestMIDIUtils(unittest.TestCase):
         with open("/tmp/test.mid", "wb") as output_file:
             MyMIDI.writeFile(output_file)
 
-    def testAdujustOrigin(self):
+    def testAdjustOrigin(self):
         track    = 0
         channel  = 0
         pitch    = 69
@@ -784,7 +827,7 @@ class TestMIDIUtils(unittest.TestCase):
 
         data = Decoder(MyMIDI.tracks[1].MIDIdata)
 
-        self.assertEqual(data.unpack_into_byte(0), TICKSPERBEAT/10) # first time, should be an integer < 127
+        self.assertEqual(data.unpack_into_byte(0), MyMIDI.ticks_per_quarternote / 10) # first time, should be an integer < 127
         self.assertEqual(data.unpack_into_byte(8), 0x00) # first time
 
     def testMultiClose(self):

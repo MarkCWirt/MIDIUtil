@@ -208,5 +208,56 @@ To improve it, I will:
    ``for event in self.MIDIEventList:``  is simplified to::
 
         for event in self.MIDIEventList:
-            self.MIDIdata += event.mtrk_event()
+            self.MIDIdata += event.serialize()
 
+
+Using ticks instead of fractional quarter notes as time
+=======================================================
+The public interface of ``MIDIFile`` is designed such that you must specify
+the start time and duration of an event in units of quarter notes. Fractions
+are acceptable, for example you can specify start time 1.5 to mean one
+and half quarter notes from the start of the MIDI file timeline.
+
+The Standard MIDI File as well as almost all MIDI sequencer software stores
+start times and durations in units of ticks.  There is in the SMF a number
+which tells you how many ticks are in a quarter note, usually 480, 960, or
+120. So converting between tick units and quarter note units is
+straightforward.
+
+Using quarter notes as start times may be more convenient than ticks if you
+are generating musical events programmatically, or writing drum machine
+patterns.
+
+However, using ticks as the start time instead quarter notes is more
+convenient if you wanted to use ``MIDIFile`` in a project to convert some
+old sequence files from some obsolete MIDI software into standard MIDI
+format.
+
+The design changes I will make:
+
+``GenericEvent`` will store start time and duration as ticks, not quarter
+notes.
+
+I will change the public API of ``MIDIFile`` so you can use either ticks or
+quarter notes as the time unit for the ``time`` argument to the ``add...()``
+methods. The signatures of all the ``add...()`` methods will remain the
+same. And the default time unit will remain quarter notes.
+
+An additional keyword argument, ``eventtime_is_ticks=False``, will be added
+to ``MIDIFile.__init__()``.  You can choose to use ticks when you instantiate
+``MIDIFile`` by specifying ``eventtime_is_ticks=True``. To maintain backward
+compability, the default is ``False``.
+
+I do not particularly like that the ``time`` argument will become dual
+personality, but it is the simplest way to allow for using either ticks or
+quarter note units. Creating a parallel set of ``add...()`` methods just for
+ticks would be another way, but is not appealing.
+
+So after this changset, the external API of ``MIDIFile`` remains the same,
+except it offers an option to allow the user to specify time in ticks
+instead of quarter notes.
+
+If for some reason you wish to access individual event times as stored in
+the ``MIDITrack.eventsList``, and have code which expects the time attribute
+to be quarter note value instead of tick, you can convert the tick value to
+quarter note value with ``MIDIFile.tick_to_quarter(tickval)``.
