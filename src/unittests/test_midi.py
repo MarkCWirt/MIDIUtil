@@ -406,9 +406,9 @@ class TestMIDIUtils(unittest.TestCase):
         MyMIDI.addKeySignature(track, time, accidentals, accidental_type, mode)
         MyMIDI.close()
         
-        data = Decoder(MyMIDI.tracks[1].MIDIdata)
+        data = Decoder(MyMIDI.tracks[0].MIDIdata)
         
-        self.assertEqual(MyMIDI.tracks[1].MIDIEventList[0].type, 'KeySignature')
+        self.assertEqual(MyMIDI.tracks[0].MIDIEventList[0].type, 'KeySignature')
         
         self.assertEqual(data.unpack_into_byte(0), 0x00) # time
         self.assertEqual(data.unpack_into_byte(1), 0xFF) # Code

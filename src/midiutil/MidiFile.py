@@ -1109,7 +1109,7 @@ class MIDIFile(object):
             MyMIDI.addKeySignature(0, 0, 3, SHARPS, MINOR)
         '''
         if self.header.numeric_format == 1:
-            track += 1
+            track = 0 #  User reported that this is needed.
         self.tracks[track].addKeySignature(time, accidentals, accidental_type,
                                            mode,
                                            insertion_order=self.event_counter)
