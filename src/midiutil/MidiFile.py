@@ -45,7 +45,6 @@ class GenericEvent(object):
         self.tick = tick
         self.insertion_order = insertion_order
 
-
     def __eq__(self, other):
         '''
         Equality operator.
@@ -59,7 +58,6 @@ class GenericEvent(object):
         attributes in the comparison.
         '''
         return (self.evtname == other.evtname and self.tick == other.tick)
-
 
     def __hash__(self):
         '''
@@ -89,7 +87,7 @@ class NoteOn(GenericEvent):
     A class that encapsulates a note
     '''
     evtname = 'NoteOn'
-    midi_status = 0x90 # 0x9x is Note On
+    midi_status = 0x90    # 0x9x is Note On
     sec_sort_order = 3
 
     def __init__(self, channel, pitch, tick, duration, volume,
@@ -111,7 +109,7 @@ class NoteOn(GenericEvent):
 
     def __str__(self):
         return 'NoteOn %d at tick %d duration %d ch %d vel %d' % (
-                self.pitch, self.tick, self.duration, self.channel, self.volume)
+            self.pitch, self.tick, self.duration, self.channel, self.volume)
 
     def serialize(self, previous_event_tick):
         """Return a bytestring representation of the event, in the format required for
@@ -133,8 +131,8 @@ class NoteOff (GenericEvent):
     A class that encapsulates a Note Off event
     '''
     evtname = 'NoteOff'
-    midi_status = 0x80 # 0x8x is Note Off
-    sec_sort_order = 2 # must be less than that of NoteOn
+    midi_status = 0x80  # 0x8x is Note Off
+    sec_sort_order = 2  # must be less than that of NoteOn
     # If two events happen at the same time, the secondary sort key is
     # ``sec_sort_order``. Thus a class of events can be processed earlier than
     # another. One place this is used in the code is to make sure that note
@@ -156,7 +154,7 @@ class NoteOff (GenericEvent):
 
     def __str__(self):
         return 'NoteOff %d at tick %d ch %d vel %d' % (
-                self.pitch, self.tick, self.channel, self.volume)
+            self.pitch, self.tick, self.channel, self.volume)
 
     def serialize(self, previous_event_tick):
         """Return a bytestring representation of the event, in the format required for
@@ -217,14 +215,14 @@ class Tempo(GenericEvent):
         midibytes = b""
         code = 0xFF
         subcode = 0x51
-        fourbite = struct.pack('>L', self.tempo) # big-endian uint32
+        fourbite = struct.pack('>L', self.tempo)  # big-endian uint32
         threebite = fourbite[1:4]  # Just discard the MSB
         varTime = writeVarLength(self.tick - previous_event_tick)
         for timeByte in varTime:
             midibytes += struct.pack('>B', timeByte)
         midibytes += struct.pack('>B', code)
         midibytes += struct.pack('>B', subcode)
-        midibytes += struct.pack('>B', 0x03) # length in bytes of 24-bit tempo
+        midibytes += struct.pack('>B', 0x03)  # length in bytes of 24-bit tempo
         midibytes += threebite
         return midibytes
 
@@ -338,10 +336,10 @@ class ProgramChange(GenericEvent):
     A class that encapsulates a program change event.
     '''
     evtname = 'ProgramChange'
-    midi_status = 0xc0 # 0xcx is Program Change
+    midi_status = 0xc0   # 0xcx is Program Change
     sec_sort_order = 1
 
-    def __init__(self,  channel,  tick,  programNumber,
+    def __init__(self, channel, tick, programNumber,
                  insertion_order=0):
         self.programNumber = programNumber
         self.channel = channel
@@ -373,10 +371,10 @@ class SysExEvent(GenericEvent):
     '''
     A class that encapsulates a System Exclusive  event.
     '''
-    evtname = 'SysEx' # doesn't match class name like most others
+    evtname = 'SysEx'  # doesn't match class name like most others
     sec_sort_order = 1
 
-    def __init__(self,  tick,  manID,  payload, insertion_order=0):
+    def __init__(self, tick, manID, payload, insertion_order=0):
         self.manID = manID
         self.payload = payload
         super(SysExEvent, self).__init__(tick, insertion_order)
@@ -397,7 +395,7 @@ class SysExEvent(GenericEvent):
             midibytes += struct.pack('>B', timeByte)
         midibytes += struct.pack('>B', code)
 
-        payloadLength = writeVarLength(len(self.payload)+2)
+        payloadLength = writeVarLength(len(self.payload) + 2)
         for lenByte in payloadLength:
             midibytes += struct.pack('>B', lenByte)
 
@@ -411,7 +409,7 @@ class UniversalSysExEvent(GenericEvent):
     '''
     A class that encapsulates a Universal System Exclusive  event.
     '''
-    evtname = 'UniversalSysEx' # doesn't match class name like most others
+    evtname = 'UniversalSysEx'  # doesn't match class name like most others
     sec_sort_order = 1
 
     def __init__(self, tick, realTime, sysExChannel, code, subcode,
@@ -440,7 +438,7 @@ class UniversalSysExEvent(GenericEvent):
         midibytes += struct.pack('>B', code)
 
         # Do we need to add a length?
-        payloadLength = writeVarLength(len(self.payload)+5)
+        payloadLength = writeVarLength(len(self.payload) + 5)
         for lenByte in payloadLength:
             midibytes += struct.pack('>B', lenByte)
 
@@ -462,10 +460,10 @@ class ControllerEvent(GenericEvent):
     A class that encapsulates a program change event.
     '''
     evtname = 'ControllerEvent'
-    midi_status = 0xB0 # 0xBx is Control Change
+    midi_status = 0xB0  # 0xBx is Control Change
     sec_sort_order = 1
 
-    def __init__(self,  channel, tick, controller_number, parameter,
+    def __init__(self, channel, tick, controller_number, parameter,
                  insertion_order=0):
         self.parameter = parameter
         self.channel = channel
@@ -497,7 +495,7 @@ class ChannelPressureEvent(GenericEvent):
     A class that encapsulates a Channel Pressure (Aftertouch) event.
     '''
     evtname = 'ChannelPressure'
-    midi_status = 0xD0 # 0xDx is Channel Pressure (Aftertouch)
+    midi_status = 0xD0  # 0xDx is Channel Pressure (Aftertouch)
     sec_sort_order = 1
 
     def __init__(self, channel, tick, pressure_value, insertion_order=0):
@@ -532,7 +530,7 @@ class PitchWheelEvent(GenericEvent):
     A class that encapsulates a pitch wheel change event.
     '''
     evtname = 'PitchWheelEvent'
-    midi_status = 0xE0 # 0xEx is Pitch Wheel Change
+    midi_status = 0xE0  # 0xEx is Pitch Wheel Change
     sec_sort_order = 1
 
     def __init__(self, channel, tick, pitch_wheel_value, insertion_order=0):
@@ -569,7 +567,7 @@ class TrackName(GenericEvent):
     evtname = 'TrackName'
     sec_sort_order = 0
 
-    def __init__(self,  tick,  trackName, insertion_order=0):
+    def __init__(self, tick, trackName, insertion_order=0):
         # GenericEvent.__init__(self, tick)
         self.trackName = trackName.encode("ISO-8859-1")
         super(TrackName, self).__init__(tick, insertion_order)
@@ -606,7 +604,7 @@ class TimeSignature(GenericEvent):
     evtname = 'TimeSignature'
     sec_sort_order = 0
 
-    def __init__(self,  tick,  numerator, denominator, clocks_per_tick,
+    def __init__(self, tick, numerator, denominator, clocks_per_tick,
                  notes_per_quarter, insertion_order=0):
         self.numerator = numerator
         self.denominator = denominator
@@ -640,7 +638,7 @@ class MIDITrack(object):
     A class that encapsulates a MIDI track
     '''
 
-    def __init__(self, removeDuplicates,  deinterleave):
+    def __init__(self, removeDuplicates, deinterleave):
         '''Initialize the MIDITrack object.
         '''
         self.headerString = struct.pack('cccc', b'M', b'T', b'r', b'k')
@@ -695,7 +693,7 @@ class MIDITrack(object):
         '''
         Add a SysEx event.
         '''
-        self.eventList.append(SysExEvent(tick, manID,  payload,
+        self.eventList.append(SysExEvent(tick, manID, payload,
                                          insertion_order=insertion_order))
 
     def addUniversalSysEx(self, tick, code, subcode, payload,
@@ -766,15 +764,15 @@ class MIDITrack(object):
         '''
         Change the tuning of MIDI notes
         '''
-        payload = struct.pack('>B',  tuningProgam)
-        payload = payload + struct.pack('>B',  len(tunings))
-        for (noteNumber,  frequency) in tunings:
-            payload = payload + struct.pack('>B',  noteNumber)
+        payload = struct.pack('>B', tuningProgam)
+        payload = payload + struct.pack('>B', len(tunings))
+        for (noteNumber, frequency) in tunings:
+            payload = payload + struct.pack('>B', noteNumber)
             MIDIFreqency = frequencyTransform(frequency)
             for byte in MIDIFreqency:
-                payload = payload + struct.pack('>B',  byte)
+                payload = payload + struct.pack('>B', byte)
 
-        self.eventList.append(UniversalSysExEvent(0, realTime,  sysExChannel,
+        self.eventList.append(UniversalSysExEvent(0, realTime, sysExChannel,
                               8, 2, payload, insertion_order=insertion_order))
 
     def processEventList(self):
@@ -852,7 +850,7 @@ class MIDITrack(object):
         previous_event_tick = 0
         for event in self.MIDIEventList:
             self.MIDIdata += event.serialize(previous_event_tick)
-            #previous_event_tick = event.tick
+            # previous_event_tick = event.tick
             # I do not like that adjustTimeAndOrigin() changes GenericEvent.tick
             # from absolute to relative. I intend to change that, and just
             # calculate the relative tick here, without changing GenericEvent.tick
@@ -872,11 +870,11 @@ class MIDITrack(object):
 
         for event in self.MIDIEventList:
             if event.evtname in ['NoteOn', 'NoteOff']:
-                #!!! Pitch 101 channel 5 produces the same key as pitch 10 channel 15.
-                #!!! This is not the only pair of pitch,channel tuples which
-                #!!! collide to the same key, just one example.  Should fix by
-                #!!! putting a separator char between pitch and channel.
-                noteeventkey = str(event.pitch)+str(event.channel)
+                # !!! Pitch 101 channel 5 produces the same key as pitch 10 channel 15.
+                # !!! This is not the only pair of pitch,channel tuples which
+                # !!! collide to the same key, just one example.  Should fix by
+                # !!! putting a separator char between pitch and channel.
+                noteeventkey = str(event.pitch) + str(event.channel)
                 if event.evtname == 'NoteOn':
                     if noteeventkey in stack:
                         stack[noteeventkey].append(event.tick)
@@ -888,7 +886,7 @@ class MIDITrack(object):
                         event.tick = stack[noteeventkey].pop()
                         tempEventList.append(event)
                     else:
-                        x = stack[noteeventkey].pop()
+                        stack[noteeventkey].pop()
                         tempEventList.append(event)
             else:
                 tempEventList.append(event)
@@ -983,7 +981,7 @@ class MIDIFile(object):
     proper and well-formed MIDI file.
     '''
 
-    def __init__(self, numTracks=1, removeDuplicates=True,  deinterleave=True,
+    def __init__(self, numTracks=1, removeDuplicates=True, deinterleave=True,
                  adjust_origin=None, file_format=1,
                  ticks_per_quarternote=TICKSPERQUARTERNOTE, eventtime_is_ticks=False):
         '''Initialize the MIDIFile class
@@ -1013,7 +1011,7 @@ class MIDIFile(object):
 
         Note that the default for ``adjust_origin`` will change in a future
         release, so one should probably explicitly set it.
-        
+
         In a format 1 file, it would be a rare cirumstance where adjusting the
         origin of each track to the track's first note makes any sense.
 
@@ -1050,7 +1048,7 @@ class MIDIFile(object):
 
         self.tracks = list()
         if file_format == 1:
-            self.numTracks = numTracks + 1 # self.tracks[0] is the baked-in tempo track
+            self.numTracks = numTracks + 1  # self.tracks[0] is the baked-in tempo track
         else:
             self.numTracks = numTracks
         self.header = MIDIHeader(self.numTracks, file_format, ticks_per_quarternote)
@@ -1072,7 +1070,7 @@ class MIDIFile(object):
             self.time_to_ticks = self.quarter_to_tick
 
         for i in range(0, self.numTracks):
-            self.tracks.append(MIDITrack(removeDuplicates,  deinterleave))
+            self.tracks.append(MIDITrack(removeDuplicates, deinterleave))
         # to keep track of the order of insertion for new sorting
         self.event_counter = 0
 
@@ -1258,7 +1256,7 @@ class MIDIFile(object):
             MyMIDI.addKeySignature(0, 0, 3, SHARPS, MINOR)
         '''
         if self.header.numeric_format == 1:
-            track = 0 #  User reported that this is needed.
+            track = 0  # User reported that this is needed.
         self.tracks[track].addKeySignature(self.time_to_ticks(time), accidentals, accidental_type,
                                            mode, insertion_order=self.event_counter)
         self.event_counter += 1
@@ -1314,7 +1312,6 @@ class MIDIFile(object):
                                  insertion_order=self.event_counter)
         self.event_counter += 1
 
-
     def addControllerEvent(self, track, channel, time, controller_number,
                            parameter):
         """
@@ -1348,7 +1345,7 @@ class MIDIFile(object):
         if self.header.numeric_format == 1:
             track += 1
         self.tracks[track].addPitchWheelEvent(channel, self.time_to_ticks(time), pitchWheelValue,
-                                              insertion_order = self.event_counter)
+                                              insertion_order=self.event_counter)
         self.event_counter += 1
 
     def makeRPNCall(self, track, channel, time, controller_msb, controller_lsb,
@@ -1415,7 +1412,7 @@ class MIDIFile(object):
         track = self.tracks[track]
 
         tick_incr = 1 if time_order else 0
-        track.addControllerEvent(channel, tick, 101, # parameter number MSB
+        track.addControllerEvent(channel, tick, 101,  # parameter number MSB
                                  controller_msb, insertion_order=self.event_counter)  # noqa: E128
         self.event_counter += 1
         tick += tick_incr
@@ -1650,7 +1647,7 @@ class MIDIFile(object):
         for i in range(0, self.numTracks):
             self.tracks[i].writeTrack(fileHandle)
 
-    def shiftTracks(self,  offset=0):
+    def shiftTracks(self, offset=0):
         """Shift tracks to be zero-origined, or origined at offset.
 
         Note that the shifting of the time in the tracks uses the MIDIEventList
@@ -1754,12 +1751,12 @@ def writeVarLength(i):
         return [0]
 
     vlbytes = []
-    hibit = 0x00 # low-order byte has high bit cleared.
+    hibit = 0x00  # low-order byte has high bit cleared.
     while i > 0:
         vlbytes.append(((i & 0x7f) | hibit) & 0xff)
         i >>= 7
         hibit = 0x80
-    vlbytes.reverse() # put most-significant byte first, least significant last
+    vlbytes.reverse()  # put most-significant byte first, least significant last
     return vlbytes
 
 
@@ -1792,18 +1789,18 @@ def frequencyTransform(freq):
     '''
     resolution = 16384
     freq = float(freq)
-    dollars = 69 + 12 * math.log(freq/(float(440)), 2)
+    dollars = 69 + 12 * math.log(freq / (float(440)), 2)
     firstByte = int(dollars)
-    lowerFreq = 440 * pow(2.0, ((float(firstByte) - 69.0)/12.0))
-    centDif = 1200 * math.log((freq/lowerFreq), 2) if freq != lowerFreq else 0
-    cents = round(centDif/100 * resolution)  # round?
+    lowerFreq = 440 * pow(2.0, ((float(firstByte) - 69.0) / 12.0))
+    centDif = 1200 * math.log((freq / lowerFreq), 2) if freq != lowerFreq else 0
+    cents = round(centDif / 100 * resolution)  # round?
     secondByte = min([int(cents) >> 7, 0x7F])
     thirdByte = cents - (secondByte << 7)
     thirdByte = min([thirdByte, 0x7f])
     if thirdByte == 0x7f and secondByte == 0x7F and firstByte == 0x7F:
         thirdByte = 0x7e
     thirdByte = int(thirdByte)
-    return [firstByte,  secondByte,  thirdByte]
+    return [firstByte, secondByte, thirdByte]
 
 
 def returnFrequency(freqBytes):
@@ -1811,10 +1808,9 @@ def returnFrequency(freqBytes):
     The reverse of frequencyTransform. Given a byte stream, return a frequency.
     '''
     resolution = 16384.0
-    baseFrequency = 440 * pow(2.0, (float(freqBytes[0]-69.0)/12.0))
-    frac = (float((int(freqBytes[1]) << 7) + int(freqBytes[2]))
-            * 100.0) / resolution
-    frequency = baseFrequency * pow(2.0, frac/1200.0)
+    baseFrequency = 440 * pow(2.0, (float(freqBytes[0] - 69.0) / 12.0))
+    frac = (float((int(freqBytes[1]) << 7) + int(freqBytes[2])) * 100.0) / resolution
+    frequency = baseFrequency * pow(2.0, frac / 1200.0)
     return frequency
 
 
