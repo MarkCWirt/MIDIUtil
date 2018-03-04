@@ -108,7 +108,7 @@ class TestMIDIUtils(unittest.TestCase):
     def testTimeShift(self):
 
         # With one track
-        MyMIDI = MIDIFile(1)
+        MyMIDI = MIDIFile(1, adjust_origin=True)
         track = 0
         channel = 0
         pitch = 100
@@ -124,7 +124,7 @@ class TestMIDIUtils(unittest.TestCase):
 
         # With two tracks
         track2 = 1
-        MyMIDI = MIDIFile(2)
+        MyMIDI = MIDIFile(2, adjust_origin=True)
         MyMIDI.addNote(track, channel, pitch, time1, duration, volume)
         time2 = 6
         MyMIDI.addNote(track2, channel, pitch, time2, duration, volume)
@@ -140,7 +140,7 @@ class TestMIDIUtils(unittest.TestCase):
         self.assertEqual(MyMIDI.tracks[2].MIDIEventList[1].tick, MyMIDI.time_to_ticks(0 + duration))
 
         # Negative Time
-        MyMIDI = MIDIFile(1)
+        MyMIDI = MIDIFile(1, adjust_origin=True)
         track = 0
         channel = 0
         pitch = 100
@@ -156,7 +156,7 @@ class TestMIDIUtils(unittest.TestCase):
 
         # Negative time, two tracks
 
-        MyMIDI = MIDIFile(2)
+        MyMIDI = MIDIFile(2, adjust_origin=True)
         track = 0
         channel = 0
         pitch = 100
@@ -790,7 +790,7 @@ class TestMIDIUtils(unittest.TestCase):
         time     = 1
         duration = 0.1
         volume   = 64
-        MyMIDI = MIDIFile(1)
+        MyMIDI = MIDIFile(1, adjust_origin=True)
         MyMIDI.addNote(track, channel, pitch, time, duration, volume)
         time = 1.1
         MyMIDI.addNote(track, channel, pitch, time, duration, volume)

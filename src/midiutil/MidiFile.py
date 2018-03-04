@@ -982,7 +982,7 @@ class MIDIFile(object):
     '''
 
     def __init__(self, numTracks=1, removeDuplicates=True, deinterleave=True,
-                 adjust_origin=None, file_format=1,
+                 adjust_origin=False, file_format=1,
                  ticks_per_quarternote=TICKSPERQUARTERNOTE, eventtime_is_ticks=False):
         '''Initialize the MIDIFile class
 
@@ -992,9 +992,8 @@ class MIDIFile(object):
             before writing to disk
         :param deinterleave: If set to ``True`` deinterleave the notes in
             the stream
-        :param adjust_origin: If set to ``True`` (or left at the default of
-            ``None``) shift all the events in the tracks so that the first
-            event takes place at time t=0
+        :param adjust_origin: If set to ``True`` shift all the events in the tracks 
+            so that the first event takes place at time t=0. Default is ``False``
         :param file_format: The format of the multi-track file. This should
             either be ``1`` (the default, and the most widely supported
             format) or ``2``.
@@ -1053,14 +1052,8 @@ class MIDIFile(object):
             self.numTracks = numTracks
         self.header = MIDIHeader(self.numTracks, file_format, ticks_per_quarternote)
 
+        self.adjust_origin = adjust_origin
         self.closed = False
-        if adjust_origin is None:
-            self.adjust_origin = True
-            warnings.warn("Please explicitly set adjust_origin. Default "
-                          "behaviour will change in a future version.",
-                          FutureWarning)
-        else:
-            self.adjust_origin = adjust_origin
 
         self.ticks_per_quarternote = ticks_per_quarternote
         self.eventtime_is_ticks = eventtime_is_ticks

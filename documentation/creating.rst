@@ -10,8 +10,14 @@ as follows:
 
 .. code:: python
 
-    def __init__(self, numTracks=1, removeDuplicates=True,
-      deinterleave=True, adjust_origin=None, file_format=1):
+  def __init__(self,
+            numTracks=1,
+            removeDuplicates=True,
+            deinterleave=True,
+            adjust_origin=False,
+            file_format=1,
+            ticks_per_quarternote=TICKSPERQUARTERNOTE,
+            eventtime_is_ticks=False):
 
 where the parameters do the following:
 
@@ -87,12 +93,8 @@ adjust_origin
 
 If ``adjust_origin`` is ``True`` the library will find the earliest
 event in all the tracks and shift all events so that that time is t=0.
-If it is ``False`` no time-shifting will occur.
-
-If it is left at it's default value, ``None``, ``adjust_origin`` will be
-set to ``True`` and a ``FutureWarning`` will be displayed. This is because in
-the next release the default behavior will change and no adjustment will be
-performed by default.
+If it is ``False`` no time-shifting will occur. The defaul value is
+``False``.
 
 file_format
 -----------
@@ -126,3 +128,17 @@ for you. Thus:
 
 works, even though "track 0" is really the second track in the file, and there is
 no track 1000.
+
+ticks_per_quarternote
+---------------------
+
+The MIDI ticks per quarter note. Defaults to 960. This defines the
+finest level of time resolution available in the file. 120, 240, 384,
+480, and 960 are common values.
+
+eventtime_is_ticks
+------------------
+
+If set to ``True``, all times passed into the event creation functions
+should be specified in ticks. Otherwise they should be specified in
+quarter-notes (the default).
