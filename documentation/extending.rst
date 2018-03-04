@@ -3,7 +3,7 @@ Extending the Library
 
 The choice of MIDI event types included in the library is somewhat
 idiosyncratic; I included the events I needed for another software
-project I was wrote. You may find that you need additional events in
+project I was writting. You may find that you need additional events in
 your work. For this reason I am including some instructions on extending
 the library.  The process isn't too hard (provided you have a working
 knowledge of Python and the MIDI standard), so the task shouldn't present
@@ -17,63 +17,113 @@ incorporated into the code. This is a relatively simple event, so while
 it may not illustrate some of the subtleties of MIDI programing, it
 provides a good, illustrative case.
 
+The MID standard defines the Tempo event as the following byte-stream::
+
+  FF 51 03 tttttt
+
+where ``FF 51`` is the code and sub-code of the event, ``03`` is the data
+length of the event, and ``tttttt`` are the three bytes of data, encoded as
+microseconds per quarter note.
+
 Create a New Event Type
 -----------------------
 
-The first order of business is to create a new subclass of the GnericEvent
-object of the MIDIFile module. This subclass initializes any specific
-instance data that is needed for the MIDI event to be written. In
-the case of the tempo event, it is the actual tempo (which is defined
-in the MIDI standard to be 60000000 divided by the tempo in beats per
-minute). This class should also call the superclass' initializer with
-the event time, ordinal, and insertion order,  and set the event type
-(a unique string used internally by the software).
-In the case of the tempo event:
+The majority of work involved with creating a new event type is the
+creation of a new subclass of the ``GenericEvent``
+object of the MIDIFile module. This subclass:
 
-.. code:: python
+- Initializes any specific instance data that is needed for the MIDI event, and
+- Defines how the data are serialized to the byte stream
+- Defines the order in which an event is written to the byte stream (see below)
 
-    class Tempo(GenericEvent):
-        '''A class that encapsulates a tempo meta-event
-        '''
-        def __init__(self,time,tempo, ordinal=3, insertion_order=0):
-            self.tempo = int(60000000 / tempo)
-            super(Tempo, self).__init__('tempo', time, ordinal, insertion_order)
+In the case of the tempo, the actual data conversion is easy: people tend
+to specify tempos in beats per minute, so the input will need to be divided into
+60000000.
 
-Any class that you define should include a type, time, ordinal (see below),
-and an insertion order.
+The serialization strategy is defined in the subclass' ``serialize`` member
+function, which is presented below.
 
-``self.ord`` and ``self.insertion_order`` are used to order the events
+``sec_sort_order`` and ``insertion_order`` are used to order the events
 in the MIDI stream. Events are first ordered in time. Events at the
-same time are then ordered by ``self.ord``, with lower numbers appearing
-in the stream first. The extant classes in the code all allow the user
-to specify an ordinal for the object, but they include default values
-that are meant to be reasonable.
-
-Lastly events are sorted on the ``self.insertion_order`` member. This
-makes it possible to, say, create a Registered Parameter Number call
+same time are then ordered by ``sec_sort_order``, with lower numbers appearing
+in the stream first. Lastly events are sorted on the ``self.insertion_order``
+member. This strategy makes it possible to, say, create a Registered Parameter Number call
 from a collection of Control Change events. Since all the CC events will
-have the same time and class (and therefore default ordinal), you can control
+have the same time and class (and therefore default secondary sort order), you can control
 the order of the events by the order in which you add them to the MIDIFile.
 
-Next, if you want the code to be able to de-duplicate events which may
-lay over top of one another, the parent class, ``GenericEvent``, has a
-member function called ``__eq__()``. If two events do not coincide in
-time or type they are not equal, but it they do the ``__eq__`` function
-must be modified to show equality. In the case of the ``Tempo`` class,
-two tempo events are considered equivalent if they are the same tempo.
-In other words, if there are two tempo events at the same time and
-the same tempo, one will be removed in the de-duplication process
-(which is the default behavious for ``MIDIFile``, but it can be
-turned off). From ``GenericEvent.__eq__()``:
+Al of this will perhaps be more clear if we examine the code:
 
 .. code:: python
 
-    if self.type == 'tempo':
-        if self.tempo != other.tempo:
-            return False
+  class Tempo(GenericEvent):
+      '''
+      A class that encapsulates a tempo meta-event
+      '''
+      evtname = 'Tempo'
+      sec_sort_order = 3
 
-If events are not equivalent, the code should return ``False``. If they are, the
-code can be allowed to fall through to its default return of ``True``.
+      def __init__(self, tick, tempo, insertion_order=0):
+          self.tempo = int(60000000 / tempo)
+          super(Tempo, self).__init__(tick, insertion_order)
+
+      def __eq__(self, other):
+          return (self.evtname == other.evtname and
+                  self.tick == other.tick and
+                  self.tempo == other.tempo)
+
+      __hash__ = GenericEvent.__hash__
+
+      def serialize(self, previous_event_tick):
+          """Return a bytestring representation of the event, in the format required for
+          writing into a standard midi file.
+          """
+
+          midibytes = b""
+          code = 0xFF
+          subcode = 0x51
+          fourbite = struct.pack('>L', self.tempo)  # big-endian uint32
+          threebite = fourbite[1:4]  # Just discard the MSB
+          varTime = writeVarLength(self.tick - previous_event_tick)
+          for timeByte in varTime:
+              midibytes += struct.pack('>B', timeByte)
+          midibytes += struct.pack('>B', code)
+          midibytes += struct.pack('>B', subcode)
+          midibytes += struct.pack('>B', 0x03)  # length in bytes of 24-bit tempo
+          midibytes += threebite
+          return midibytes
+
+
+The event name (``evtname``) and secondary sort order are defined in class data; any class that
+you create will do the same. ``tick`` is the time in MIDI ticks of the event and
+insertion order will be set in the code. All events should accept these
+parameters. ``tempo`` is the specific instance data needed for this event type.
+
+The ``__init__()`` member converts the tempo to number needed by the standard and
+then calls the super-class' initialization function with tick and insertion order.
+All event subclasses should do this.
+
+Next, the ``__eq__()`` function is defined that specifies when two events are
+the same. In this case they are the same if the tick, event name, and tempo are
+the same. This code is used to identify and remove duplicate events. ``__hash__()``
+should explicitly be brought down from the parent class, in in Python 3 it is
+not implicitly inherited.
+
+Lastly, the ``serialize`` member function should be created. This will return a
+byte stream representing the MIDI data. A few things to note about this:
+
+- All MIDI events begin with a time, which is written in an idiosyncratic
+  variable-length format. Use the ``writeVarLength`` utility function to calculate
+  this.
+- Note that in the case of the tempo event, the standard only uses three bytes,
+  whereas in python a long will be packed into four bytes. Hence we just
+  discard the MSB.
+- In the temo the actual data is packed:
+  - The time
+  - The code (0xFF)
+  - The subcode (0x51)
+  - The length of that (defined in the event as 3 bytes)
+  - The data proper
 
 Create an Accessor Function
 ---------------------------
@@ -83,25 +133,43 @@ event of this type. Continuing the example of the tempo event:
 
 .. code:: python
 
-  def addTempo(self,time,tempo, insertion_order=0):
+  def addTempo(self, tick, tempo, insertion_order=0):
       '''
       Add a tempo change (or set) event.
       '''
-      self.eventList.append(Tempo(time,tempo, insertion_order = insertion_order))
+      self.eventList.append(Tempo(tick, tempo,
+                            insertion_order=insertion_order))
 
 (Most/many MIDI events require a channel specification, but the tempo event
 does not.)
 
-The public accessor function is via the MIDIFile object, and must include
+This is more-or-less boilerplate code, and just needs to appropriately create the
+object you defined above.
+
+Note that this function can in some cases create multiple events. For example,
+when one adds a note, both a ``NoneOn`` and a ``NoteOff`` event will be created.
+
+Lastly, the public accessor function is via the MIDIFile object, and must include
 the track number to which the event is written. So in ``MIDIFile``:
 
 .. code:: python
 
-  def addTempo(self,track, time,tempo):
+  def addTempo(self, track, time, tempo):
+      """
+
+      Add notes to the MIDIFile object
+
+      :param track: The track to which the tempo event  is added. Note that
+          in a format 1 file this parameter is ignored and the tempo is
+          written to the tempo track
+      :param time: The time (in beats) at which tempo event is placed
+      :param tempo: The tempo, in Beats per Minute. [Integer]
+      """
       if self.header.numeric_format == 1:
           track = 0
-      self.tracks[track].addTempo(time,tempo, insertion_order = self.event_counter)
-      self.event_counter = self.event_counter + 1
+      self.tracks[track].addTempo(self.time_to_ticks(time), tempo,
+                                  insertion_order=self.event_counter)
+      self.event_counter += 1
 
 Note that a track has been added (which is zero-origined and needs to be
 constrained by the number of tracks that the ``MIDIFile`` was created with),
@@ -115,108 +183,15 @@ incremented by one for format 1 files so that the event is not written to the
 tempo track (but preserving the zero-origined convention for all tracks in
 both formats.)
 
+The only other complexity is that the public functions accept by default a time
+in quarter-notes, not MIDI ticks. So the public accessor function should
+pass the time through the ``time_to_ticks()`` member. If the MIFIFile was
+instantiated with ``eventtime_is_ticks = True``, this is just an identity fucntion
+and the public accessor will expect time in ticks. Otherwise it will convert from
+quarter-notes to ticks (suing the ``TICKSPERQUARTERNOTE`` instance data)
+
 This is the function you will use in your code to create an event of
 the desired type.
-
-Modify processEventList()
--------------------------
-
-Next, the logic pertaining to the new event type should be added to
-``processEventList()`` function of the ``MIDITrack`` class. In general this code
-will create a MIDIEvent object and set its type, time, ordinality, and
-any specific information that is needed for the event type. This object
-is then added to the MIDIEventList.
-
-The relevant section for the tempo event is:
-
-.. code:: python
-
-    elif thing.type == 'tempo':
-        event = MIDIEvent("Tempo", thing.time * TICKSPERBEAT, thing.ord, thing.insertion_order)
-        event.tempo = thing.tempo
-        self.MIDIEventList.append(event)
-
-THe ``MIDIEvent`` class is expected to have a ``type``, ``time``
-(which should be converted from beats to ticks as above), ordinal, and an
-insertion order, which are similar to the values in the ``GenericEvent`` class.
-You are free, of course, to add any other data items that need to be specified.
-In the case of ``Tempo`` this is the tempo to be written.
-
-Write the Event Data to the MIDI Stream
-----------------------------------------
-
-The last step is to modify the ``MIDIFile.writeEventsToStream()`` function;
-here is where some understanding of the MIDI standard is necessary. The
-following code shows the creation of a MIDI tempo event:
-
-.. code:: python
-
-    elif event.type == "Tempo":
-        code = 0xFF
-        subcode = 0x51
-        fourbite = struct.pack('>L', event.tempo)
-        threebite = fourbite[1:4]       # Just discard the MSB
-        varTime = writeVarLength(event.time)
-        for timeByte in varTime:
-            self.MIDIdata = self.MIDIdata + struct.pack('>B',timeByte)
-        self.MIDIdata = self.MIDIdata + struct.pack('>B',code)
-        self.MIDIdata = self.MIDIdata + struct.pack('>B',subcode)
-        self.MIDIdata = self.MIDIdata + struct.pack('>B', 0x03)
-        self.MIDIdata = self.MIDIdata + threebite
-
-The event.type string ("Tempo") was the one chosen in the processEventList
-logic.
-
-The code and sub-code are binary values that come from the MIDI
-specification.
-
-Next the data is packed into a three byte structure (or a four byte
-structure, discarding the most significant byte). Again, the MIDI
-specification determines the number of bytes used in the data payload.
-
-All MIDI events begin with a time, which is stored in a slightly bizarre
-variable-length format. This time should be converted to MIDI variable-length
-data with the ``writeVarLength()`` function before writing to the stream.
-In the MIDI standard's variable length data only seven bits of a word are
-used to store data; the eighth bit signifies if more bytes encoding the
-value follow. The total length may be 1 to 3 bytes, depending upon the size of
-the value encoded. The ``writeVarLength()`` function takes care of this
-converssion for you.
-
-Now the data is written to the binary object ``self.MIDIdata``, which is
-the actual MIDI-encoded data stream. As per the MIDI standard, first we
-write our variable-length time value. Next we add the event type code and
-sub-code. Then we write the length of the data payload, which in the case
-of the tempo event is three bytes. Lastly, we write the actual payload,
-which has been packed into the variable ``threebite``.
-
-The reason that there are separate classes for ``GenericEvent`` and ``MIDIEvent``
-is that there need not be a one-to-one correspondance. For example, the
-code defines a ``Note`` object, but when this is processed in
-``processEventList()`` two ``MIDIEvent`` objects are created, one for
-the ``note on`` event, one for the ``note off`` event.
-
-.. code:: python
-
-    if thing.type == 'note':
-        event         = MIDIEvent("NoteOn", thing.time * TICKSPERBEAT,
-                                    thing.ord, thing.insertion_order)
-        event.pitch   = thing.pitch
-        event.volume  = thing.volume
-        event.channel = thing.channel
-        self.MIDIEventList.append(event)
-
-        event = MIDIEvent("NoteOff", (thing.time+ thing.duration) * TICKSPERBEAT,
-                                    thing.ord -0.1,
-                                    thing.insertion_order)
-        event.pitch   = thing.pitch
-        event.volume  = thing.volume
-        event.channel = thing.channel
-        self.MIDIEventList.append(event)
-
-Note that the ``NoteOff`` event is created with a slightly lower ordinality
-than the ``NoteOn`` event. This is so that at any given time the note off
-events will be processed before the note on events.
 
 Write Some Tests
 ----------------
