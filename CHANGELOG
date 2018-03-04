@@ -1,7 +1,9 @@
+Date:       4 March 2018
+Version:    1.2.1
 
     * Fairly major restructuring of the code contributed by meteorsw, including:
       * Removing the MIDIEvent class and subsuming functionality in GenericEvent
-        and derivative.
+        and derivative classes.
       * Allowing for the specification of times in MIDI ticks, as well as quarter
         notes.
       * General clean-up and restructuring. Logic on how an event serializes itself

@@ -185,7 +185,7 @@ both formats.)
 
 The only other complexity is that the public functions accept by default a time
 in quarter-notes, not MIDI ticks. So the public accessor function should
-pass the time through the ``time_to_ticks()`` member. If the MIFIFile was
+pass the time through the ``time_to_ticks()`` member. If the MIDIFile was
 instantiated with ``eventtime_is_ticks = True``, this is just an identity fucntion
 and the public accessor will expect time in ticks. Otherwise it will convert from
 quarter-notes to ticks (suing the ``TICKSPERQUARTERNOTE`` instance data)
