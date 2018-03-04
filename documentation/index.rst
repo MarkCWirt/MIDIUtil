@@ -158,6 +158,8 @@ fixes,  and suggestions on the library:
 * Francis G.
 * cclauss (Code formating cleanup and PEP-8 stuff, which I'm not good at following).
 * Philippe-Adrien Nousse (Adphi) for the pitch bend implementation.
+* meteorsw (https://github.com/meteorsw) for major restructuring and clean-up
+  of code.
 
 Indices and tables
 ------------------
