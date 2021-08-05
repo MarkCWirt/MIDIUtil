@@ -870,23 +870,16 @@ class MIDITrack(object):
 
         for event in self.MIDIEventList:
             if event.evtname in ['NoteOn', 'NoteOff']:
-                # !!! Pitch 101 channel 5 produces the same key as pitch 10 channel 15.
-                # !!! This is not the only pair of pitch,channel tuples which
-                # !!! collide to the same key, just one example.  Should fix by
-                # !!! putting a separator char between pitch and channel.
-                noteeventkey = str(event.pitch) + str(event.channel)
+                noteeventkey = f'{str(event.pitch)}-{str(event.channel)}'
                 if event.evtname == 'NoteOn':
                     if noteeventkey in stack:
                         stack[noteeventkey].append(event.tick)
                     else:
                         stack[noteeventkey] = [event.tick]
                     tempEventList.append(event)
-                elif event.evtname == 'NoteOff':
-                    if len(stack[noteeventkey]) > 1:
+                else:  # 'NoteOff':
+                    if noteeventkey in stack and len(stack[noteeventkey]) > 0:
                         event.tick = stack[noteeventkey].pop()
-                        tempEventList.append(event)
-                    else:
-                        stack[noteeventkey].pop()
                         tempEventList.append(event)
             else:
                 tempEventList.append(event)
@@ -1261,7 +1254,7 @@ class MIDIFile(object):
 
         :param track: The track to which the notice is added.
         :param time: The time (in beats) at which text event is placed.
-        :param text: The text to adde [ASCII String]
+        :param text: The text to add [ASCII String]
         """
         if self.header.numeric_format == 1:
             track += 1
