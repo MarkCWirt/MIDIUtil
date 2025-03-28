@@ -1,0 +1,42 @@
+# تأكد من تثبيت مكتبة midiutil باستخدام:
+# pip install midiutil
+
+from midiutil import MIDIFile
+
+# إعدادات الملف الموسيقي
+tempo = 95             # سرعة الأغنية (BPM)
+volume = 100           # مستوى الصوت
+track = 0              # رقم المسار
+channel = 9            # القناة 10 في MIDI (مخصصة للآلات الإيقاعية)
+time = 0               # زمن البداية
+
+# إنشاء ملف MIDI بمسار واحد
+midi = MIDIFile(1)
+midi.addTempo(track, time, tempo)
+
+# نُنشئ نمط إيقاعي بسيط:
+# - الطبلة القوية (Bass Drum) على بداية كل بار (ضربة 1)
+# - الطبل الصغير (Snare) على الضربة الثالثة
+# - Hi-Hats لكل نصف ضربة
+
+duration = 1  # مدة الضربة (ضربة كاملة)
+num_bars = 8  # عدد الأشرطة (يمكنك تعديلها)
+
+for bar in range(num_bars):
+    for beat in range(4):
+        current_time = bar * 4 + beat
+        # الطبلة القوية (MIDI note 35) على الضربة الأولى
+        if beat == 0:
+            midi.addNote(track, channel, 35, current_time, duration, volume)
+        # الطبل الصغير (MIDI note 38) على الضربة الثالثة
+        if beat == 2:
+            midi.addNote(track, channel, 38, current_time, duration, volume)
+        # Hi-Hats (MIDI note 42) لكل نصف ضربة
+        midi.addNote(track, channel, 42, current_time, duration/2, volume)
+        midi.addNote(track, channel, 42, current_time + 0.5, duration/2, volume)
+
+# حفظ ملف MIDI
+with open("rap_beat.mid", "wb") as output_file:
+    midi.writeFile(output_file)
+
+print("تم إنشاء ملف MIDI 'rap_beat.mid'.")
