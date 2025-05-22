@@ -1,0 +1,37 @@
+from midiutil import MIDIFile
+
+midi_file = MIDIFile(1)
+track = 0
+time = 0
+channel = 0
+volume = 100
+tempo_bpm = 90
+
+midi_file.addTempo(track, time, tempo_bpm)
+
+note_map = {
+    "D4": 62, "E4": 64, "F#4": 66, "G4": 67, "A4": 69,
+    "D5": 74
+}
+
+melody = [
+    ("D4", 1), ("F#4", 1), ("A4", 2), ("D5", 2), (None, 2), ("D4", 2),
+    ("D4", 1), ("F#4", 1), ("G4", 1), ("A4", 1), ("F#4", 2), ("D4", 2),
+    ("D4", 1), ("D4", 1), ("F#4", 1), ("A4", 1), ("G4", 2), ("D4", 2),
+    ("F#4", 2), ("E4", 2), ("D4", 1), ("D4", 1), ("F#4", 2),
+    ("D4", 1), ("G4", 1), ("A4", 1), ("D5", 1), ("F#4", 2), ("A4", 2),
+    ("D5", 1), ("D5", 1), ("F#4", 1), ("A4", 1), ("G4", 2), ("D4", 2),
+    ("D4", 1), ("F#4", 1), ("G4", 1), ("A4", 1), ("F#4", 2), ("D4", 2),
+    ("D4", 1), ("D4", 1), ("F#4", 1), ("A4", 1), ("G4", 2), ("D4", 2),
+    ("D5", 1), ("A4", 1), ("F#4", 2), ("D4", 2), (None, 2)
+]
+
+for note_name, duration in melody:
+    if note_name:
+        midi_file.addNote(track, channel, note_map[note_name], time, duration, volume)
+    time += duration
+
+with open("marcha_corneta_tambores.mid", "wb") as f:
+    midi_file.writeFile(f)
+
+print("Archivo MIDI creado: marcha_corneta_tambores.mid")
