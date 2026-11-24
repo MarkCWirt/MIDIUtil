@@ -13,6 +13,7 @@
 
 
 from __future__ import division, print_function
+from io import BytesIO
 import sys
 import struct
 
@@ -775,6 +776,29 @@ class TestMIDIUtils(unittest.TestCase):
         self.assertEqual(data.unpack_into_byte(15), 0)
         self.assertEqual(data.unpack_into_byte(16), 0)
         self.assertEqual(data.unpack_into_byte(17), 0xf7)
+
+    def testWriteFormatZero(self):
+        song = MIDIFile(file_format=0, ticks_per_quarternote=96)
+        song.addTempo(0, 0, 120)
+        song.addNote(0, 1, 60, 0.5, 1, 80)
+        output = BytesIO()
+        song.writeFile(output)
+        output.seek(0)
+
+        self.assertEqual(struct.unpack(">4sIHHH", output.read(14)),
+                         (b"MThd", 6, 0, 1, 96))
+        events = (b"\x00\xff\x51\x03\x07\xa1\x20"  # 120 BPM
+                  b"\x30\x91\x3c\x50"              # tick 48, note on
+                  b"\x60\x81\x3c\x50"              # tick 144, note off
+                  b"\x00\xff\x2f\x00")             # end of track
+        self.assertEqual(struct.unpack(">4sI", output.read(8)),
+                         (b"MTrk", len(events)))
+        self.assertEqual(output.read(), events)
+
+    def testFormatZeroRequiresOneTrack(self):
+        for num_tracks in (0, 2):
+            with self.assertRaises(ValueError):
+                MIDIFile(num_tracks, file_format=0)
 
     def testWriteFile(self):
         # Just to make sure the stream can be written without throwing an error.

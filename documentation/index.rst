@@ -19,9 +19,8 @@ MIDIUtil
 Introduction
 ------------
 
-MIDIUtil is a pure Python library that allows one to write multi-track
-Musical Instrument Digital Interface (MIDI) files from within Python
-programs (both format 1 and format 2 files are now supported). 
+MIDIUtil is a pure Python library for writing Standard MIDI Files
+in formats 0, 1, and 2.
 It is object-oriented and allows one to create and write these
 files with a minimum of fuss.
 
