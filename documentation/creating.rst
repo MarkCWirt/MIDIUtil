@@ -99,8 +99,13 @@ If it is ``False`` no time-shifting will occur. The defaul value is
 file_format
 -----------
 
-This specifies the format of the file to be written. Both format 1 (the default)
-and format 2 files are supported.
+Set ``file_format`` to 0, 1 (the default), or 2.
+
+Format 0 requires exactly one track. Use track index ``0`` for all events,
+including tempo changes and notes on different MIDI channels.
+
+.. literalinclude:: ../examples/format-0.py
+   :language: python
 
 In the format 1 file there is a separate "tempo" track to which tempo and
 time signature events are written. The calls to create these events --

@@ -946,9 +946,7 @@ class MIDIHeader(object):
 
         :param numTracks: The number of tracks the file contains. Integer,
             one or greater
-        :param file_format: The format of the multi-track file. This should
-            either be ``1`` (the default, and the most widely supported
-            format) or ``2``.
+        :param file_format: The MIDI file format: 0 (single track), 1, or 2.
         :param ticks_per_quarternote: The number of ticks per quarter
             note is what the Standard MIDI File Format Specification calls
             "division".  Ticks are the integer unit of time in the SMF, and in
@@ -956,6 +954,8 @@ class MIDIHeader(object):
             384, 480, 960. Note that all these numbers are evenly divisible by
             2,3,4,6,8,12,16, and 24, except 120 does not have 16 as a divisor.
         '''
+        if file_format == 0 and numTracks != 1:
+            raise ValueError("MIDI format 0 requires exactly one track")
         self.headerString = struct.pack('cccc', b'M', b'T', b'h', b'd')
         self.headerSize = struct.pack('>L', 6)
         # Format 1 = multi-track file
@@ -994,9 +994,8 @@ class MIDIFile(object):
             the stream
         :param adjust_origin: If set to ``True`` shift all the events in the tracks 
             so that the first event takes place at time t=0. Default is ``False``
-        :param file_format: The format of the multi-track file. This should
-            either be ``1`` (the default, and the most widely supported
-            format) or ``2``.
+        :param file_format: The MIDI file format: 0, 1 (default), or 2.
+            Format 0 requires ``numTracks=1``.
         :param ticks_per_quarternote: The number of ticks per quarter note is
             what the Standard MIDI File Format Specification calls "division".
             Ticks are the integer unit of time in the SMF, and in most if
@@ -1028,8 +1027,10 @@ class MIDIFile(object):
 
         In previous versions of this code the file written was format 2
         (which can be thought of as a collection of independent tracks) but
-        was identified as format 1. In this version one can specify either
-        format 1 or 2.
+        was identified as format 1.
+
+        In a format 0 file, tempo changes and notes on all MIDI channels
+        share track 0. Create one with ``MIDIFile(file_format=0)``.
 
         In format 1 files there is a separate tempo track which contains
         tempo and time signature data, but contains no note data. If one
